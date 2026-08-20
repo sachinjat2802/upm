@@ -18,12 +18,17 @@ class CpmBridge {
     }
 
     _findCpmBin() {
-        const rootDir = path.resolve(path.join(__dirname, '..', '..'));
-        for (const rel of [path.join('target', 'release', 'cpm.exe'), path.join('target', 'debug', 'cpm.exe')]) {
-            const p = path.join(rootDir, rel);
-            if (fs.existsSync(p)) {
-                return p;
+        let curr = path.resolve(__dirname);
+        for (let i = 0; i < 5; i++) {
+            for (const rel of [path.join('target', 'release', 'cpm.exe'), path.join('target', 'debug', 'cpm.exe')]) {
+                const p = path.join(curr, rel);
+                if (fs.existsSync(p)) {
+                    return p;
+                }
             }
+            const parent = path.dirname(curr);
+            if (parent === curr) break;
+            curr = parent;
         }
         return 'cpm';
     }

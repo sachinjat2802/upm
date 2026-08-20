@@ -19,11 +19,16 @@ class CpmBridge:
         self.cpm_bin = cpm_bin or self._find_cpm_bin()
 
     def _find_cpm_bin(self):
-        root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-        for rel in [os.path.join("target", "release", "cpm.exe"), os.path.join("target", "debug", "cpm.exe")]:
-            p = os.path.join(root_dir, rel)
-            if os.path.exists(p):
-                return p
+        curr = os.path.dirname(os.path.abspath(__file__))
+        for _ in range(5):
+            for rel in [os.path.join("target", "release", "cpm.exe"), os.path.join("target", "debug", "cpm.exe")]:
+                p = os.path.join(curr, rel)
+                if os.path.exists(p):
+                    return p
+            parent = os.path.dirname(curr)
+            if parent == curr:
+                break
+            curr = parent
         return "cpm"
 
     def call(self, target: str, args=None):
