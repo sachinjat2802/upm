@@ -14,6 +14,7 @@ pub mod dockerfile_cmd;
 pub mod init_cmd;
 pub mod migrate_cmd;
 pub mod repl_cmd;
+pub mod search_cmd;
 pub mod stubs_cmd;
 
 use crate::acquisition::{AcquisitionRunner, AdapterRegistry, DetectionEngine, UpmManifest};
@@ -32,6 +33,7 @@ pub use dockerfile_cmd::execute_dockerfile;
 pub use init_cmd::execute_init;
 pub use migrate_cmd::execute_migrate;
 pub use repl_cmd::execute_repl;
+pub use search_cmd::execute_search;
 pub use stubs_cmd::execute_generate_stubs;
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
