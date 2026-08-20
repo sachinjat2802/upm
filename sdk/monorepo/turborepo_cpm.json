@@ -1,0 +1,16 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "pipeline": {
+    "cpm:install": {
+      "inputs": ["upm.toml", "package.json", "pyproject.toml", "Cargo.toml"],
+      "outputs": ["node_modules/**", ".venv/**", "target/**"]
+    },
+    "cpm:build": {
+      "dependsOn": ["^cpm:build"],
+      "outputs": ["dist/**", "target/release/**"]
+    },
+    "cpm:test": {
+      "dependsOn": ["cpm:build"]
+    }
+  }
+}

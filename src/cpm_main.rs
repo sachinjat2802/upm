@@ -215,6 +215,13 @@ enum Commands {
         path: PathBuf,
         action: Option<String>,
     },
+    /// 📜 Cross-host distributed log aggregator
+    Logs {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(long)]
+        json: bool,
+    },
     /// 🌉 Cross-language bridge
     Bridge {
         #[command(subcommand)]
@@ -279,6 +286,7 @@ async fn main() -> anyhow::Result<()> {
         Commands::Flamegraph { path, out } => execute_flamegraph(&path, out.as_deref())?,
         Commands::Operator { path, out } => execute_operator(&path, out.as_deref())?,
         Commands::Cache { path, action } => execute_cache(&path, action.as_deref())?,
+        Commands::Logs { path, json } => execute_logs(&path, json)?,
         Commands::Bridge { sub } => match sub {
             BridgeSubcommands::Call { target, args_json } => {
                 execute_bridge_call(&target, args_json.as_deref()).await?;
