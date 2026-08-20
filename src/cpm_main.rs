@@ -130,6 +130,9 @@ enum Commands {
         #[arg(short = 'o', long)]
         out: Option<String>,
     },
+    /// 💬 Interactive Polyglot REPL Shell
+    #[command(visible_alias = "r")]
+    Repl,
     /// 🌉 Cross-language bridge
     Bridge {
         #[command(subcommand)]
@@ -179,6 +182,7 @@ async fn main() -> anyhow::Result<()> {
         Commands::Doctor { path, fix } => execute_doctor(&path, fix)?,
         Commands::GenerateStubs { out_dir } => execute_generate_stubs(&out_dir).await?,
         Commands::Bundle { path, out } => execute_bundle(&path, out.as_deref())?,
+        Commands::Repl => execute_repl().await?,
         Commands::Bridge { sub } => match sub {
             BridgeSubcommands::Call { target, args_json } => {
                 execute_bridge_call(&target, args_json.as_deref()).await?;

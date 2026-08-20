@@ -11,6 +11,7 @@ pub mod detect_cmd;
 pub mod doctor_cmd;
 pub mod init_cmd;
 pub mod migrate_cmd;
+pub mod repl_cmd;
 pub mod stubs_cmd;
 
 use crate::acquisition::{AcquisitionRunner, AdapterRegistry, DetectionEngine, UpmManifest};
@@ -26,6 +27,7 @@ pub use detect_cmd::execute_detect;
 pub use doctor_cmd::execute_doctor;
 pub use init_cmd::execute_init;
 pub use migrate_cmd::execute_migrate;
+pub use repl_cmd::execute_repl;
 pub use stubs_cmd::execute_generate_stubs;
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
