@@ -252,6 +252,12 @@ enum Commands {
         #[arg(short = 'o', long)]
         out: Option<String>,
     },
+    /// 🐚 Auto-generate shell tab completion scripts (PowerShell, Bash, Zsh, Fish)
+    Completion {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        shell: Option<String>,
+    },
     /// 🌉 Cross-language bridge
     Bridge {
         #[command(subcommand)]
@@ -322,6 +328,7 @@ async fn main() -> anyhow::Result<()> {
         Commands::AuditLog { path } => execute_audit_log(&path)?,
         Commands::Trace { path, out } => execute_trace(&path, out.as_deref())?,
         Commands::Graph { path, out } => execute_graph(&path, out.as_deref())?,
+        Commands::Completion { path, shell } => execute_completion(&path, shell.as_deref())?,
         Commands::Bridge { sub } => match sub {
             BridgeSubcommands::Call { target, args_json } => {
                 execute_bridge_call(&target, args_json.as_deref()).await?;
