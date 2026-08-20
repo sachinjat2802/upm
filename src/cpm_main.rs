@@ -153,6 +153,16 @@ enum Commands {
     Search {
         query: String,
     },
+    /// ⏪ Restore previous workspace manifest/lockfile snapshot
+    Rollback {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+    },
+    /// 📜 Open-source license compliance audit
+    Licenses {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+    },
     /// 🌉 Cross-language bridge
     Bridge {
         #[command(subcommand)]
@@ -206,6 +216,8 @@ async fn main() -> anyhow::Result<()> {
         Commands::Alias { path, action, name, command } => execute_alias(&path, action.as_deref(), name.as_deref(), command.as_deref())?,
         Commands::Dockerfile { path, out } => execute_dockerfile(&path, out.as_deref())?,
         Commands::Search { query } => execute_search(&query)?,
+        Commands::Rollback { path } => execute_rollback(&path)?,
+        Commands::Licenses { path } => execute_licenses(&path)?,
         Commands::Bridge { sub } => match sub {
             BridgeSubcommands::Call { target, args_json } => {
                 execute_bridge_call(&target, args_json.as_deref()).await?;

@@ -12,8 +12,10 @@ pub mod detect_cmd;
 pub mod doctor_cmd;
 pub mod dockerfile_cmd;
 pub mod init_cmd;
+pub mod licenses_cmd;
 pub mod migrate_cmd;
 pub mod repl_cmd;
+pub mod rollback_cmd;
 pub mod search_cmd;
 pub mod stubs_cmd;
 
@@ -31,8 +33,10 @@ pub use detect_cmd::execute_detect;
 pub use doctor_cmd::execute_doctor;
 pub use dockerfile_cmd::execute_dockerfile;
 pub use init_cmd::execute_init;
+pub use licenses_cmd::execute_licenses;
 pub use migrate_cmd::execute_migrate;
 pub use repl_cmd::execute_repl;
+pub use rollback_cmd::execute_rollback;
 pub use search_cmd::execute_search;
 pub use stubs_cmd::execute_generate_stubs;
 
