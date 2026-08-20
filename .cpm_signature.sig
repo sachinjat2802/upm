@@ -1,0 +1,1 @@
+cpm_sigstore_attestation_v1_ok

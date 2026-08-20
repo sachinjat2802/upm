@@ -28,6 +28,7 @@ pub mod rollback_cmd;
 pub mod sccache_cmd;
 pub mod search_cmd;
 pub mod secrets_cmd;
+pub mod sig_cmd;
 pub mod stubs_cmd;
 
 use crate::acquisition::{AcquisitionRunner, AdapterRegistry, DetectionEngine, UpmManifest};
@@ -60,6 +61,7 @@ pub use rollback_cmd::execute_rollback;
 pub use sccache_cmd::execute_sccache;
 pub use search_cmd::execute_search;
 pub use secrets_cmd::execute_scan_secrets;
+pub use sig_cmd::execute_verify_sig;
 pub use stubs_cmd::execute_generate_stubs;
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────

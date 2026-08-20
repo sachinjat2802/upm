@@ -227,6 +227,12 @@ enum Commands {
         #[arg(default_value = ".")]
         path: PathBuf,
     },
+    /// 🔏 Verify Sigstore / GPG cryptographic package signatures
+    VerifySig {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        package: Option<String>,
+    },
     /// 🌉 Cross-language bridge
     Bridge {
         #[command(subcommand)]
@@ -293,6 +299,7 @@ async fn main() -> anyhow::Result<()> {
         Commands::Cache { path, action } => execute_cache(&path, action.as_deref())?,
         Commands::Logs { path, json } => execute_logs(&path, json)?,
         Commands::Sccache { path } => execute_sccache(&path)?,
+        Commands::VerifySig { path, package } => execute_verify_sig(&path, package.as_deref())?,
         Commands::Bridge { sub } => match sub {
             BridgeSubcommands::Call { target, args_json } => {
                 execute_bridge_call(&target, args_json.as_deref()).await?;
