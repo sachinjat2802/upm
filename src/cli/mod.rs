@@ -6,6 +6,7 @@
 
 pub mod benchmark_cmd;
 pub mod bridge_cmd;
+pub mod bundle_cmd;
 pub mod detect_cmd;
 pub mod doctor_cmd;
 pub mod init_cmd;
@@ -20,6 +21,7 @@ use std::time::Instant;
 
 pub use benchmark_cmd::execute_benchmark;
 pub use bridge_cmd::{execute_bridge_call, execute_bridge_inspect, execute_bridge_status};
+pub use bundle_cmd::execute_bundle;
 pub use detect_cmd::execute_detect;
 pub use doctor_cmd::execute_doctor;
 pub use init_cmd::execute_init;

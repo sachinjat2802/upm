@@ -155,6 +155,24 @@ pub async fn execute_bridge_inspect(language: &str) -> anyhow::Result<()> {
             let host_proc = HostSupervisor::spawn_host("node", host_path).await?;
             host_proc.peer.call("__inspect__", vec![]).await?
         }
+        "go" | "golang" => {
+            let host_path = Path::new("hosts/go_host.go");
+            if !host_path.exists() {
+                println!("  {} Go host not found at {}", "✖".bold().red(), "hosts/go_host.go".bold());
+                anyhow::bail!("Go host script not found");
+            }
+            let host_proc = HostSupervisor::spawn_host("go", Path::new("run")).await?;
+            host_proc.peer.call("__inspect__", vec![]).await?
+        }
+        "ruby" | "rb" => {
+            let host_path = Path::new("hosts/ruby_host.rb");
+            if !host_path.exists() {
+                println!("  {} Ruby host not found at {}", "✖".bold().red(), "hosts/ruby_host.rb".bold());
+                anyhow::bail!("Ruby host script not found");
+            }
+            let host_proc = HostSupervisor::spawn_host("ruby", host_path).await?;
+            host_proc.peer.call("__inspect__", vec![]).await?
+        }
         _ => {
             println!("  {} Unsupported host language: '{}'", "✖".bold().red(), language.bold());
             anyhow::bail!("Unsupported host language: '{}'", language);

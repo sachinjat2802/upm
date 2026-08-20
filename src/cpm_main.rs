@@ -123,6 +123,13 @@ enum Commands {
         #[arg(default_value = "./sdk")]
         out_dir: PathBuf,
     },
+    /// 📦 Export an air-gapped offline workspace bundle
+    Bundle {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(short = 'o', long)]
+        out: Option<String>,
+    },
     /// 🌉 Cross-language bridge
     Bridge {
         #[command(subcommand)]
@@ -171,6 +178,7 @@ async fn main() -> anyhow::Result<()> {
         Commands::Migrate { path } => execute_migrate(&path)?,
         Commands::Doctor { path, fix } => execute_doctor(&path, fix)?,
         Commands::GenerateStubs { out_dir } => execute_generate_stubs(&out_dir).await?,
+        Commands::Bundle { path, out } => execute_bundle(&path, out.as_deref())?,
         Commands::Bridge { sub } => match sub {
             BridgeSubcommands::Call { target, args_json } => {
                 execute_bridge_call(&target, args_json.as_deref()).await?;
