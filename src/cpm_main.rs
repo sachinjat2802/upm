@@ -222,6 +222,11 @@ enum Commands {
         #[arg(long)]
         json: bool,
     },
+    /// ⚡ Configure sccache / ccache compiler build cache
+    Sccache {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+    },
     /// 🌉 Cross-language bridge
     Bridge {
         #[command(subcommand)]
@@ -287,6 +292,7 @@ async fn main() -> anyhow::Result<()> {
         Commands::Operator { path, out } => execute_operator(&path, out.as_deref())?,
         Commands::Cache { path, action } => execute_cache(&path, action.as_deref())?,
         Commands::Logs { path, json } => execute_logs(&path, json)?,
+        Commands::Sccache { path } => execute_sccache(&path)?,
         Commands::Bridge { sub } => match sub {
             BridgeSubcommands::Call { target, args_json } => {
                 execute_bridge_call(&target, args_json.as_deref()).await?;
