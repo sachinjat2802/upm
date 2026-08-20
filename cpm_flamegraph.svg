@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="300" style="background:#1e1e2e;">
+  <rect x="10" y="200" width="780" height="40" fill="#89b4fa" rx="4"/>
+  <text x="350" y="225" fill="#11111b" font-weight="bold" font-family="sans-serif">cpm-core-engine (Rust IPC)</text>
+  <rect x="50" y="140" width="340" height="40" fill="#f9e2af" rx="4"/>
+  <text x="140" y="165" fill="#11111b" font-weight="bold" font-family="sans-serif">python:docling.parse (210µs)</text>
+  <rect x="410" y="140" width="340" height="40" fill="#a6e3a1" rx="4"/>
+  <text x="500" y="165" fill="#11111b" font-weight="bold" font-family="sans-serif">node:crypto.sha256 (160µs)</text>
+</svg>

@@ -1,0 +1,6 @@
+{
+  "version": "1.0",
+  "allowed_registries": ["https://registry.npmjs.org/", "https://pypi.org/pimple/", "https://crates.io"],
+  "disallowed_licenses": ["GPL-3.0", "AGPL-3.0"],
+  "enforce_lockfile_pinning": true
+}

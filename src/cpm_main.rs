@@ -190,6 +190,18 @@ enum Commands {
         #[arg(short = 'o', long)]
         out: Option<String>,
     },
+    /// 🛡️ Enforce enterprise RBAC security policies
+    Policy {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+    },
+    /// 🔥 Cross-language call stack flamegraph visualizer
+    Flamegraph {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(short = 'o', long)]
+        out: Option<String>,
+    },
     /// 🌉 Cross-language bridge
     Bridge {
         #[command(subcommand)]
@@ -250,6 +262,8 @@ async fn main() -> anyhow::Result<()> {
         Commands::Resolve { path } => execute_resolve(&path)?,
         Commands::Cost { path } => execute_cost(&path)?,
         Commands::Helm { path, out } => execute_helm(&path, out.as_deref())?,
+        Commands::Policy { path } => execute_policy(&path)?,
+        Commands::Flamegraph { path, out } => execute_flamegraph(&path, out.as_deref())?,
         Commands::Bridge { sub } => match sub {
             BridgeSubcommands::Call { target, args_json } => {
                 execute_bridge_call(&target, args_json.as_deref()).await?;
