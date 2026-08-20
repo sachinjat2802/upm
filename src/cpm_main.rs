@@ -202,6 +202,19 @@ enum Commands {
         #[arg(short = 'o', long)]
         out: Option<String>,
     },
+    /// ☸️ Auto-generate Kubernetes Operator CRD manifest
+    Operator {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(short = 'o', long)]
+        out: Option<String>,
+    },
+    /// 🗄️ Manage global content-addressable package cache
+    Cache {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        action: Option<String>,
+    },
     /// 🌉 Cross-language bridge
     Bridge {
         #[command(subcommand)]
@@ -264,6 +277,8 @@ async fn main() -> anyhow::Result<()> {
         Commands::Helm { path, out } => execute_helm(&path, out.as_deref())?,
         Commands::Policy { path } => execute_policy(&path)?,
         Commands::Flamegraph { path, out } => execute_flamegraph(&path, out.as_deref())?,
+        Commands::Operator { path, out } => execute_operator(&path, out.as_deref())?,
+        Commands::Cache { path, action } => execute_cache(&path, action.as_deref())?,
         Commands::Bridge { sub } => match sub {
             BridgeSubcommands::Call { target, args_json } => {
                 execute_bridge_call(&target, args_json.as_deref()).await?;
