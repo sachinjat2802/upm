@@ -20,7 +20,9 @@ CPM (Cross-language Package Manager) is a polyglot package manager that **auto-d
 | Calling Python from Node requires manual setup | `cpm bridge call python:math.sqrt '[9]'` |
 | Detecting which tools a repo uses is manual | Auto-scoring detection engine |
 
-## Quick Start
+## Quick Start & Migration
+
+- 📖 **[Migration Guide (HTML)](file:///d:/cpm/docs/migration-guide.html)** | **[Migration Guide (Markdown)](file:///d:/cpm/docs/MIGRATION_GUIDE.md)** — Step-by-step workflow to move existing apps to CPM with zero breaking changes.
 
 ```bash
 # Initialize a polyglot project (interactive!)
