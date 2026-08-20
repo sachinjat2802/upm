@@ -110,6 +110,19 @@ enum Commands {
         #[arg(default_value = ".")]
         path: PathBuf,
     },
+    /// 🩺 Self-healing environment diagnostics & repair
+    #[command(visible_alias = "doc")]
+    Doctor {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(long)]
+        fix: bool,
+    },
+    /// 📝 Generate IDE type definitions (.d.ts & .pyi)
+    GenerateStubs {
+        #[arg(default_value = "./sdk")]
+        out_dir: PathBuf,
+    },
     /// 🌉 Cross-language bridge
     Bridge {
         #[command(subcommand)]
@@ -127,6 +140,13 @@ enum BridgeSubcommands {
     /// Dynamically inspect registered RPC methods on a foreign language host
     Inspect {
         language: String,
+    },
+    /// Microsecond performance profiling benchmark
+    Benchmark {
+        #[arg(default_value = "python")]
+        language: String,
+        #[arg(default_value_t = 100)]
+        iterations: usize,
     },
     /// Show transport tiers and host status
     Status,
@@ -149,6 +169,8 @@ async fn main() -> anyhow::Result<()> {
         Commands::Run { script, path } => execute_run(&path, &script)?,
         Commands::Status { path } => execute_status(&path)?,
         Commands::Migrate { path } => execute_migrate(&path)?,
+        Commands::Doctor { path, fix } => execute_doctor(&path, fix)?,
+        Commands::GenerateStubs { out_dir } => execute_generate_stubs(&out_dir).await?,
         Commands::Bridge { sub } => match sub {
             BridgeSubcommands::Call { target, args_json } => {
                 execute_bridge_call(&target, args_json.as_deref()).await?;
@@ -156,7 +178,12 @@ async fn main() -> anyhow::Result<()> {
             BridgeSubcommands::Inspect { language } => {
                 execute_bridge_inspect(&language).await?;
             }
-            BridgeSubcommands::Status => execute_bridge_status()?,
+            BridgeSubcommands::Benchmark { language, iterations } => {
+                execute_benchmark(&language, iterations).await?;
+            }
+            BridgeSubcommands::Status => {
+                execute_bridge_status()?;
+            }
         },
     }
 
