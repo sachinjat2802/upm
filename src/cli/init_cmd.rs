@@ -133,6 +133,7 @@ pub fn execute_init(
     foreign_langs: Option<String>,
     yes: bool,
 ) -> anyhow::Result<()> {
+    std::fs::create_dir_all(path)?;
     let canonical = path.canonicalize().unwrap_or_else(|_| path.to_path_buf());
     let folder_name = canonical
         .file_name()

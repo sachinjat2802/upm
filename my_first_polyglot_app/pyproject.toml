@@ -1,0 +1,5 @@
+[project]
+name = "my_first_polyglot_app"
+version = "0.1.0"
+description = "Universal Package Platform polyglot project"
+dependencies = []
