@@ -245,6 +245,13 @@ enum Commands {
         #[arg(short = 'o', long)]
         out: Option<String>,
     },
+    /// 🕸️ Cross-platform polyglot dependency graph web visualizer
+    Graph {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(short = 'o', long)]
+        out: Option<String>,
+    },
     /// 🌉 Cross-language bridge
     Bridge {
         #[command(subcommand)]
@@ -314,6 +321,7 @@ async fn main() -> anyhow::Result<()> {
         Commands::VerifySig { path, package } => execute_verify_sig(&path, package.as_deref())?,
         Commands::AuditLog { path } => execute_audit_log(&path)?,
         Commands::Trace { path, out } => execute_trace(&path, out.as_deref())?,
+        Commands::Graph { path, out } => execute_graph(&path, out.as_deref())?,
         Commands::Bridge { sub } => match sub {
             BridgeSubcommands::Call { target, args_json } => {
                 execute_bridge_call(&target, args_json.as_deref()).await?;

@@ -1,0 +1,19 @@
+<idea-plugin>
+    <id>com.cpm.polyglot.plugin</id>
+    <name>CPM Polyglot Package Manager</name>
+    <version>1.0.0</version>
+    <vendor email="support@cpm.io">CPM Open Source Team</vendor>
+
+    <description><![CDATA[
+    Integrates CPM / UPM Polyglot Package Manager into IntelliJ IDEA, PyCharm, WebStorm, and CLion IDEs.
+    Provides code completion for upm.toml, dependency inspection, and RPC bridge process management.
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <actions>
+        <action id="CPM.Doctor" class="com.cpm.actions.DoctorAction" text="CPM Doctor Self-Healing">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+    </actions>
+</idea-plugin>
