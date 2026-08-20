@@ -133,6 +133,21 @@ enum Commands {
     /// 💬 Interactive Polyglot REPL Shell
     #[command(visible_alias = "r")]
     Repl,
+    /// 🏷️ Manage custom CLI command aliases
+    Alias {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        action: Option<String>,
+        name: Option<String>,
+        command: Option<String>,
+    },
+    /// 🐳 Auto-generate polyglot Dockerfile
+    Dockerfile {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(short = 'o', long)]
+        out: Option<String>,
+    },
     /// 🌉 Cross-language bridge
     Bridge {
         #[command(subcommand)]
@@ -183,6 +198,8 @@ async fn main() -> anyhow::Result<()> {
         Commands::GenerateStubs { out_dir } => execute_generate_stubs(&out_dir).await?,
         Commands::Bundle { path, out } => execute_bundle(&path, out.as_deref())?,
         Commands::Repl => execute_repl().await?,
+        Commands::Alias { path, action, name, command } => execute_alias(&path, action.as_deref(), name.as_deref(), command.as_deref())?,
+        Commands::Dockerfile { path, out } => execute_dockerfile(&path, out.as_deref())?,
         Commands::Bridge { sub } => match sub {
             BridgeSubcommands::Call { target, args_json } => {
                 execute_bridge_call(&target, args_json.as_deref()).await?;

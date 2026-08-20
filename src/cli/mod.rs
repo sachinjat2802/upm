@@ -4,11 +4,13 @@
 /// Commands delegate to the acquisition engine, adapter registry, and
 /// bridge subsystem.
 
+pub mod alias_cmd;
 pub mod benchmark_cmd;
 pub mod bridge_cmd;
 pub mod bundle_cmd;
 pub mod detect_cmd;
 pub mod doctor_cmd;
+pub mod dockerfile_cmd;
 pub mod init_cmd;
 pub mod migrate_cmd;
 pub mod repl_cmd;
@@ -20,11 +22,13 @@ use std::path::Path;
 use std::process::Command;
 use std::time::Instant;
 
+pub use alias_cmd::execute_alias;
 pub use benchmark_cmd::execute_benchmark;
 pub use bridge_cmd::{execute_bridge_call, execute_bridge_inspect, execute_bridge_status};
 pub use bundle_cmd::execute_bundle;
 pub use detect_cmd::execute_detect;
 pub use doctor_cmd::execute_doctor;
+pub use dockerfile_cmd::execute_dockerfile;
 pub use init_cmd::execute_init;
 pub use migrate_cmd::execute_migrate;
 pub use repl_cmd::execute_repl;
