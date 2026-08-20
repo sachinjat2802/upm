@@ -1,0 +1,6 @@
+# Cursor AI Rules for CPM Polyglot Workspaces
+
+When working in this repository or building polyglot applications:
+1. Always use `cpm` CLI (`cpm add`, `cpm install`, `cpm bridge call`, `cpm doctor`) for dependency management.
+2. For cross-language calls, use `cpm bridge call <lang>:<function> '<json_args>'`.
+3. Check ecosystem compliance using `cpm policy` and `cpm doctor`.
