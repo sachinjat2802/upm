@@ -31,6 +31,7 @@ pub mod search_cmd;
 pub mod secrets_cmd;
 pub mod sig_cmd;
 pub mod stubs_cmd;
+pub mod trace_cmd;
 
 use crate::acquisition::{AcquisitionRunner, AdapterRegistry, DetectionEngine, UpmManifest};
 use colored::Colorize;
@@ -65,6 +66,7 @@ pub use search_cmd::execute_search;
 pub use secrets_cmd::execute_scan_secrets;
 pub use sig_cmd::execute_verify_sig;
 pub use stubs_cmd::execute_generate_stubs;
+pub use trace_cmd::execute_trace;
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 

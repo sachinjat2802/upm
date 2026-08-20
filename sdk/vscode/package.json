@@ -1,0 +1,28 @@
+{
+  "name": "cpm-vscode-extension",
+  "displayName": "CPM Polyglot Package Manager & Bridge",
+  "description": "Visual Studio Code Extension for CPM polyglot workspace management, upm.toml syntax, and bridge debugging.",
+  "version": "1.0.0",
+  "publisher": "sachinjat2802",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Programming Languages", "Other"],
+  "activationEvents": [
+    "onLanguage:toml",
+    "onCommand:cpm.doctor"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "cpm.doctor",
+        "title": "CPM: Run Self-Healing Diagnostics"
+      },
+      {
+        "command": "cpm.bridge.status",
+        "title": "CPM: Inspect Foreign RPC Bridge Hosts"
+      }
+    ]
+  }
+}
