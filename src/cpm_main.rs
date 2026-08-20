@@ -233,6 +233,11 @@ enum Commands {
         path: PathBuf,
         package: Option<String>,
     },
+    /// 📑 View immutable cryptographic audit trail log
+    AuditLog {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+    },
     /// 🌉 Cross-language bridge
     Bridge {
         #[command(subcommand)]
@@ -300,6 +305,7 @@ async fn main() -> anyhow::Result<()> {
         Commands::Logs { path, json } => execute_logs(&path, json)?,
         Commands::Sccache { path } => execute_sccache(&path)?,
         Commands::VerifySig { path, package } => execute_verify_sig(&path, package.as_deref())?,
+        Commands::AuditLog { path } => execute_audit_log(&path)?,
         Commands::Bridge { sub } => match sub {
             BridgeSubcommands::Call { target, args_json } => {
                 execute_bridge_call(&target, args_json.as_deref()).await?;

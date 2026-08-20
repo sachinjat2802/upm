@@ -5,6 +5,7 @@
 /// bridge subsystem.
 
 pub mod alias_cmd;
+pub mod audit_log_cmd;
 pub mod benchmark_cmd;
 pub mod bridge_cmd;
 pub mod bundle_cmd;
@@ -38,6 +39,7 @@ use std::process::Command;
 use std::time::Instant;
 
 pub use alias_cmd::execute_alias;
+pub use audit_log_cmd::execute_audit_log;
 pub use benchmark_cmd::execute_benchmark;
 pub use bridge_cmd::{execute_bridge_call, execute_bridge_inspect, execute_bridge_status};
 pub use bundle_cmd::execute_bundle;
