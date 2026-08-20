@@ -1,0 +1,17 @@
+ecosystems = [
+    "pnpm",
+    "uv",
+    "cargo",
+]
+
+[project]
+name = "rfp_proposal_platform"
+version = "0.1.0"
+primary_language = "javascript"
+
+[foreign_dependencies]
+"cargo:serde" = "^1.0"
+"pip:docling" = "^2.0.0"
+
+[transports]
+default_tier = "rpc"

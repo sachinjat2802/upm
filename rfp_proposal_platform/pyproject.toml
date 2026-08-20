@@ -1,0 +1,5 @@
+[project]
+name = "rfp_proposal_platform"
+version = "0.1.0"
+description = "Universal Package Platform polyglot project"
+dependencies = []

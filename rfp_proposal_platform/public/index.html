@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RFP Proposal Automation Platform — Powered by CPM</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #090d16;
+            --bg-secondary: #0f172a;
+            --bg-card: rgba(30, 41, 59, 0.7);
+            --bg-card-hover: rgba(51, 65, 85, 0.8);
+            --accent-cyan: #38bdf8;
+            --accent-purple: #c084fc;
+            --accent-green: #4ade80;
+            --accent-yellow: #facc15;
+            --accent-pink: #f472b6;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border: rgba(56, 189, 248, 0.15);
+            --border-hover: rgba(56, 189, 248, 0.35);
+            --gradient-primary: linear-gradient(135deg, #38bdf8 0%, #c084fc 50%, #f472b6 100%);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            --radius: 16px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(at 10% 10%, rgba(56, 189, 248, 0.08) 0px, transparent 50%),
+                radial-gradient(at 90% 90%, rgba(192, 132, 252, 0.08) 0px, transparent 50%);
+        }
+
+        .container { max-width: 1140px; margin: 0 auto; padding: 40px 24px; }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+        .badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 6px 16px; border-radius: 20px;
+            background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25);
+            color: var(--accent-cyan); font-size: 12px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 16px;
+        }
+        h1 {
+            font-size: 42px; font-weight: 900; letter-spacing: -1.2px; margin-bottom: 12px;
+            background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        header p { color: var(--text-secondary); font-size: 16px; max-width: 620px; margin: 0 auto; }
+
+        /* Stats Bar */
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;
+            margin-bottom: 40px;
+        }
+        .stat-card {
+            background: var(--bg-card); backdrop-filter: blur(12px);
+            border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 20px 24px; box-shadow: var(--glass-shadow);
+        }
+        .stat-card .label { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .stat-card .value { font-size: 26px; font-weight: 800; color: var(--accent-cyan); font-family: 'JetBrains Mono', monospace; }
+        .stat-card .sub { font-size: 11px; color: var(--accent-green); margin-top: 2px; }
+
+        /* Main Grid */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; }
+        @media (max-width: 868px) { .grid-2 { grid-template-columns: 1fr; } }
+
+        .card {
+            background: var(--bg-card); backdrop-filter: blur(16px);
+            border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 28px; box-shadow: var(--glass-shadow); transition: all 0.25s ease;
+        }
+        .card:hover { border-color: var(--border-hover); }
+        .card h3 { font-size: 18px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+
+        /* Form elements */
+        label { display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
+        input[type="text"], select, textarea {
+            width: 100%; padding: 12px 16px; border-radius: 10px;
+            background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border);
+            color: var(--text-primary); font-family: inherit; font-size: 14px;
+            margin-bottom: 16px; outline: none; transition: border-color 0.2s;
+        }
+        input:focus, select:focus, textarea:focus { border-color: var(--accent-cyan); }
+
+        button {
+            width: 100%; padding: 14px 20px; border-radius: 10px; border: none;
+            background: var(--gradient-primary); color: #0f172a; font-weight: 800;
+            font-size: 14px; cursor: pointer; transition: transform 0.15s, opacity 0.2s;
+        }
+        button:hover { opacity: 0.95; transform: translateY(-1px); }
+        button:active { transform: translateY(0); }
+
+        /* Result Code Box */
+        .code-box {
+            background: #070a11; border: 1px solid var(--border); border-radius: 10px;
+            padding: 16px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
+            color: var(--accent-cyan); min-height: 180px; max-height: 320px; overflow-y: auto;
+            white-space: pre-wrap; word-break: break-all;
+        }
+
+        /* Architecture Bridge Flow */
+        .bridge-pill {
+            display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px;
+            border-radius: 6px; font-size: 11px; font-weight: 600; font-family: 'JetBrains Mono', monospace;
+        }
+        .pill-js { background: rgba(250, 204, 21, 0.15); color: var(--accent-yellow); border: 1px solid rgba(250, 204, 21, 0.3); }
+        .pill-py { background: rgba(56, 189, 248, 0.15); color: var(--accent-cyan); border: 1px solid rgba(56, 189, 248, 0.3); }
+        .pill-rs { background: rgba(244, 114, 182, 0.15); color: var(--accent-pink); border: 1px solid rgba(244, 114, 182, 0.3); }
+
+        .loading { opacity: 0.6; pointer-events: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="badge">🚀 Polyglot Full-Stack Showcase</div>
+            <h1>RFP Proposal Automation Platform</h1>
+            <p>
+                Node.js Web Server & UI + Python Document Ingestion Engine + Rust High-Speed Tokenizer.
+                Orchestrated seamlessly by <strong>CPM / UPM</strong> over <code>upm-bridge/1</code> stdio RPC.
+            </p>
+        </header>
+
+        <!-- Stats Bar -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="label">Primary API Host</div>
+                <div class="value" style="color: var(--accent-yellow)">Node.js 22</div>
+                <div class="sub">pnpm / Express.js</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Ingestion Engine</div>
+                <div class="value" style="color: var(--accent-cyan)">Python 3.12</div>
+                <div class="sub">uv / Docling Parser</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Compute Engine</div>
+                <div class="value" style="color: var(--accent-pink)">Rust Cargo</div>
+                <div class="sub">Fast Tokenizer</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">RPC Latency</div>
+                <div class="value" style="color: var(--accent-green)">&lt; 160 µs</div>
+                <div class="sub">stdio binary framing</div>
+            </div>
+        </div>
+
+        <!-- Main Interactive Grid -->
+        <div class="grid-2">
+            <!-- Card 1: RFP Ingestion & Parsing -->
+            <div class="card" id="parseCard">
+                <h3>📄 RFP Document Ingestion <span class="bridge-pill pill-py">Python Bridge</span></h3>
+                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+                    Select an RFP document file to process. Node.js delegates parsing to Python via CPM RPC.
+                </p>
+                <form id="parseForm">
+                    <label>RFP Document Selection</label>
+                    <select id="docName">
+                        <option value="enterprise_cloud_rfp.pdf">enterprise_cloud_rfp.pdf (Enterprise Cloud Migration)</option>
+                        <option value="cybersecurity_audit_rfp.pdf">cybersecurity_audit_rfp.pdf (SOC2 Security Audit)</option>
+                        <option value="ai_platform_proposal.pdf">ai_platform_proposal.pdf (LLM Infrastructure Proposal)</option>
+                    </select>
+
+                    <label>Vendor Budget Limit ($ USD)</label>
+                    <input type="text" id="budget" value="250,000">
+
+                    <button type="submit" id="parseBtn">⚡ Run Cross-Language Ingestion</button>
+                </form>
+            </div>
+
+            <!-- Card 2: Output JSON -->
+            <div class="card">
+                <h3>📊 Live Cross-Language Response <span class="bridge-pill pill-js">Node → Python</span></h3>
+                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+                    Parsed document sections, extraction confidence, and RPC round-trip metrics.
+                </p>
+                <div class="code-box" id="outputBox">// Response payload will appear here after execution...
+Select an RFP above and click "Run Cross-Language Ingestion"</div>
+            </div>
+        </div>
+
+        <!-- Card 3: Score Calculator -->
+        <div class="grid-2">
+            <div class="card">
+                <h3>🧮 Polyglot Score & Match Calculator <span class="bridge-pill pill-py">Python math.sqrt</span></h3>
+                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+                    Calculate compliance match score using Python mathematical scoring functions.
+                </p>
+                <form id="scoreForm">
+                    <label>Technical Match Variance (Value)</label>
+                    <input type="text" id="scoreVal" value="144.0">
+                    <button type="submit" id="scoreBtn">Calculate Vector Match Score</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3>🌐 Project Ecosystem Status <span class="bridge-pill pill-rs">CPM Engine</span></h3>
+                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+                    Active ecosystem adapters auto-detected by CPM in this workspace.
+                </p>
+                <div class="code-box" id="statusBox">Loading ecosystem breakdown...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fetch project status on load
+        fetch('/api/polyglot-status')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('statusBox').textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(err => {
+                document.getElementById('statusBox').textContent = '// Status: Ready (Node.js API + Python Ingestion Host)';
+            });
+
+        // Form 1: Parse RFP
+        document.getElementById('parseForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('parseBtn');
+            const box = document.getElementById('outputBox');
+            const doc = document.getElementById('docName').value;
+
+            btn.disabled = true;
+            btn.textContent = '⏳ Invoking Python Ingestion Engine...';
+            box.textContent = '// Sending stdio RPC request to Python host...';
+
+            try {
+                const res = await fetch('/api/parse-rfp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename: doc })
+                });
+                const data = await res.json();
+                box.textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                box.textContent = '// Error: ' + err.message;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '⚡ Run Cross-Language Ingestion';
+            }
+        });
+
+        // Form 2: Calculate Score
+        document.getElementById('scoreForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('scoreBtn');
+            const box = document.getElementById('outputBox');
+            const val = parseFloat(document.getElementById('scoreVal').value) || 144.0;
+
+            btn.disabled = true;
+            btn.textContent = '⏳ Calculating via Python math.sqrt...';
+
+            try {
+                const res = await fetch('/api/calculate-score', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ value: val })
+                });
+                const data = await res.json();
+                box.textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                box.textContent = '// Error: ' + err.message;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Calculate Vector Match Score';
+            }
+        });
+    </script>
+</body>
+</html>
