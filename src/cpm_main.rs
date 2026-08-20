@@ -183,6 +183,13 @@ enum Commands {
         #[arg(default_value = ".")]
         path: PathBuf,
     },
+    /// ☸️ Auto-generate Kubernetes Helm chart manifests
+    Helm {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(short = 'o', long)]
+        out: Option<String>,
+    },
     /// 🌉 Cross-language bridge
     Bridge {
         #[command(subcommand)]
@@ -242,6 +249,7 @@ async fn main() -> anyhow::Result<()> {
         Commands::Diff { path } => execute_diff(&path)?,
         Commands::Resolve { path } => execute_resolve(&path)?,
         Commands::Cost { path } => execute_cost(&path)?,
+        Commands::Helm { path, out } => execute_helm(&path, out.as_deref())?,
         Commands::Bridge { sub } => match sub {
             BridgeSubcommands::Call { target, args_json } => {
                 execute_bridge_call(&target, args_json.as_deref()).await?;

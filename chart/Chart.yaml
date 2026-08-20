@@ -1,0 +1,6 @@
+apiVersion: v2
+name: cpm-polyglot-service
+description: Helm chart for CPM Polyglot Microservice Deployment
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
