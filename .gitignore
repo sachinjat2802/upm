@@ -1,0 +1,25 @@
+# Build artifacts
+/target/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Ecosystem artifacts (created by cpm init)
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+vendor/
+_build/
+.dart_tool/
+.gradle/
+obj/

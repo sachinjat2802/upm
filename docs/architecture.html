@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPM — Architecture Specification</title>
+    <meta name="description" content="Detailed architectural design of UPM covering L2 Acquisition Engine and L2' Invocation Bridge.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root{--bg:#0a0e17;--bg2:#111827;--card:#1a2236;--card2:#1f2a42;--code-bg:#0d1321;--code-inline:rgba(99,179,237,.1);--t1:#e2e8f0;--t2:#94a3b8;--t3:#64748b;--blue:#63b3ed;--cyan:#22d3ee;--purple:#a78bfa;--green:#34d399;--yellow:#fbbf24;--orange:#fb923c;--pink:#f472b6;--red:#f87171;--border:rgba(99,179,237,.12);--border2:rgba(99,179,237,.25);--grad:linear-gradient(135deg,#63b3ed 0%,#a78bfa 50%,#f472b6 100%);--r:12px;--rs:8px}
+        *{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+        body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--t1);line-height:1.7;-webkit-font-smoothing:antialiased}
+        ::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+        .container{max-width:860px;margin:0 auto;padding:0 32px}
+        .page-header{padding:60px 0 48px;text-align:center;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(167,139,250,.06) 0%,transparent 100%)}
+        .page-header .badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2);color:var(--purple);letter-spacing:.5px;text-transform:uppercase;margin-bottom:16px}
+        .page-header h1{font-size:38px;font-weight:900;letter-spacing:-1.2px;margin-bottom:12px}
+        .page-header h1 span{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .page-header p{color:var(--t2);font-size:16px;max-width:560px;margin:0 auto}
+        .nav-bar{display:flex;gap:8px;padding:20px 0;border-bottom:1px solid var(--border);flex-wrap:wrap}
+        .nav-bar a{padding:7px 16px;border-radius:var(--rs);background:var(--card);border:1px solid var(--border);color:var(--t2);text-decoration:none;font-size:12px;font-weight:600;transition:all .2s}
+        .nav-bar a:hover,.nav-bar a.active{background:var(--card2);border-color:var(--border2);color:var(--t1)}
+        .section{padding:48px 0;border-bottom:1px solid var(--border)}
+        .section:last-of-type{border-bottom:none}
+        .section h2{font-size:24px;font-weight:800;letter-spacing:-.5px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+        .section>p{color:var(--t2);font-size:14.5px;margin-bottom:20px;max-width:640px}
+        h3{font-size:18px;font-weight:700;margin:28px 0 12px}
+        h4{font-size:14px;font-weight:600;color:var(--blue);margin:20px 0 8px}
+        p{margin-bottom:12px;color:var(--t2);font-size:14px}
+        strong{color:var(--t1)}
+        code{font-family:'JetBrains Mono',monospace;font-size:12.5px;background:var(--code-inline);color:var(--cyan);padding:2px 6px;border-radius:4px}
+        pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--rs);padding:18px 22px;margin:12px 0 18px;overflow-x:auto;position:relative}
+        pre code{background:none;padding:0;color:var(--t1);line-height:1.7}
+        pre .label{position:absolute;top:8px;right:12px;font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;font-family:'Inter',sans-serif}
+        .comment{color:#546e7a}.keyword{color:var(--purple)}.string{color:var(--green)}.type{color:var(--yellow)}.number{color:var(--orange)}.func{color:var(--blue)}
+        table{width:100%;border-collapse:collapse;margin:12px 0 18px;font-size:13px}
+        th{text-align:left;padding:10px 14px;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--t3);border-bottom:1px solid var(--border);background:rgba(99,179,237,.03)}
+        td{padding:10px 14px;border-bottom:1px solid rgba(99,179,237,.06);color:var(--t2)}
+        tr:hover td{background:rgba(99,179,237,.03)}
+        .diagram{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:32px;margin:20px 0;overflow-x:auto}
+        .diagram pre{background:transparent;border:none;padding:0;margin:0;text-align:center}
+        .diagram pre code{color:var(--t2);font-size:13px;line-height:1.8}
+        .flow-row{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin:16px 0}
+        .flow-box{padding:12px 22px;border:1px solid var(--blue);border-radius:var(--rs);color:var(--blue);background:rgba(99,179,237,.06);font-size:13px;font-weight:600;font-family:'JetBrains Mono',monospace;white-space:nowrap}
+        .flow-box.accent{border-color:var(--purple);color:var(--purple);background:rgba(167,139,250,.06)}
+        .flow-box.green{border-color:var(--green);color:var(--green);background:rgba(52,211,153,.06)}
+        .flow-arrow{color:var(--t3);font-size:20px;font-weight:300}
+        .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin:20px 0}
+        .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:22px;transition:all .2s}
+        .card:hover{border-color:var(--border2);transform:translateY(-2px)}
+        .card .icon{font-size:28px;margin-bottom:10px;display:block}
+        .card h4{margin:0 0 6px;color:var(--t1);font-size:14px;font-weight:700}
+        .card p{font-size:12.5px;color:var(--t3);margin:0;line-height:1.5}
+        .badge-inline{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.3px}
+        .badge-blue{background:rgba(99,179,237,.12);color:var(--blue)}
+        .badge-purple{background:rgba(167,139,250,.12);color:var(--purple)}
+        .badge-green{background:rgba(52,211,153,.12);color:var(--green)}
+        .alert{padding:14px 18px;border-radius:var(--rs);margin:14px 0;font-size:13px;display:flex;gap:10px;align-items:flex-start}
+        .alert-blue{background:rgba(99,179,237,.08);border:1px solid rgba(99,179,237,.2);color:var(--blue)}
+        .alert-purple{background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.2);color:var(--purple)}
+        ul,ol{margin:8px 0 16px 20px;color:var(--t2);font-size:14px}li{margin-bottom:6px}
+        .footer{padding:40px 0;text-align:center;color:var(--t3);font-size:12px}
+        .footer a{color:var(--blue);text-decoration:none}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}.section{animation:fadeUp .4s ease both}
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <header class="page-header">
+        <div class="badge">🏗️ Architecture</div>
+        <h1>CPM <span>Architecture Specification</span></h1>
+        <p>Detailed design of the L2 Acquisition Engine and L2' Invocation Bridge that power CPM's polyglot package management.</p>
+    </header>
+
+    <nav class="nav-bar">
+        <a href="setup-guide.html">📋 Setup Guide</a>
+        <a href="getting-started.html">🚀 Getting Started</a>
+        <a href="architecture.html" class="active">🏗️ Architecture</a>
+        <a href="bridge-specification.html">🌉 Bridge Spec</a>
+    </nav>
+
+    <!-- ═══ Overview ═══ -->
+    <section class="section">
+        <h2>📐 System Overview</h2>
+        <p>CPM is organized into three layers: Acquisition (L2), Invocation (L2'), and the CLI surface.</p>
+
+        <div class="flow-row">
+            <div class="flow-box">CLI Layer</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box accent">L2 Acquisition</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box green">L2' Invocation</div>
+        </div>
+
+        <div class="card-grid">
+            <div class="card">
+                <span class="icon">🔍</span>
+                <h4>L2 Acquisition</h4>
+                <p>Multi-signal scoring detection, adapter registry, manifest management, and native command execution across 15+ package managers.</p>
+            </div>
+            <div class="card">
+                <span class="icon">🌉</span>
+                <h4>L2' Invocation</h4>
+                <p>Cross-language stdio RPC protocol (<code>upm-bridge/1</code>), value codec, handle GC, and language host supervisors.</p>
+            </div>
+            <div class="card">
+                <span class="icon">⌨️</span>
+                <h4>CLI Layer</h4>
+                <p>User-facing commands (<code>init</code>, <code>detect</code>, <code>install</code>, <code>add</code>, <code>bridge</code>) that orchestrate both engines.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ Source Map ═══ -->
+    <section class="section">
+        <h2>📁 Source Map</h2>
+        <p>Where every component lives in the codebase.</p>
+
+        <pre><code><span class="type">src/</span>
+├── <span class="type">acquisition/</span>          <span class="comment"># L2 — Detection + Package Management</span>
+│   ├── <span class="func">adapter.rs</span>        <span class="comment"># 15+ ecosystem adapter definitions</span>
+│   ├── <span class="func">scoring.rs</span>        <span class="comment"># Weighted detection scoring engine</span>
+│   ├── <span class="func">manifest.rs</span>       <span class="comment"># upm.toml + native manifest scaffolding</span>
+│   └── <span class="func">runner.rs</span>         <span class="comment"># Native command execution</span>
+├── <span class="type">bridge/</span>               <span class="comment"># L2' — Cross-Language Invocation</span>
+│   ├── <span class="func">protocol.rs</span>       <span class="comment"># Wire envelope types</span>
+│   ├── <span class="type">transport/</span>        <span class="comment"># Framed stdio transport</span>
+│   │   ├── <span class="func">mod.rs</span>        <span class="comment"># Transport trait</span>
+│   │   └── <span class="func">rpc.rs</span>        <span class="comment"># StdioRpcTransport (4-byte BE framing)</span>
+│   ├── <span class="func">value.rs</span>          <span class="comment"># UpmValue codec ($blob, $ref, $fn)</span>
+│   ├── <span class="func">handles.rs</span>        <span class="comment"># Object/callback handle GC registry</span>
+│   ├── <span class="func">peer.rs</span>           <span class="comment"># Bidirectional RPC peer</span>
+│   └── <span class="func">host.rs</span>           <span class="comment"># Language host process supervisor</span>
+├── <span class="type">cli/</span>                  <span class="comment"># CLI subcommand handlers</span>
+│   ├── <span class="func">init_cmd.rs</span>       <span class="comment"># Interactive project initialization</span>
+│   ├── <span class="func">detect_cmd.rs</span>     <span class="comment"># Ecosystem detection display</span>
+│   ├── <span class="func">bridge_cmd.rs</span>     <span class="comment"># Bridge RPC + status</span>
+│   └── <span class="func">mod.rs</span>            <span class="comment"># install, add, remove, update, etc.</span>
+├── <span class="func">main.rs</span>               <span class="comment"># `upm` binary entry point</span>
+├── <span class="func">cpm_main.rs</span>           <span class="comment"># `cpm` binary entry point</span>
+└── <span class="func">lib.rs</span>                <span class="comment"># Library root (re-exports)</span></code></pre>
+    </section>
+
+    <!-- ═══ L2 Acquisition ═══ -->
+    <section class="section">
+        <h2>🔍 L2 Universal Acquisition Engine</h2>
+        <p>Detects, configures, and manages package manager operations across 10+ language ecosystems without introducing custom package repositories.</p>
+
+        <h3>Detection Pipeline</h3>
+
+        <div class="flow-row">
+            <div class="flow-box">Workspace Dir</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box">Adapter Registry</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box accent">Multi-Signal Scoring</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box green">Winner per Language</div>
+        </div>
+
+        <h3>Scoring Engine</h3>
+        <p>Each registered adapter is evaluated against the filesystem using five weighted signals:</p>
+
+        <table>
+            <thead><tr><th>Signal</th><th>Weight</th><th>Description</th><th>Example</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Lockfile Present</strong></td><td><span class="badge-inline badge-green">+100</span></td><td>Ecosystem-specific lockfile exists</td><td><code>pnpm-lock.yaml</code>, <code>uv.lock</code></td></tr>
+                <tr><td><strong>Manifest Marker</strong></td><td><span class="badge-inline badge-purple">+80</span></td><td>Marker string inside manifest file</td><td><code>[tool.poetry]</code> in pyproject.toml</td></tr>
+                <tr><td><strong>Manifest Present</strong></td><td><span class="badge-inline badge-blue">+40</span></td><td>Standard manifest file exists</td><td><code>package.json</code>, <code>Cargo.toml</code></td></tr>
+                <tr><td><strong>Glob Match</strong></td><td><span class="badge-inline badge-blue">+30</span></td><td>File extension or pattern match</td><td><code>*.csproj</code>, <code>*.gemspec</code></td></tr>
+                <tr><td><strong>Directory Indicator</strong></td><td><span class="badge-inline badge-blue">+20</span></td><td>Output/dependency folder present</td><td><code>node_modules/</code>, <code>.venv/</code></td></tr>
+                <tr><td><strong>Declared Priority</strong></td><td><span class="badge-inline badge-blue">+0-4</span></td><td>Adapter-defined tie-breaker</td><td>pnpm (4) vs npm (1)</td></tr>
+            </tbody>
+        </table>
+
+        <h3>Winner Determination Rules</h3>
+        <ul>
+            <li><strong>Language Grouping</strong> — Ecosystems are grouped by language (e.g. npm, pnpm, yarn, bun are all <code>"javascript"</code>).</li>
+            <li><strong>Highest Score Wins</strong> — The adapter with the highest total score within each language group becomes the winner.</li>
+            <li><strong>Polyglot Retention</strong> — Winners from distinct language groups all coexist. A project can have pnpm (JS) + uv (Python) + cargo (Rust) simultaneously.</li>
+        </ul>
+
+        <h3>Supported Ecosystems</h3>
+        <table>
+            <thead><tr><th>Language</th><th>Adapters</th><th>Manifest</th><th>Lockfile</th></tr></thead>
+            <tbody>
+                <tr><td>📦 JavaScript</td><td>npm, pnpm, yarn, bun</td><td><code>package.json</code></td><td><code>package-lock.json</code>, <code>pnpm-lock.yaml</code>, etc.</td></tr>
+                <tr><td>🐍 Python</td><td>pip, uv, poetry</td><td><code>pyproject.toml</code> / <code>requirements.txt</code></td><td><code>uv.lock</code>, <code>poetry.lock</code></td></tr>
+                <tr><td>🦀 Rust</td><td>cargo</td><td><code>Cargo.toml</code></td><td><code>Cargo.lock</code></td></tr>
+                <tr><td>🐹 Go</td><td>go</td><td><code>go.mod</code></td><td><code>go.sum</code></td></tr>
+                <tr><td>☕ Java</td><td>maven, gradle</td><td><code>pom.xml</code> / <code>build.gradle</code></td><td><code>gradle.lockfile</code></td></tr>
+                <tr><td>🐘 PHP</td><td>composer</td><td><code>composer.json</code></td><td><code>composer.lock</code></td></tr>
+                <tr><td>💎 Ruby</td><td>bundler</td><td><code>Gemfile</code></td><td><code>Gemfile.lock</code></td></tr>
+                <tr><td>🔷 C#</td><td>nuget</td><td><code>*.csproj</code></td><td><code>packages.lock.json</code></td></tr>
+                <tr><td>🎯 Dart</td><td>pub</td><td><code>pubspec.yaml</code></td><td><code>pubspec.lock</code></td></tr>
+                <tr><td>💧 Elixir</td><td>mix</td><td><code>mix.exs</code></td><td><code>mix.lock</code></td></tr>
+            </tbody>
+        </table>
+
+        <h3>Manifest Management</h3>
+        <p>The <code>upm.toml</code> manifest tracks project metadata, active ecosystems, and foreign dependencies in a single file:</p>
+
+        <pre><code><span class="comment"># upm.toml — single source of truth</span>
+[<span class="type">project</span>]
+name = <span class="string">"my-app"</span>
+version = <span class="string">"0.1.0"</span>
+primary_language = <span class="string">"python"</span>
+
+ecosystems = [<span class="string">"uv"</span>, <span class="string">"pnpm"</span>, <span class="string">"cargo"</span>]
+
+[<span class="type">foreign_dependencies</span>]
+<span class="string">"pip:requests"</span> = <span class="string">"^2.31"</span>
+<span class="string">"npm:express"</span> = <span class="string">"^4.19"</span>
+
+[<span class="type">transports</span>]
+default_tier = <span class="string">"rpc"</span><span class="label">TOML</span></code></pre>
+    </section>
+
+    <!-- ═══ L2' Invocation ═══ -->
+    <section class="section">
+        <h2>🌉 L2' Invocation Engine (<code>upm-bridge/1</code>)</h2>
+        <p>Bridges runtime boundary calls between host environments over stdio streams using a framed JSON protocol.</p>
+
+        <h3>Communication Model</h3>
+
+        <div class="diagram">
+            <div class="flow-row">
+                <div class="flow-box" style="min-width:200px">
+                    🦀 Host Process (Rust)<br>
+                    <span style="font-size:11px;color:var(--t3)">BridgePeer + HandleRegistry</span>
+                </div>
+                <div style="text-align:center;color:var(--t3)">
+                    <div>──── stdin ────▶</div>
+                    <div style="font-size:10px;color:var(--purple);margin:4px 0">upm-bridge/1</div>
+                    <div>◀──── stdout ────</div>
+                </div>
+                <div class="flow-box green" style="min-width:200px">
+                    🐍 Language Host<br>
+                    <span style="font-size:11px;color:var(--t3)">python_host.py / node_host.js</span>
+                </div>
+            </div>
+        </div>
+
+        <h3>Key Components</h3>
+
+        <div class="card-grid">
+            <div class="card">
+                <span class="icon">📡</span>
+                <h4>Transport Layer</h4>
+                <p>4-byte Big-Endian length-prefixed framing over stdin/stdout. Max message size: 64 MB. Trait-based for extensibility.</p>
+            </div>
+            <div class="card">
+                <span class="icon">📦</span>
+                <h4>Value Codec</h4>
+                <p>Universal <code>UpmValue</code> enum extending JSON with <code>$blob</code> (binary), <code>$ref</code> (handles), and <code>$fn</code> (callbacks).</p>
+            </div>
+            <div class="card">
+                <span class="icon">🗂️</span>
+                <h4>Handle Registry</h4>
+                <p>Thread-safe registry for object references and callback closures. Supports batched release via <code>ReleaseHandles</code> messages.</p>
+            </div>
+            <div class="card">
+                <span class="icon">🔄</span>
+                <h4>Bridge Peer</h4>
+                <p>Bidirectional RPC peer that sends requests, dispatches <code>$fn:</code> callbacks, processes handle releases, and handles ping/pong.</p>
+            </div>
+            <div class="card">
+                <span class="icon">🚀</span>
+                <h4>Host Supervisor</h4>
+                <p>Generic <code>spawn_host(program, script)</code> that launches any language runtime with <code>kill_on_drop</code> cleanup.</p>
+            </div>
+            <div class="card">
+                <span class="icon">⚡</span>
+                <h4>Transport Tiers</h4>
+                <p><strong>FFI</strong> (~0.88µs) · <strong>Embed</strong> (~2.6µs) · <strong>RPC</strong> (~156µs, default). Escalates automatically by capability.</p>
+            </div>
+        </div>
+
+        <h3>Wire Protocol</h3>
+
+        <pre><code><span class="comment">┌───────────────┬──────────────────────┐</span>
+<span class="comment">│</span> <span class="number">4 bytes BE u32</span><span class="comment">│</span> <span class="string">JSON payload (UTF-8)</span> <span class="comment">│</span>
+<span class="comment">│</span> <span class="number">(body length)</span> <span class="comment">│</span>                      <span class="comment">│</span>
+<span class="comment">└───────────────┴──────────────────────┘</span></code></pre>
+
+        <p>See the full <a href="bridge-specification.html" style="color:var(--blue)">Bridge Specification</a> for envelope schemas and value semantics.</p>
+    </section>
+
+    <footer class="footer">
+        <p><a href="setup-guide.html">Setup Guide</a> · <a href="getting-started.html">Getting Started</a> · <a href="bridge-specification.html">Bridge Spec</a></p>
+        <p style="margin-top:8px">Write in one language. Depend on all of them. ❤️</p>
+    </footer>
+</div>
+</body>
+</html>

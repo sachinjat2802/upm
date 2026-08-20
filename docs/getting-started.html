@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPM — Getting Started Guide</title>
+    <meta name="description" content="The complete guide to polyglot development with CPM. Learn how to set up projects in any language and import packages from other languages.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #111827;
+            --bg-card: #1a2236;
+            --bg-card-hover: #1f2a42;
+            --bg-code: #0d1321;
+            --bg-code-inline: rgba(99,179,237,0.1);
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-blue: #63b3ed;
+            --accent-cyan: #22d3ee;
+            --accent-purple: #a78bfa;
+            --accent-green: #34d399;
+            --accent-yellow: #fbbf24;
+            --accent-orange: #fb923c;
+            --accent-pink: #f472b6;
+            --accent-red: #f87171;
+            --border: rgba(99,179,237,0.12);
+            --border-hover: rgba(99,179,237,0.25);
+            --gradient-primary: linear-gradient(135deg, #63b3ed 0%, #a78bfa 50%, #f472b6 100%);
+            --gradient-card: linear-gradient(135deg, rgba(99,179,237,0.06) 0%, rgba(167,139,250,0.04) 100%);
+            --shadow-card: 0 4px 24px rgba(0,0,0,0.3);
+            --shadow-glow: 0 0 40px rgba(99,179,237,0.08);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --radius-xs: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Scrollbar ─────────────────────────────────────── */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
+
+        /* ── Layout ────────────────────────────────────────── */
+        .page-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ── Sidebar ───────────────────────────────────────── */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            z-index: 100;
+            padding: 24px 0;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-brand {
+            padding: 0 24px 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+
+        .sidebar-brand h2 {
+            font-size: 18px;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .sidebar-brand p {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .sidebar-nav { list-style: none; }
+
+        .sidebar-nav li a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 24px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 500;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-nav li a:hover {
+            color: var(--text-primary);
+            background: rgba(99,179,237,0.05);
+            border-left-color: var(--accent-blue);
+        }
+
+        .sidebar-nav li a .nav-icon { font-size: 15px; width: 20px; text-align: center; }
+
+        .sidebar-nav .nav-section {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            padding: 16px 24px 6px;
+        }
+
+        /* ── Main Content ──────────────────────────────────── */
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        /* ── Hero ──────────────────────────────────────────── */
+        .hero {
+            position: relative;
+            padding: 80px 60px 60px;
+            background: linear-gradient(180deg, rgba(99,179,237,0.08) 0%, transparent 100%);
+            border-bottom: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -100px;
+            right: -100px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(99,179,237,0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: rgba(99,179,237,0.1);
+            border: 1px solid rgba(99,179,237,0.2);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent-blue);
+            margin-bottom: 20px;
+            letter-spacing: 0.3px;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            font-weight: 900;
+            line-height: 1.15;
+            letter-spacing: -1.5px;
+            margin-bottom: 16px;
+        }
+
+        .hero h1 .gradient-text {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 17px;
+            color: var(--text-secondary);
+            max-width: 600px;
+            line-height: 1.7;
+        }
+
+        /* ── Section ───────────────────────────────────────── */
+        .section {
+            padding: 56px 60px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-header {
+            margin-bottom: 32px;
+        }
+
+        .section-header h2 {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.8px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-header h2 .section-icon {
+            font-size: 28px;
+        }
+
+        .section-header p {
+            font-size: 15px;
+            color: var(--text-secondary);
+            max-width: 640px;
+        }
+
+        h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 32px 0 16px;
+            letter-spacing: -0.3px;
+        }
+
+        h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 24px 0 12px;
+            color: var(--accent-blue);
+        }
+
+        p { margin-bottom: 14px; color: var(--text-secondary); font-size: 14.5px; }
+
+        strong { color: var(--text-primary); font-weight: 600; }
+
+        /* ── Code ──────────────────────────────────────────── */
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            background: var(--bg-code-inline);
+            color: var(--accent-cyan);
+            padding: 2px 7px;
+            border-radius: 4px;
+        }
+
+        pre {
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 20px 24px;
+            margin: 14px 0 20px;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: var(--text-primary);
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        pre .code-label {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .comment { color: #546e7a; }
+        .keyword { color: var(--accent-purple); }
+        .string { color: var(--accent-green); }
+        .func { color: var(--accent-blue); }
+        .number { color: var(--accent-orange); }
+        .type { color: var(--accent-yellow); }
+        .cmd { color: var(--accent-cyan); }
+        .flag { color: var(--accent-pink); }
+
+        /* ── Cards Grid ────────────────────────────────────── */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            transition: all 0.25s ease;
+            cursor: default;
+        }
+
+        .card:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-card);
+        }
+
+        .card-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .card h4 {
+            margin: 0 0 6px;
+            color: var(--text-primary);
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .card p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .card .card-cmds {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        .card .card-cmds code {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 12px;
+            background: none;
+            color: var(--accent-cyan);
+            padding: 0;
+        }
+
+        /* ── Language Card (special) ───────────────────────── */
+        .lang-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+            margin: 20px 0;
+            transition: border-color 0.2s;
+        }
+        .lang-card:hover { border-color: var(--border-hover); }
+
+        .lang-card-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .lang-card-header .lang-icon { font-size: 36px; }
+
+        .lang-card-header h3 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .lang-card-header .lang-tag {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 12px;
+            background: rgba(99,179,237,0.1);
+            color: var(--accent-blue);
+        }
+
+        /* ── Tables ────────────────────────────────────────── */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 14px 0 20px;
+            font-size: 13.5px;
+        }
+
+        th {
+            text-align: left;
+            padding: 10px 16px;
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            background: rgba(99,179,237,0.03);
+        }
+
+        td {
+            padding: 10px 16px;
+            border-bottom: 1px solid rgba(99,179,237,0.06);
+            color: var(--text-secondary);
+        }
+
+        tr:hover td { background: rgba(99,179,237,0.03); }
+
+        /* ── Steps ─────────────────────────────────────────── */
+        .steps { margin: 20px 0; counter-reset: step-counter; }
+
+        .step {
+            display: flex;
+            gap: 20px;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(99,179,237,0.06);
+            counter-increment: step-counter;
+        }
+
+        .step:last-child { border-bottom: none; }
+
+        .step-number {
+            flex-shrink: 0;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 14px;
+            color: var(--bg-primary);
+        }
+
+        .step-content { flex: 1; min-width: 0; }
+        .step-content h4 { margin: 0 0 6px; color: var(--text-primary); }
+        .step-content p { margin: 0; font-size: 13.5px; }
+
+        /* ── Flow Diagram ──────────────────────────────────── */
+        .flow-diagram {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            margin: 20px 0;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            overflow-x: auto;
+        }
+
+        .flow-diagram .box {
+            display: inline-block;
+            padding: 10px 20px;
+            border: 1px solid var(--accent-blue);
+            border-radius: var(--radius-xs);
+            color: var(--accent-blue);
+            background: rgba(99,179,237,0.06);
+        }
+
+        .flow-diagram .arrow {
+            display: inline-block;
+            color: var(--text-muted);
+            margin: 0 12px;
+        }
+
+        .flow-diagram .protocol {
+            font-size: 10px;
+            color: var(--accent-purple);
+            display: block;
+            margin-top: 4px;
+        }
+
+        /* ── Recipe Card ───────────────────────────────────── */
+        .recipe {
+            background: var(--gradient-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+            margin: 20px 0;
+        }
+
+        .recipe-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .recipe-header .recipe-badge {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 12px;
+            background: rgba(251,191,36,0.12);
+            color: var(--accent-yellow);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .recipe h4 { margin: 0 0 4px; color: var(--text-primary); }
+        .recipe > p { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; }
+
+        /* ── Alert ─────────────────────────────────────────── */
+        .alert {
+            padding: 16px 20px;
+            border-radius: var(--radius-sm);
+            margin: 16px 0;
+            font-size: 13.5px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .alert-tip {
+            background: rgba(52,211,153,0.08);
+            border: 1px solid rgba(52,211,153,0.2);
+            color: var(--accent-green);
+        }
+
+        .alert-info {
+            background: rgba(99,179,237,0.08);
+            border: 1px solid rgba(99,179,237,0.2);
+            color: var(--accent-blue);
+        }
+
+        .alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+        /* ── Footer ────────────────────────────────────────── */
+        .footer {
+            padding: 40px 60px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .footer a { color: var(--accent-blue); text-decoration: none; }
+        .footer a:hover { text-decoration: underline; }
+
+        /* ── Responsive ────────────────────────────────────── */
+        @media (max-width: 1024px) {
+            .sidebar { transform: translateX(-100%); }
+            .main-content { margin-left: 0; }
+            .hero, .section { padding-left: 32px; padding-right: 32px; }
+            .footer { padding-left: 32px; padding-right: 32px; }
+        }
+
+        @media (max-width: 640px) {
+            .hero h1 { font-size: 28px; }
+            .cards-grid { grid-template-columns: 1fr; }
+        }
+
+        /* ── Animations ────────────────────────────────────── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section { animation: fadeUp 0.5s ease both; }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+
+        <!-- ─── Sidebar ─────────────────────────────────── -->
+        <nav class="sidebar">
+            <div class="sidebar-brand">
+                <h2>📦 CPM Docs</h2>
+                <p>Getting Started Guide</p>
+            </div>
+            <ul class="sidebar-nav">
+                <li class="nav-section">Setup</li>
+                <li><a href="#installation"><span class="nav-icon">⚡</span> Installation</a></li>
+                <li><a href="#first-project"><span class="nav-icon">🚀</span> Your First Project</a></li>
+
+                <li class="nav-section">Languages</li>
+                <li><a href="#lang-js"><span class="nav-icon">📦</span> JavaScript / TS</a></li>
+                <li><a href="#lang-python"><span class="nav-icon">🐍</span> Python</a></li>
+                <li><a href="#lang-rust"><span class="nav-icon">🦀</span> Rust</a></li>
+                <li><a href="#lang-go"><span class="nav-icon">🐹</span> Go</a></li>
+                <li><a href="#lang-java"><span class="nav-icon">☕</span> Java / Kotlin</a></li>
+                <li><a href="#lang-others"><span class="nav-icon">🌐</span> PHP, Ruby, C#, …</a></li>
+
+                <li class="nav-section">Cross-Language</li>
+                <li><a href="#importing"><span class="nav-icon">🔗</span> Foreign Packages</a></li>
+                <li><a href="#bridge"><span class="nav-icon">🌉</span> Bridge RPC Calls</a></li>
+
+                <li class="nav-section">Recipes</li>
+                <li><a href="#recipes"><span class="nav-icon">🍳</span> Real-World Recipes</a></li>
+
+                <li class="nav-section">Reference</li>
+                <li><a href="#upm-toml"><span class="nav-icon">📄</span> upm.toml Format</a></li>
+                <li><a href="#commands"><span class="nav-icon">⌨️</span> All Commands</a></li>
+            </ul>
+        </nav>
+
+        <!-- ─── Main ────────────────────────────────────── -->
+        <main class="main-content">
+
+            <!-- Hero -->
+            <header class="hero" id="top">
+                <div class="hero-badge">📖 Comprehensive Guide</div>
+                <h1>
+                    Getting Started with<br>
+                    <span class="gradient-text">CPM / UPM</span>
+                </h1>
+                <p>
+                    Learn how to set up projects in any language, add dependencies
+                    from other ecosystems, and call foreign functions — all from one CLI.
+                </p>
+            </header>
+
+            <!-- ═══ 1. Installation ═══ -->
+            <section class="section" id="installation">
+                <div class="section-header">
+                    <h2><span class="section-icon">⚡</span> Installation</h2>
+                    <p>Build CPM from source and add it to your PATH.</p>
+                </div>
+
+                <pre><code><span class="comment"># Clone and build</span>
+<span class="cmd">git clone</span> https://github.com/upm-org/upm.git
+<span class="cmd">cd</span> upm
+<span class="cmd">cargo build</span> <span class="flag">--release</span>
+
+<span class="comment"># The binaries are at:</span>
+<span class="comment">#   target/release/cpm.exe</span>
+<span class="comment">#   target/release/upm.exe</span>
+
+<span class="comment"># Verify</span>
+<span class="cmd">cpm</span> <span class="flag">--version</span>
+<span class="comment"># → upm 0.1.0</span></code></pre>
+
+                <div class="alert alert-tip">
+                    <span class="alert-icon">💡</span>
+                    <span>Both <code>cpm</code> and <code>upm</code> are identical binaries — use whichever name you prefer.</span>
+                </div>
+            </section>
+
+            <!-- ═══ 2. First Project ═══ -->
+            <section class="section" id="first-project">
+                <div class="section-header">
+                    <h2><span class="section-icon">🚀</span> Your First Project</h2>
+                    <p>Create a polyglot project in seconds with interactive prompts or flags.</p>
+                </div>
+
+                <h3>Interactive Mode</h3>
+                <pre><code><span class="cmd">mkdir</span> my-app && <span class="cmd">cd</span> my-app
+<span class="cmd">cpm init</span></code></pre>
+
+                <p>CPM guides you through three questions — project name, base language, and foreign ecosystems:</p>
+
+                <pre><code>  ╭──────────────────────────────────────────────────────╮
+  │  🚀 <span class="type">UPM Project Initializer</span>                         │
+  ╰──────────────────────────────────────────────────────╯
+
+  <span class="func">?</span> Project name [my-app]: <span class="string">my-app</span>
+  <span class="func">?</span> What is your base language?
+   › <span class="number">1)</span> 📦 JavaScript / TypeScript
+     <span class="number">2)</span> 🐍 Python
+     <span class="number">3)</span> 🦀 Rust
+     <span class="number">4)</span> 🐹 Go
+  › Choose [1]: <span class="string">2</span>
+
+  <span class="func">?</span> Which foreign ecosystems do you want to support?
+     <span class="number">1)</span> 📦 JavaScript / TypeScript
+     <span class="number">2)</span> 🦀 Rust
+     <span class="number">3)</span> 🐹 Go
+  › Choose: <span class="string">1,3</span></code></pre>
+
+                <h3>Non-Interactive One-Liners</h3>
+                <pre><code><span class="comment"># Python + Node.js support</span>
+<span class="cmd">cpm init</span> <span class="flag">-l</span> python <span class="flag">-f</span> node <span class="flag">-y</span>
+
+<span class="comment"># Rust + Python + Go</span>
+<span class="cmd">cpm init</span> <span class="flag">-l</span> rust <span class="flag">-f</span> python,go <span class="flag">-y</span>
+
+<span class="comment"># JavaScript + everything</span>
+<span class="cmd">cpm init</span> <span class="flag">-l</span> javascript <span class="flag">-f</span> python,rust,go <span class="flag">-y</span></code></pre>
+
+                <h3>What Gets Created</h3>
+                <pre><code><span class="type">my-app/</span>
+├── <span class="func">upm.toml</span>              <span class="comment"># CPM manifest (tracks all ecosystems)</span>
+├── <span class="func">pyproject.toml</span>         <span class="comment"># Python manifest (base language)</span>
+├── <span class="func">main.py</span>               <span class="comment"># Python entry point</span>
+├── <span class="func">package.json</span>           <span class="comment"># Node.js manifest (foreign)</span>
+├── <span class="func">index.js</span>               <span class="comment"># Node.js entry point</span>
+├── <span class="func">go.mod</span>                 <span class="comment"># Go manifest (foreign)</span>
+└── <span class="func">main.go</span>                <span class="comment"># Go entry point</span></code></pre>
+            </section>
+
+            <!-- ═══ 3. Language Guides ═══ -->
+            <section class="section" id="lang-js">
+                <div class="section-header">
+                    <h2><span class="section-icon">🌐</span> Language Setup Guides</h2>
+                    <p>Each language comes with auto-detection, manifest scaffolding, and native package manager integration.</p>
+                </div>
+
+                <!-- JavaScript -->
+                <div class="lang-card">
+                    <div class="lang-card-header">
+                        <span class="lang-icon">📦</span>
+                        <h3>JavaScript / TypeScript</h3>
+                        <span class="lang-tag">npm · pnpm · yarn · bun</span>
+                    </div>
+
+                    <p>CPM auto-detects your JS package manager by lockfile:</p>
+                    <table>
+                        <thead><tr><th>Lockfile</th><th>Detected</th><th>Priority</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>pnpm-lock.yaml</code></td><td>pnpm</td><td>★★★★</td></tr>
+                            <tr><td><code>yarn.lock</code></td><td>yarn</td><td>★★★</td></tr>
+                            <tr><td><code>bun.lockb</code></td><td>bun</td><td>★★</td></tr>
+                            <tr><td><code>package-lock.json</code></td><td>npm</td><td>★</td></tr>
+                        </tbody>
+                    </table>
+
+                    <pre><code><span class="cmd">cpm init</span> <span class="flag">-l</span> javascript <span class="flag">-y</span>
+
+<span class="comment"># Add packages</span>
+<span class="cmd">cpm add</span> npm:express
+<span class="cmd">cpm add</span> npm:typescript
+<span class="cmd">cpm add</span> npm:@types/node
+
+<span class="comment"># Install & run</span>
+<span class="cmd">cpm install</span>
+<span class="cmd">cpm run</span> dev</code></pre>
+
+                    <h4>Example index.js</h4>
+                    <pre><code><span class="keyword">const</span> express = <span class="func">require</span>(<span class="string">'express'</span>);
+<span class="keyword">const</span> app = <span class="func">express</span>();
+
+app.<span class="func">get</span>(<span class="string">'/'</span>, (req, res) => {
+    res.<span class="func">json</span>({ message: <span class="string">'Hello from CPM polyglot project!'</span> });
+});
+
+app.<span class="func">listen</span>(<span class="number">3000</span>, () => console.<span class="func">log</span>(<span class="string">'Server running on :3000'</span>));<span class="code-label">JavaScript</span></code></pre>
+                </div>
+
+                <!-- Python -->
+                <div class="lang-card" id="lang-python">
+                    <div class="lang-card-header">
+                        <span class="lang-icon">🐍</span>
+                        <h3>Python</h3>
+                        <span class="lang-tag">uv · poetry · pip</span>
+                    </div>
+
+                    <p>CPM prefers modern Python tooling — <strong>uv</strong> is detected first if present.</p>
+                    <table>
+                        <thead><tr><th>Signal</th><th>Detected</th><th>Priority</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>uv.lock</code> or <code>[tool.uv]</code></td><td>uv</td><td>★★★★</td></tr>
+                            <tr><td><code>poetry.lock</code> or <code>[tool.poetry]</code></td><td>poetry</td><td>★★★</td></tr>
+                            <tr><td><code>requirements.txt</code></td><td>pip</td><td>★</td></tr>
+                        </tbody>
+                    </table>
+
+                    <pre><code><span class="cmd">cpm init</span> <span class="flag">-l</span> python <span class="flag">-y</span>
+
+<span class="comment"># Add packages</span>
+<span class="cmd">cpm add</span> pip:requests
+<span class="cmd">cpm add</span> pip:fastapi
+<span class="cmd">cpm add</span> pip:pandas
+
+<span class="comment"># Install & run</span>
+<span class="cmd">cpm install</span>
+<span class="cmd">cpm run</span> main.py</code></pre>
+
+                    <h4>Example main.py</h4>
+                    <pre><code><span class="keyword">import</span> requests
+
+<span class="keyword">def</span> <span class="func">fetch_data</span>(url):
+    <span class="string">"""Fetch JSON data from an API."""</span>
+    response = requests.<span class="func">get</span>(url)
+    <span class="keyword">return</span> response.<span class="func">json</span>()
+
+<span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:
+    data = <span class="func">fetch_data</span>(<span class="string">'https://api.github.com/repos/python/cpython'</span>)
+    <span class="func">print</span>(<span class="string">f"Python has </span>{data[<span class="string">'stargazers_count'</span>]}<span class="string"> stars!"</span>)<span class="code-label">Python</span></code></pre>
+                </div>
+
+                <!-- Rust -->
+                <div class="lang-card" id="lang-rust">
+                    <div class="lang-card-header">
+                        <span class="lang-icon">🦀</span>
+                        <h3>Rust</h3>
+                        <span class="lang-tag">cargo</span>
+                    </div>
+
+                    <pre><code><span class="cmd">cpm init</span> <span class="flag">-l</span> rust <span class="flag">-y</span>
+
+<span class="comment"># Add packages</span>
+<span class="cmd">cpm add</span> cargo:serde
+<span class="cmd">cpm add</span> cargo:tokio
+<span class="cmd">cpm add</span> cargo:reqwest
+
+<span class="comment"># Build & run</span>
+<span class="cmd">cpm install</span>          <span class="comment"># runs cargo build</span>
+<span class="cmd">cpm run</span> main          <span class="comment"># runs cargo run --bin main</span></code></pre>
+
+                    <h4>Example src/main.rs</h4>
+                    <pre><code><span class="keyword">use</span> serde::<span class="type">Deserialize</span>;
+
+<span class="keyword">#[derive(Deserialize, Debug)]</span>
+<span class="keyword">struct</span> <span class="type">Repo</span> {
+    name: <span class="type">String</span>,
+    stargazers_count: <span class="type">u64</span>,
+}
+
+<span class="keyword">#[tokio::main]</span>
+<span class="keyword">async fn</span> <span class="func">main</span>() -> <span class="type">Result</span>&lt;(), <span class="type">Box</span>&lt;<span class="keyword">dyn</span> std::error::<span class="type">Error</span>&gt;&gt; {
+    <span class="keyword">let</span> repo: <span class="type">Repo</span> = reqwest::<span class="func">get</span>(<span class="string">"https://api.github.com/repos/rust-lang/rust"</span>)
+        .<span class="keyword">await</span>?.<span class="func">json</span>().<span class="keyword">await</span>?;
+    <span class="func">println!</span>(<span class="string">"{} has {} stars!"</span>, repo.name, repo.stargazers_count);
+    <span class="type">Ok</span>(())
+}<span class="code-label">Rust</span></code></pre>
+                </div>
+
+                <!-- Go -->
+                <div class="lang-card" id="lang-go">
+                    <div class="lang-card-header">
+                        <span class="lang-icon">🐹</span>
+                        <h3>Go</h3>
+                        <span class="lang-tag">go mod</span>
+                    </div>
+
+                    <pre><code><span class="cmd">cpm init</span> <span class="flag">-l</span> go <span class="flag">-y</span>
+
+<span class="comment"># Add packages</span>
+<span class="cmd">cpm add</span> go:github.com/gin-gonic/gin
+<span class="cmd">cpm add</span> go:github.com/rs/zerolog
+
+<span class="comment"># Install & run</span>
+<span class="cmd">cpm install</span>          <span class="comment"># runs go mod download</span>
+<span class="cmd">cpm run</span> .             <span class="comment"># runs go run .</span></code></pre>
+
+                    <h4>Example main.go</h4>
+                    <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"net/http"</span>
+    <span class="string">"github.com/gin-gonic/gin"</span>
+)
+
+<span class="keyword">func</span> <span class="func">main</span>() {
+    r := gin.<span class="func">Default</span>()
+    r.<span class="func">GET</span>(<span class="string">"/"</span>, <span class="keyword">func</span>(c *gin.<span class="type">Context</span>) {
+        c.<span class="func">JSON</span>(http.<span class="type">StatusOK</span>, gin.<span class="type">H</span>{<span class="string">"message"</span>: <span class="string">"Hello from CPM!"</span>})
+    })
+    r.<span class="func">Run</span>(<span class="string">":8080"</span>)
+}<span class="code-label">Go</span></code></pre>
+                </div>
+
+                <!-- Other Languages -->
+                <div id="lang-java"></div>
+                <div id="lang-others"></div>
+                <h3>More Ecosystems</h3>
+
+                <div class="cards-grid">
+                    <div class="card">
+                        <span class="card-icon">☕</span>
+                        <h4>Java / Kotlin</h4>
+                        <p>Maven and Gradle auto-detected by <code>pom.xml</code> or <code>build.gradle</code>.</p>
+                        <div class="card-cmds">
+                            <code>cpm add maven:com.google.code.gson:gson</code>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <span class="card-icon">🐘</span>
+                        <h4>PHP</h4>
+                        <p>Composer detected by <code>composer.json</code>.</p>
+                        <div class="card-cmds">
+                            <code>cpm add composer:laravel/framework</code>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <span class="card-icon">💎</span>
+                        <h4>Ruby</h4>
+                        <p>Bundler detected by <code>Gemfile</code>.</p>
+                        <div class="card-cmds">
+                            <code>cpm add bundler:rails</code>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <span class="card-icon">🔷</span>
+                        <h4>C# / .NET</h4>
+                        <p>NuGet via dotnet CLI, detected by <code>*.csproj</code>.</p>
+                        <div class="card-cmds">
+                            <code>cpm add nuget:Newtonsoft.Json</code>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <span class="card-icon">🎯</span>
+                        <h4>Dart / Flutter</h4>
+                        <p>Pub detected by <code>pubspec.yaml</code>.</p>
+                        <div class="card-cmds">
+                            <code>cpm add pub:http</code>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <span class="card-icon">💧</span>
+                        <h4>Elixir</h4>
+                        <p>Mix detected by <code>mix.exs</code>.</p>
+                        <div class="card-cmds">
+                            <code>cpm add mix:phoenix</code>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══ 4. Importing Foreign Packages ═══ -->
+            <section class="section" id="importing">
+                <div class="section-header">
+                    <h2><span class="section-icon">🔗</span> Importing Foreign Packages</h2>
+                    <p>The core superpower of CPM: use packages from <strong>any ecosystem</strong> in the same project.</p>
+                </div>
+
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>Add the foreign ecosystem at init time</h4>
+                            <pre><code><span class="comment"># Base is Python, but you also need Node.js packages</span>
+<span class="cmd">cpm init</span> <span class="flag">-l</span> python <span class="flag">-f</span> node <span class="flag">-y</span></code></pre>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>Add dependencies from any ecosystem</h4>
+                            <pre><code><span class="comment"># Python packages (your base language)</span>
+<span class="cmd">cpm add</span> pip:requests
+<span class="cmd">cpm add</span> pip:pandas
+
+<span class="comment"># Node.js packages (foreign ecosystem)</span>
+<span class="cmd">cpm add</span> npm:sharp           <span class="comment"># Image processing</span>
+<span class="cmd">cpm add</span> npm:puppeteer       <span class="comment"># Browser automation</span></code></pre>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>Install everything at once</h4>
+                            <pre><code><span class="cmd">cpm install</span>
+<span class="comment"># → Runs BOTH uv sync (Python) AND pnpm install (Node.js)</span></code></pre>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h4>Call foreign code via the bridge</h4>
+                            <pre><code><span class="comment"># From your Python project, call Node.js sharp to resize an image</span>
+<span class="cmd">cpm bridge call</span> node:sharp.resize <span class="string">'["photo.jpg", 800, 600]'</span></code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info">
+                    <span class="alert-icon">ℹ️</span>
+                    <span>
+                        All foreign dependencies are tracked in <code>upm.toml</code> under
+                        <code>[foreign_dependencies]</code> using the format <code>"ecosystem:package" = "version"</code>.
+                    </span>
+                </div>
+            </section>
+
+            <!-- ═══ 5. Bridge ═══ -->
+            <section class="section" id="bridge">
+                <div class="section-header">
+                    <h2><span class="section-icon">🌉</span> Cross-Language Bridge (RPC)</h2>
+                    <p>Call functions in foreign languages over stdio RPC — no setup, no servers, no boilerplate.</p>
+                </div>
+
+                <h3>How It Works</h3>
+
+                <div class="flow-diagram">
+                    <span class="box">Your CLI / Rust Host</span>
+                    <span class="arrow">──── stdio ────▶</span>
+                    <span class="box">Python / Node.js Host</span>
+                    <br>
+                    <span class="protocol">upm-bridge/1 · 4-byte BE length-prefixed JSON frames</span>
+                </div>
+
+                <h3>Python Bridge Examples</h3>
+                <pre><code><span class="comment"># Math operations</span>
+<span class="cmd">cpm bridge call</span> python:math.sqrt <span class="string">'[144.0]'</span>
+<span class="comment"># → 12.0</span>
+
+<span class="comment"># Hash data</span>
+<span class="cmd">cpm bridge call</span> python:hash.sha256 <span class="string">'["hello world"]'</span>
+<span class="comment"># → "b94d27b9934d3e08..."</span>
+
+<span class="comment"># Parse a document</span>
+<span class="cmd">cpm bridge call</span> python:docling.parse <span class="string">'["report.pdf"]'</span>
+<span class="comment"># → { "filename": "report.pdf", "pages": 28, "sections": [...] }</span></code></pre>
+
+                <h3>Node.js Bridge Examples</h3>
+                <pre><code><span class="comment"># Image processing</span>
+<span class="cmd">cpm bridge call</span> node:sharp.resize <span class="string">'["photo.jpg", 800, 600]'</span>
+<span class="comment"># → { "resized": true, "width": 800, "height": 600 }</span>
+
+<span class="comment"># Crypto hashing</span>
+<span class="cmd">cpm bridge call</span> node:crypto.sha256 <span class="string">'["hello world"]'</span></code></pre>
+
+                <h3>Add Your Own Methods</h3>
+                <p>Extend the host scripts in the <code>hosts/</code> directory:</p>
+
+                <pre><code><span class="comment"># In hosts/python_host.py, inside handle_request():</span>
+
+<span class="keyword">elif</span> method == <span class="string">"my_custom.analyze"</span>:
+    text = args[<span class="number">0</span>]
+    word_count = <span class="func">len</span>(text.<span class="func">split</span>())
+    result = {
+        <span class="string">"text_length"</span>: <span class="func">len</span>(text),
+        <span class="string">"word_count"</span>: word_count,
+        <span class="string">"avg_word_length"</span>: <span class="func">len</span>(text) / <span class="func">max</span>(word_count, <span class="number">1</span>)
+    }
+    <span class="func">send_message</span>({<span class="string">"type"</span>: <span class="string">"response"</span>, <span class="string">"id"</span>: req_id, <span class="string">"result"</span>: result, <span class="string">"error"</span>: <span class="type">None</span>})<span class="code-label">Python</span></code></pre>
+
+                <pre><code><span class="comment"># Then call it:</span>
+<span class="cmd">cpm bridge call</span> python:my_custom.analyze <span class="string">'["Hello world from CPM"]'</span>
+<span class="comment"># → { "text_length": 20, "word_count": 4, "avg_word_length": 5.0 }</span></code></pre>
+            </section>
+
+            <!-- ═══ 6. Recipes ═══ -->
+            <section class="section" id="recipes">
+                <div class="section-header">
+                    <h2><span class="section-icon">🍳</span> Real-World Recipes</h2>
+                    <p>Copy-paste project setups for common polyglot architectures.</p>
+                </div>
+
+                <div class="recipe">
+                    <div class="recipe-header">
+                        <span class="recipe-badge">Recipe 1</span>
+                    </div>
+                    <h4>🐍 Python ML + 📦 Node.js API Server</h4>
+                    <p>Use Python for machine learning, Node.js for the REST API.</p>
+                    <pre><code><span class="cmd">mkdir</span> ml-api && <span class="cmd">cd</span> ml-api
+<span class="cmd">cpm init</span> <span class="flag">-l</span> python <span class="flag">-f</span> node <span class="flag">-y</span>
+
+<span class="comment"># Python: ML</span>
+<span class="cmd">cpm add</span> pip:scikit-learn
+<span class="cmd">cpm add</span> pip:pandas
+<span class="cmd">cpm add</span> pip:numpy
+
+<span class="comment"># Node.js: API</span>
+<span class="cmd">cpm add</span> npm:express
+<span class="cmd">cpm add</span> npm:cors
+
+<span class="cmd">cpm install</span></code></pre>
+                </div>
+
+                <div class="recipe">
+                    <div class="recipe-header">
+                        <span class="recipe-badge">Recipe 2</span>
+                    </div>
+                    <h4>🦀 Rust CLI + 🐍 Python Data Processing</h4>
+                    <p>Rust for CLI speed, Python for data analysis and visualization.</p>
+                    <pre><code><span class="cmd">mkdir</span> data-tool && <span class="cmd">cd</span> data-tool
+<span class="cmd">cpm init</span> <span class="flag">-l</span> rust <span class="flag">-f</span> python <span class="flag">-y</span>
+
+<span class="cmd">cpm add</span> cargo:clap
+<span class="cmd">cpm add</span> cargo:serde_json
+<span class="cmd">cpm add</span> pip:pandas
+<span class="cmd">cpm add</span> pip:matplotlib
+
+<span class="cmd">cpm install</span></code></pre>
+                </div>
+
+                <div class="recipe">
+                    <div class="recipe-header">
+                        <span class="recipe-badge">Recipe 3</span>
+                    </div>
+                    <h4>🐹 Go Backend + 📦 Node.js Frontend</h4>
+                    <p>Go for the API server, Node.js for the frontend build toolchain.</p>
+                    <pre><code><span class="cmd">mkdir</span> fullstack && <span class="cmd">cd</span> fullstack
+<span class="cmd">cpm init</span> <span class="flag">-l</span> go <span class="flag">-f</span> node <span class="flag">-y</span>
+
+<span class="cmd">cpm add</span> go:github.com/gin-gonic/gin
+<span class="cmd">cpm add</span> npm:vite
+<span class="cmd">cpm add</span> npm:react
+
+<span class="cmd">cpm install</span></code></pre>
+                </div>
+
+                <div class="recipe">
+                    <div class="recipe-header">
+                        <span class="recipe-badge">Recipe 4</span>
+                    </div>
+                    <h4>🌐 Polyglot Monorepo (4 Languages)</h4>
+                    <p>One repo, four languages, one tool to manage them all.</p>
+                    <pre><code><span class="cmd">mkdir</span> platform && <span class="cmd">cd</span> platform
+<span class="cmd">cpm init</span> <span class="flag">-l</span> javascript <span class="flag">-f</span> python,rust,go <span class="flag">-y</span>
+
+<span class="cmd">cpm add</span> npm:fastify          <span class="comment"># JS API gateway</span>
+<span class="cmd">cpm add</span> pip:fastapi          <span class="comment"># Python ML service</span>
+<span class="cmd">cpm add</span> cargo:actix-web      <span class="comment"># Rust compute service</span>
+<span class="cmd">cpm add</span> go:github.com/gin-gonic/gin  <span class="comment"># Go auth service</span>
+
+<span class="cmd">cpm install</span>   <span class="comment"># installs ALL ecosystems at once</span>
+<span class="cmd">cpm status</span>    <span class="comment"># beautiful project overview</span>
+<span class="cmd">cpm audit</span>     <span class="comment"># security audit across all ecosystems</span></code></pre>
+                </div>
+            </section>
+
+            <!-- ═══ 7. upm.toml ═══ -->
+            <section class="section" id="upm-toml">
+                <div class="section-header">
+                    <h2><span class="section-icon">📄</span> Understanding upm.toml</h2>
+                    <p>The single source of truth for your polyglot project.</p>
+                </div>
+
+                <pre><code><span class="comment"># Project metadata</span>
+[<span class="type">project</span>]
+name = <span class="string">"my-polyglot-app"</span>
+version = <span class="string">"0.1.0"</span>
+primary_language = <span class="string">"python"</span>
+
+<span class="comment"># Active ecosystem adapters</span>
+ecosystems = [<span class="string">"uv"</span>, <span class="string">"pnpm"</span>, <span class="string">"cargo"</span>]
+
+<span class="comment"># Cross-ecosystem dependency tracking</span>
+[<span class="type">foreign_dependencies</span>]
+<span class="string">"pip:requests"</span> = <span class="string">"^2.31"</span>
+<span class="string">"pip:pandas"</span> = <span class="string">"^2.2"</span>
+<span class="string">"npm:express"</span> = <span class="string">"^4.19"</span>
+<span class="string">"cargo:serde"</span> = <span class="string">"^1.0"</span>
+
+<span class="comment"># Bridge transport configuration</span>
+[<span class="type">transports</span>]
+default_tier = <span class="string">"rpc"</span>  <span class="comment"># Options: "rpc", "embed", "ffi"</span><span class="code-label">TOML</span></code></pre>
+
+                <h3>Ecosystem Adapter Names</h3>
+                <table>
+                    <thead><tr><th>Name</th><th>Language</th><th>Tool</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>npm</code>, <code>pnpm</code>, <code>yarn</code>, <code>bun</code></td><td>JavaScript</td><td>npm / pnpm / yarn / bun</td></tr>
+                        <tr><td><code>pip</code>, <code>uv</code>, <code>poetry</code></td><td>Python</td><td>pip / uv / poetry</td></tr>
+                        <tr><td><code>cargo</code></td><td>Rust</td><td>cargo</td></tr>
+                        <tr><td><code>go</code></td><td>Go</td><td>go mod</td></tr>
+                        <tr><td><code>maven</code>, <code>gradle</code></td><td>Java/Kotlin</td><td>Maven / Gradle</td></tr>
+                        <tr><td><code>composer</code></td><td>PHP</td><td>Composer</td></tr>
+                        <tr><td><code>bundler</code></td><td>Ruby</td><td>Bundler</td></tr>
+                        <tr><td><code>nuget</code></td><td>C# / .NET</td><td>dotnet</td></tr>
+                        <tr><td><code>pub</code></td><td>Dart</td><td>dart pub</td></tr>
+                        <tr><td><code>mix</code></td><td>Elixir</td><td>mix</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- ═══ 8. Commands ═══ -->
+            <section class="section" id="commands">
+                <div class="section-header">
+                    <h2><span class="section-icon">⌨️</span> Command Reference</h2>
+                    <p>Every command, alias, and flag at a glance.</p>
+                </div>
+
+                <pre><code><span class="comment"># ── Project Lifecycle ──────────────────────────────</span>
+<span class="cmd">cpm init</span>                        <span class="comment"># Interactive setup</span>
+<span class="cmd">cpm init</span> <span class="flag">-l</span> python <span class="flag">-f</span> node <span class="flag">-y</span>   <span class="comment"># Non-interactive</span>
+<span class="cmd">cpm status</span>                      <span class="comment"># Project overview</span>
+<span class="cmd">cpm detect</span>                      <span class="comment"># Show detected ecosystems</span>
+
+<span class="comment"># ── Dependency Management ──────────────────────────</span>
+<span class="cmd">cpm install</span>                     <span class="comment"># Install all (alias: is)</span>
+<span class="cmd">cpm install</span> <span class="flag">--parallel</span>          <span class="comment"># Install ecosystems concurrently (-p)</span>
+<span class="cmd">cpm install</span> <span class="flag">--filter</span> python     <span class="comment"># Target specific language (-f)</span>
+<span class="cmd">cpm add</span> requests                <span class="comment"># Smart auto-detects ecosystem prefix!</span>
+<span class="cmd">cpm add</span> pip:requests            <span class="comment"># Add explicit dep (alias: a)</span>
+<span class="cmd">cpm remove</span> pip:requests         <span class="comment"># Remove dep (alias: rm)</span>
+<span class="cmd">cpm update</span> <span class="flag">--parallel</span>           <span class="comment"># Update all concurrently</span>
+<span class="cmd">cpm outdated</span> <span class="flag">--filter</span> node      <span class="comment"># Show outdated node deps</span>
+<span class="cmd">cpm audit</span>                       <span class="comment"># Security vulnerabilities</span>
+
+<span class="comment"># ── Running Code ───────────────────────────────────</span>
+<span class="cmd">cpm run</span> dev                     <span class="comment"># Run script across ecosystems</span>
+<span class="cmd">cpm run</span> build
+<span class="cmd">cpm run</span> test
+
+<span class="comment"># ── Cross-Language Bridge ──────────────────────────</span>
+<span class="cmd">cpm bridge inspect</span> python       <span class="comment"># Inspect available RPC methods on host</span>
+<span class="cmd">cpm bridge inspect</span> node
+<span class="cmd">cpm bridge call</span> python:math.sqrt <span class="string">'[9]'</span>
+<span class="cmd">cpm bridge call</span> node:crypto.sha256 <span class="string">'["hi"]'</span>
+<span class="cmd">cpm bridge status</span>
+
+<span class="comment"># ── Shortcuts ──────────────────────────────────────</span>
+<span class="cmd">cpm i</span>    → cpm init         <span class="cmd">cpm a</span>  → cpm add
+<span class="cmd">cpm d</span>    → cpm detect       <span class="cmd">cpm rm</span> → cpm remove
+<span class="cmd">cpm is</span>   → cpm install      <span class="cmd">cpm up</span> → cpm update</code></pre>
+
+                <h3>Flags</h3>
+                <table>
+                    <thead><tr><th>Flag</th><th>Commands</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>-p, --parallel</code></td><td>install, update</td><td>Run ecosystem operations concurrently in parallel threads</td></tr>
+                        <tr><td><code>-f, --filter &lt;LANG&gt;</code></td><td>install, update, outdated, audit</td><td>Target specific ecosystem by language or adapter name</td></tr>
+                        <tr><td><code>--dry-run</code></td><td>install, add, remove, update</td><td>Show what would run without executing</td></tr>
+                        <tr><td><code>-y, --yes</code></td><td>init</td><td>Accept all defaults without prompting</td></tr>
+                        <tr><td><code>-l, --base-lang</code></td><td>init</td><td>Set the base language</td></tr>
+                        <tr><td><code>-f, --foreign-langs</code></td><td>init</td><td>Comma-separated foreign languages</td></tr>
+                        <tr><td><code>--name</code></td><td>init</td><td>Set project name</td></tr>
+                        <tr><td><code>--help</code></td><td>all</td><td>Show help for any command</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Footer -->
+            <footer class="footer">
+                <p>
+                    Built with ❤️ by the CPM/UPM team &nbsp;·&nbsp;
+                    <a href="https://github.com/upm-org/upm">GitHub</a> &nbsp;·&nbsp;
+                    <a href="architecture.html">Architecture</a> &nbsp;·&nbsp;
+                    <a href="bridge-specification.html">Bridge Spec</a>
+                </p>
+                <p style="margin-top: 8px; font-size: 12px;">
+                    Write in one language. Depend on all of them.
+                </p>
+            </footer>
+
+        </main>
+    </div>
+</body>
+</html>

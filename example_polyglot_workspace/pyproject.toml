@@ -1,0 +1,11 @@
+[tool.uv]
+name = "ingestion-pipeline"
+version = "0.1.0"
+
+[project]
+name = "ingestion-pipeline"
+version = "0.1.0"
+dependencies = [
+    "docling>=2.0.0",
+    "torch>=2.2.0"
+]

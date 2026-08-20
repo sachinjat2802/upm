@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPM — Bridge Protocol Specification</title>
+    <meta name="description" content="Wire framing, envelope JSON schemas, value codec semantics, and handle management for upm-bridge/1.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root{--bg:#0a0e17;--bg2:#111827;--card:#1a2236;--card2:#1f2a42;--code-bg:#0d1321;--code-inline:rgba(99,179,237,.1);--t1:#e2e8f0;--t2:#94a3b8;--t3:#64748b;--blue:#63b3ed;--cyan:#22d3ee;--purple:#a78bfa;--green:#34d399;--yellow:#fbbf24;--orange:#fb923c;--pink:#f472b6;--red:#f87171;--border:rgba(99,179,237,.12);--border2:rgba(99,179,237,.25);--grad:linear-gradient(135deg,#22d3ee 0%,#63b3ed 50%,#a78bfa 100%);--r:12px;--rs:8px}
+        *{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+        body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--t1);line-height:1.7;-webkit-font-smoothing:antialiased}
+        ::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+        .container{max-width:860px;margin:0 auto;padding:0 32px}
+        .page-header{padding:60px 0 48px;text-align:center;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(34,211,238,.06) 0%,transparent 100%)}
+        .page-header .badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.2);color:var(--cyan);letter-spacing:.5px;text-transform:uppercase;margin-bottom:16px}
+        .page-header h1{font-size:38px;font-weight:900;letter-spacing:-1.2px;margin-bottom:12px}
+        .page-header h1 span{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .page-header p{color:var(--t2);font-size:16px;max-width:560px;margin:0 auto}
+        .nav-bar{display:flex;gap:8px;padding:20px 0;border-bottom:1px solid var(--border);flex-wrap:wrap}
+        .nav-bar a{padding:7px 16px;border-radius:var(--rs);background:var(--card);border:1px solid var(--border);color:var(--t2);text-decoration:none;font-size:12px;font-weight:600;transition:all .2s}
+        .nav-bar a:hover,.nav-bar a.active{background:var(--card2);border-color:var(--border2);color:var(--t1)}
+        .section{padding:48px 0;border-bottom:1px solid var(--border)}
+        .section:last-of-type{border-bottom:none}
+        .section h2{font-size:24px;font-weight:800;letter-spacing:-.5px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+        .section>p{color:var(--t2);font-size:14.5px;margin-bottom:20px;max-width:640px}
+        h3{font-size:18px;font-weight:700;margin:28px 0 12px}
+        p{margin-bottom:12px;color:var(--t2);font-size:14px}
+        strong{color:var(--t1)}
+        code{font-family:'JetBrains Mono',monospace;font-size:12.5px;background:var(--code-inline);color:var(--cyan);padding:2px 6px;border-radius:4px}
+        pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--rs);padding:18px 22px;margin:12px 0 18px;overflow-x:auto;position:relative}
+        pre code{background:none;padding:0;color:var(--t1);line-height:1.7}
+        pre .label{position:absolute;top:8px;right:12px;font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;font-family:'Inter',sans-serif}
+        .comment{color:#546e7a}.keyword{color:var(--purple)}.string{color:var(--green)}.type{color:var(--yellow)}.number{color:var(--orange)}.func{color:var(--blue)}
+        table{width:100%;border-collapse:collapse;margin:12px 0 18px;font-size:13px}
+        th{text-align:left;padding:10px 14px;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--t3);border-bottom:1px solid var(--border);background:rgba(99,179,237,.03)}
+        td{padding:10px 14px;border-bottom:1px solid rgba(99,179,237,.06);color:var(--t2)}
+        tr:hover td{background:rgba(99,179,237,.03)}
+        .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin:20px 0}
+        .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:22px;transition:all .2s}
+        .card:hover{border-color:var(--border2);transform:translateY(-2px)}
+        .card .icon{font-size:28px;margin-bottom:10px;display:block}
+        .card h4{margin:0 0 6px;color:var(--t1);font-size:14px;font-weight:700}
+        .card p{font-size:12.5px;color:var(--t3);margin:0;line-height:1.5}
+        .badge-inline{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.3px}
+        .badge-blue{background:rgba(99,179,237,.12);color:var(--blue)}
+        .badge-purple{background:rgba(167,139,250,.12);color:var(--purple)}
+        .badge-green{background:rgba(52,211,153,.12);color:var(--green)}
+        .alert{padding:14px 18px;border-radius:var(--rs);margin:14px 0;font-size:13px;display:flex;gap:10px;align-items:flex-start}
+        .alert-cyan{background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.2);color:var(--cyan)}
+        .alert-purple{background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.2);color:var(--purple)}
+        ul,ol{margin:8px 0 16px 20px;color:var(--t2);font-size:14px}li{margin-bottom:6px}
+        .footer{padding:40px 0;text-align:center;color:var(--t3);font-size:12px}
+        .footer a{color:var(--blue);text-decoration:none}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}.section{animation:fadeUp .4s ease both}
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <header class="page-header">
+        <div class="badge">⚡ Protocol Spec</div>
+        <h1>upm-bridge/1 <span>Specification</span></h1>
+        <p>Wire framing, envelope JSON schemas, value codec semantics, handle management, and callback dispatch rules.</p>
+    </header>
+
+    <nav class="nav-bar">
+        <a href="setup-guide.html">📋 Setup Guide</a>
+        <a href="getting-started.html">🚀 Getting Started</a>
+        <a href="architecture.html">🏗️ Architecture</a>
+        <a href="bridge-specification.html" class="active">🌉 Bridge Spec</a>
+    </nav>
+
+    <!-- ═══ 1. Transport Framing ═══ -->
+    <section class="section">
+        <h2>1. Transport Framing</h2>
+        <p>All messages sent over standard input/output (stdio) MUST be framed with a <strong>4-byte Big-Endian uint32 length header</strong> preceding the UTF-8 encoded JSON body payload.</p>
+
+        <pre><code><span class="comment">┌───────────────────────┬───────────────────────────────────────┐</span>
+<span class="comment">│  Length (4-byte BE)   │  JSON Envelope Payload (UTF-8 Bytes)  │</span>
+<span class="comment">├───────────────────────┼───────────────────────────────────────┤</span>
+<span class="comment">│  0x00 0x00 0x00 0x3E  │  {"type":"request","id":"1", ...}     │</span>
+<span class="comment">└───────────────────────┴───────────────────────────────────────┘</span></code></pre>
+
+        <div class="alert alert-cyan">
+            <span><strong>Safety Guard:</strong> Standard implementations enforce a maximum message payload size of <strong>64 MB</strong> (<code>MAX_MESSAGE_SIZE</code>) to prevent OOM errors from malformed headers.</span>
+        </div>
+    </section>
+
+    <!-- ═══ 2. Wire Envelope Message Types ═══ -->
+    <section class="section">
+        <h2>2. Wire Envelope Message Types</h2>
+        <p>Messages exchanged between host and peer runtimes use a tagged discriminator <code>type</code> field.</p>
+
+        <h3>RPC Invocation Request</h3>
+        <pre><code>{
+  <span class="string">"type"</span>: <span class="string">"request"</span>,
+  <span class="string">"id"</span>: <span class="string">"req_1001"</span>,
+  <span class="string">"method"</span>: <span class="string">"python:math.sqrt"</span>,
+  <span class="string">"args"</span>: [<span class="number">144.0</span>],
+  <span class="string">"kwargs"</span>: {}
+}<span class="label">JSON</span></code></pre>
+
+        <h3>RPC Invocation Response (Success)</h3>
+        <pre><code>{
+  <span class="string">"type"</span>: <span class="string">"response"</span>,
+  <span class="string">"id"</span>: <span class="string">"req_1001"</span>,
+  <span class="string">"result"</span>: <span class="number">12.0</span>,
+  <span class="string">"error"</span>: <span class="keyword">null</span>
+}<span class="label">JSON</span></code></pre>
+
+        <h3>RPC Invocation Response (Error)</h3>
+        <pre><code>{
+  <span class="string">"type"</span>: <span class="string">"response"</span>,
+  <span class="string">"id"</span>: <span class="string">"req_1001"</span>,
+  <span class="string">"result"</span>: <span class="keyword">null</span>,
+  <span class="string">"error"</span>: {
+    <span class="string">"error_type"</span>: <span class="string">"ValueError"</span>,
+    <span class="string">"message"</span>: <span class="string">"math domain error"</span>,
+    <span class="string">"stack_trace"</span>: <span class="string">"Traceback (most recent call last):\n..."</span>
+  }
+}<span class="label">JSON</span></code></pre>
+
+        <h3>Batched Handle Release (Garbage Collection)</h3>
+        <pre><code>{
+  <span class="string">"type"</span>: <span class="string">"release_handles"</span>,
+  <span class="string">"handles"</span>: [<span class="string">"ref_1001"</span>, <span class="string">"fn_2002"</span>]
+}<span class="label">JSON</span></code></pre>
+
+        <h3>Ping & Pong Keepalive</h3>
+        <pre><code>{ <span class="string">"type"</span>: <span class="string">"ping"</span>, <span class="string">"id"</span>: <span class="string">"p1"</span> }
+{ <span class="string">"type"</span>: <span class="string">"pong"</span>, <span class="string">"id"</span>: <span class="string">"p1"</span> }<span class="label">JSON</span></code></pre>
+    </section>
+
+    <!-- ═══ 3. Value Serialization Semantics ═══ -->
+    <section class="section">
+        <h2>3. Value Representation Semantics</h2>
+        <p>The universal value type <code>UpmValue</code> seamlessly extends JSON with binary blobs, object handle references, and invokable callbacks.</p>
+
+        <table>
+            <thead><tr><th>Type</th><th>JSON Sentinel Representation</th><th>Semantics & Behavior</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><strong>Primitives</strong></td>
+                    <td><code>123</code>, <code>"text"</code>, <code>true</code>, <code>[...]</code>, <code>{...}</code></td>
+                    <td>Copied directly by value over JSON.</td>
+                </tr>
+                <tr>
+                    <td><strong>Out-of-band Blob</strong></td>
+                    <td><code>{"$blob": "uuid", "data_base64": "...", "len": 1024}</code></td>
+                    <td>Base64-encoded binary payload transferred efficiently without string mangling.</td>
+                </tr>
+                <tr>
+                    <td><strong>Object Handle</strong></td>
+                    <td><code>{"$ref": "ref_uuid", "type_name": "Counter"}</code></td>
+                    <td>Opaque handle retained in host memory. Passing it back references the same object.</td>
+                </tr>
+                <tr>
+                    <td><strong>Function Callback</strong></td>
+                    <td><code>{"$fn": "fn_uuid"}</code></td>
+                    <td>Remote invokable callback handle. Can be called back as <code>$fn:fn_uuid</code>.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="alert alert-purple">
+            <span><strong>Handle Lifecycle & GC:</strong> When object or callback references are no longer needed by a foreign runtime, a batched <code>release_handles</code> message is emitted to reclaim memory in the peer's <code>HandleRegistry</code>.</span>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <p><a href="setup-guide.html">Setup Guide</a> · <a href="getting-started.html">Getting Started</a> · <a href="architecture.html">Architecture</a></p>
+        <p style="margin-top:8px">Write in one language. Depend on all of them. ❤️</p>
+    </footer>
+</div>
+</body>
+</html>

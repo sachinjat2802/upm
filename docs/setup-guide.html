@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPM — Setup & Prerequisites Guide</title>
+    <meta name="description" content="Complete setup guide for CPM with prerequisites for every supported language ecosystem.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #111827;
+            --bg-card: #1a2236;
+            --bg-card-hover: #1f2a42;
+            --bg-code: #0d1321;
+            --bg-code-inline: rgba(99,179,237,0.1);
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-blue: #63b3ed;
+            --accent-cyan: #22d3ee;
+            --accent-purple: #a78bfa;
+            --accent-green: #34d399;
+            --accent-yellow: #fbbf24;
+            --accent-orange: #fb923c;
+            --accent-pink: #f472b6;
+            --accent-red: #f87171;
+            --border: rgba(99,179,237,0.12);
+            --border-hover: rgba(99,179,237,0.25);
+            --gradient-primary: linear-gradient(135deg, #63b3ed 0%, #a78bfa 50%, #f472b6 100%);
+            --radius: 12px;
+            --radius-sm: 8px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+        .container { max-width: 860px; margin: 0 auto; padding: 0 32px; }
+
+        /* ── Header ───────────────────────────────── */
+        .page-header {
+            padding: 60px 0 48px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(99,179,237,0.06) 0%, transparent 100%);
+        }
+        .page-header .badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 5px 14px; border-radius: 20px; font-size: 11px; font-weight: 700;
+            background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.2);
+            color: var(--accent-green); letter-spacing: 0.5px; text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+        .page-header h1 {
+            font-size: 38px; font-weight: 900; letter-spacing: -1.2px; margin-bottom: 12px;
+        }
+        .page-header h1 span {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .page-header p { color: var(--text-secondary); font-size: 16px; max-width: 560px; margin: 0 auto; }
+
+        /* ── Navigation ───────────────────────────── */
+        .toc {
+            padding: 32px 0; border-bottom: 1px solid var(--border);
+        }
+        .toc h3 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 12px; }
+        .toc-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px;
+        }
+        .toc-grid a {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 14px; border-radius: var(--radius-sm);
+            background: var(--bg-card); border: 1px solid var(--border);
+            color: var(--text-secondary); text-decoration: none; font-size: 13px; font-weight: 500;
+            transition: all 0.2s;
+        }
+        .toc-grid a:hover { background: var(--bg-card-hover); border-color: var(--border-hover); color: var(--text-primary); }
+
+        /* ── Section ──────────────────────────────── */
+        .section { padding: 48px 0; border-bottom: 1px solid var(--border); }
+        .section:last-of-type { border-bottom: none; }
+        .section h2 {
+            font-size: 24px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .section h2 .icon { font-size: 24px; }
+        .section > p { color: var(--text-secondary); font-size: 14.5px; margin-bottom: 20px; max-width: 640px; }
+        h3 { font-size: 18px; font-weight: 700; margin: 28px 0 12px; }
+        h4 { font-size: 14px; font-weight: 600; color: var(--accent-blue); margin: 20px 0 8px; }
+        p { margin-bottom: 12px; color: var(--text-secondary); font-size: 14px; }
+        strong { color: var(--text-primary); }
+        ul, ol { margin: 8px 0 16px 20px; color: var(--text-secondary); font-size: 14px; }
+        li { margin-bottom: 6px; }
+
+        /* ── Code ─────────────────────────────────── */
+        code {
+            font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
+            background: var(--bg-code-inline); color: var(--accent-cyan);
+            padding: 2px 6px; border-radius: 4px;
+        }
+        pre {
+            background: var(--bg-code); border: 1px solid var(--border); border-radius: var(--radius-sm);
+            padding: 18px 22px; margin: 12px 0 18px; overflow-x: auto; position: relative;
+        }
+        pre code { background: none; padding: 0; color: var(--text-primary); line-height: 1.7; }
+        .comment { color: #546e7a; }
+        .cmd { color: var(--accent-cyan); }
+        .flag { color: var(--accent-pink); }
+        .string { color: var(--accent-green); }
+        .url { color: var(--accent-purple); }
+        pre .label {
+            position: absolute; top: 8px; right: 12px; font-size: 10px; font-weight: 600;
+            color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* ── Cards ────────────────────────────────── */
+        .prereq-card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 24px; margin: 16px 0; transition: border-color 0.2s;
+        }
+        .prereq-card:hover { border-color: var(--border-hover); }
+        .prereq-card .header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .prereq-card .header .lang-icon { font-size: 28px; }
+        .prereq-card .header h4 { margin: 0; font-size: 16px; color: var(--text-primary); font-weight: 700; }
+        .prereq-card .header .tag {
+            font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px;
+            text-transform: uppercase; letter-spacing: 0.4px;
+        }
+        .tag-required { background: rgba(248,113,113,0.12); color: var(--accent-red); }
+        .tag-optional { background: rgba(99,179,237,0.12); color: var(--accent-blue); }
+
+        .install-tabs { display: flex; gap: 2px; margin: 12px 0 0; }
+        .install-tab {
+            padding: 6px 14px; border-radius: 6px 6px 0 0; font-size: 11px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s; border: 1px solid var(--border); border-bottom: none;
+            color: var(--text-muted); background: transparent;
+        }
+        .install-tab.active { background: var(--bg-code); color: var(--accent-cyan); }
+        .install-panel { display: none; }
+        .install-panel.active { display: block; }
+        .install-panel pre { margin-top: 0; border-radius: 0 var(--radius-sm) var(--radius-sm) var(--radius-sm); }
+
+        /* ── Alert ────────────────────────────────── */
+        .alert {
+            padding: 14px 18px; border-radius: var(--radius-sm); margin: 14px 0; font-size: 13px;
+            display: flex; gap: 10px; align-items: flex-start;
+        }
+        .alert-green { background: rgba(52,211,153,0.08); border: 1px solid rgba(52,211,153,0.2); color: var(--accent-green); }
+        .alert-blue { background: rgba(99,179,237,0.08); border: 1px solid rgba(99,179,237,0.2); color: var(--accent-blue); }
+        .alert-yellow { background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.2); color: var(--accent-yellow); }
+        .alert-purple { background: rgba(167,139,250,0.08); border: 1px solid rgba(167,139,250,0.2); color: var(--accent-purple); }
+        .alert .icon { font-size: 15px; flex-shrink: 0; }
+
+        /* ── Table ────────────────────────────────── */
+        table { width: 100%; border-collapse: collapse; margin: 12px 0 18px; font-size: 13px; }
+        th {
+            text-align: left; padding: 8px 14px; font-weight: 600; font-size: 10px;
+            text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted);
+            border-bottom: 1px solid var(--border); background: rgba(99,179,237,0.03);
+        }
+        td { padding: 8px 14px; border-bottom: 1px solid rgba(99,179,237,0.06); color: var(--text-secondary); }
+        tr:hover td { background: rgba(99,179,237,0.03); }
+
+        /* ── Checklist ────────────────────────────── */
+        .checklist { list-style: none; margin: 12px 0; padding: 0; }
+        .checklist li {
+            display: flex; align-items: flex-start; gap: 10px; padding: 8px 0;
+            border-bottom: 1px solid rgba(99,179,237,0.05); font-size: 13.5px; color: var(--text-secondary);
+        }
+        .checklist li:last-child { border-bottom: none; }
+        .checklist .check { color: var(--accent-green); font-size: 14px; flex-shrink: 0; margin-top: 2px; }
+
+        /* ── Steps ────────────────────────────────── */
+        .step-list { counter-reset: steps; margin: 16px 0; }
+        .step-item {
+            display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px solid rgba(99,179,237,0.06);
+            counter-increment: steps;
+        }
+        .step-item:last-child { border-bottom: none; }
+        .step-num {
+            width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+            background: var(--gradient-primary); display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 800; color: var(--bg-primary);
+        }
+        .step-body { flex: 1; }
+        .step-body h4 { margin: 0 0 4px; color: var(--text-primary); font-size: 14px; }
+        .step-body p { margin: 0 0 8px; font-size: 13px; }
+
+        /* ── Highlight Box ─────────────────────────── */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(99,179,237,0.08), rgba(167,139,250,0.06));
+            border: 1px solid var(--border-hover); border-radius: var(--radius);
+            padding: 28px; margin: 24px 0; text-align: center;
+        }
+        .highlight-box h3 { margin: 0 0 8px; font-size: 20px; }
+        .highlight-box p { margin: 0; font-size: 14px; color: var(--text-secondary); }
+        .highlight-box .big-icon { font-size: 40px; display: block; margin-bottom: 12px; }
+
+        /* ── Footer ───────────────────────────────── */
+        .footer { padding: 40px 0; text-align: center; color: var(--text-muted); font-size: 12px; }
+        .footer a { color: var(--accent-blue); text-decoration: none; }
+
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        .section { animation: fadeUp 0.4s ease both; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- ═══ Header ═══ -->
+    <header class="page-header">
+        <div class="badge">📋 Setup Guide</div>
+        <h1>CPM <span>Setup & Prerequisites</span></h1>
+        <p>Everything you need to install and configure CPM, plus prerequisites for every supported language.</p>
+    </header>
+
+    <!-- ═══ TOC ═══ -->
+    <nav class="toc">
+        <h3>Jump To</h3>
+        <div class="toc-grid">
+            <a href="#system-requirements">⚙️ System Requirements</a>
+            <a href="#install-cpm">📦 Install CPM</a>
+            <a href="#prereqs">🔧 Language Prerequisites</a>
+            <a href="#add-anytime">🔗 Add Languages Anytime</a>
+            <a href="#verify">✅ Verify Setup</a>
+            <a href="#first-project">🚀 First Project</a>
+            <a href="#troubleshooting">🔍 Troubleshooting</a>
+        </div>
+    </nav>
+
+    <!-- ═══ System Requirements ═══ -->
+    <section class="section" id="system-requirements">
+        <h2><span class="icon">⚙️</span> System Requirements</h2>
+        <p>CPM runs on Windows, macOS, and Linux. You need the Rust toolchain to build from source.</p>
+
+        <table>
+            <thead><tr><th>Requirement</th><th>Minimum</th><th>Recommended</th></tr></thead>
+            <tbody>
+                <tr><td><strong>OS</strong></td><td>Windows 10, macOS 12, Ubuntu 20.04</td><td>Latest version</td></tr>
+                <tr><td><strong>Rust</strong></td><td>1.70+</td><td>Latest stable via <code>rustup</code></td></tr>
+                <tr><td><strong>Disk</strong></td><td>200 MB (build)</td><td>500 MB+</td></tr>
+                <tr><td><strong>RAM</strong></td><td>2 GB</td><td>4 GB+</td></tr>
+            </tbody>
+        </table>
+
+        <div class="alert alert-blue">
+            <span class="icon">ℹ️</span>
+            <span>CPM itself only needs Rust. Language-specific prerequisites are only needed for the ecosystems you use.</span>
+        </div>
+    </section>
+
+    <!-- ═══ Install CPM ═══ -->
+    <section class="section" id="install-cpm">
+        <h2><span class="icon">📦</span> Install CPM</h2>
+        <p>Build CPM from source and add it to your PATH.</p>
+
+        <div class="step-list">
+            <div class="step-item">
+                <div class="step-num">1</div>
+                <div class="step-body">
+                    <h4>Install Rust (if not already installed)</h4>
+                    <p>Visit <a href="https://rustup.rs" style="color: var(--accent-blue);">rustup.rs</a> or run:</p>
+
+                    <div class="install-tabs" data-group="rust-install">
+                        <div class="install-tab active" data-tab="win">Windows</div>
+                        <div class="install-tab" data-tab="mac">macOS / Linux</div>
+                    </div>
+                    <div class="install-panel active" data-panel="win">
+                        <pre><code><span class="comment"># Download and run rustup-init.exe from https://rustup.rs</span>
+<span class="comment"># Or via winget:</span>
+<span class="cmd">winget install</span> Rustlang.Rustup
+
+<span class="comment"># Restart your terminal, then verify:</span>
+<span class="cmd">rustc</span> <span class="flag">--version</span>
+<span class="comment"># → rustc 1.XX.0</span><span class="label">PowerShell</span></code></pre>
+                    </div>
+                    <div class="install-panel" data-panel="mac">
+                        <pre><code><span class="cmd">curl</span> <span class="flag">--proto</span> <span class="string">'=https'</span> <span class="flag">--tlsv1.2</span> <span class="flag">-sSf</span> <span class="url">https://sh.rustup.rs</span> | <span class="cmd">sh</span>
+
+<span class="comment"># Restart your terminal, then verify:</span>
+<span class="cmd">rustc</span> <span class="flag">--version</span><span class="label">Bash</span></code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <div class="step-num">2</div>
+                <div class="step-body">
+                    <h4>Clone and Build CPM</h4>
+                    <pre><code><span class="cmd">git clone</span> <span class="url">https://github.com/upm-org/upm.git</span>
+<span class="cmd">cd</span> upm
+<span class="cmd">cargo build</span> <span class="flag">--release</span>
+
+<span class="comment"># Binaries are at:</span>
+<span class="comment">#   target/release/cpm.exe   (or cpm on macOS/Linux)</span>
+<span class="comment">#   target/release/upm.exe   (or upm on macOS/Linux)</span></code></pre>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <div class="step-num">3</div>
+                <div class="step-body">
+                    <h4>Add to PATH</h4>
+
+                    <div class="install-tabs" data-group="path-install">
+                        <div class="install-tab active" data-tab="win2">Windows</div>
+                        <div class="install-tab" data-tab="mac2">macOS / Linux</div>
+                    </div>
+                    <div class="install-panel active" data-panel="win2">
+                        <pre><code><span class="comment"># PowerShell (run as Administrator)</span>
+<span class="cmd">Copy-Item</span> target\release\cpm.exe <span class="string">C:\Windows\System32\</span>
+<span class="cmd">Copy-Item</span> target\release\upm.exe <span class="string">C:\Windows\System32\</span>
+
+<span class="comment"># Or add the target/release folder to your PATH environment variable</span><span class="label">PowerShell</span></code></pre>
+                    </div>
+                    <div class="install-panel" data-panel="mac2">
+                        <pre><code><span class="comment"># Copy to a directory on your PATH</span>
+<span class="cmd">cp</span> target/release/cpm <span class="string">~/.local/bin/</span>
+<span class="cmd">cp</span> target/release/upm <span class="string">~/.local/bin/</span>
+
+<span class="comment"># Or add to ~/.bashrc or ~/.zshrc:</span>
+<span class="keyword">export</span> PATH=<span class="string">"$PATH:$(pwd)/target/release"</span><span class="label">Bash</span></code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <div class="step-num">4</div>
+                <div class="step-body">
+                    <h4>Verify Installation</h4>
+                    <pre><code><span class="cmd">cpm</span> <span class="flag">--version</span>
+<span class="comment"># → upm 0.1.0</span>
+
+<span class="cmd">cpm</span> <span class="flag">--help</span>
+<span class="comment"># → Shows full command reference with emoji icons</span></code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ Prerequisites ═══ -->
+    <section class="section" id="prereqs">
+        <h2><span class="icon">🔧</span> Language Prerequisites</h2>
+        <p>Only install the prerequisites for the languages you plan to use. CPM will auto-detect whatever you have installed.</p>
+
+        <div class="alert alert-green">
+            <span class="icon">💡</span>
+            <span><strong>You don't need all of these!</strong> Only install the tools for the ecosystems you want. You can always add more later — CPM supports adding new language ecosystems at any time.</span>
+        </div>
+
+        <!-- Node.js -->
+        <div class="prereq-card">
+            <div class="header">
+                <span class="lang-icon">📦</span>
+                <h4>Node.js (JavaScript / TypeScript)</h4>
+                <span class="tag tag-optional">Optional</span>
+            </div>
+            <p>Required for: <code>npm</code>, <code>pnpm</code>, <code>yarn</code>, <code>bun</code> ecosystems and Node.js bridge host.</p>
+
+            <div class="install-tabs" data-group="node-install">
+                <div class="install-tab active" data-tab="node-win">Windows</div>
+                <div class="install-tab" data-tab="node-mac">macOS</div>
+                <div class="install-tab" data-tab="node-linux">Linux</div>
+            </div>
+            <div class="install-panel active" data-panel="node-win">
+                <pre><code><span class="comment"># Via winget (recommended)</span>
+<span class="cmd">winget install</span> OpenJS.NodeJS.LTS
+
+<span class="comment"># Or download from https://nodejs.org</span>
+
+<span class="comment"># Then install pnpm (recommended package manager)</span>
+<span class="cmd">npm install</span> <span class="flag">-g</span> pnpm<span class="label">PowerShell</span></code></pre>
+            </div>
+            <div class="install-panel" data-panel="node-mac">
+                <pre><code><span class="comment"># Via Homebrew</span>
+<span class="cmd">brew install</span> node
+
+<span class="comment"># Then install pnpm</span>
+<span class="cmd">npm install</span> <span class="flag">-g</span> pnpm<span class="label">Bash</span></code></pre>
+            </div>
+            <div class="install-panel" data-panel="node-linux">
+                <pre><code><span class="comment"># Via NodeSource (Ubuntu/Debian)</span>
+<span class="cmd">curl</span> <span class="flag">-fsSL</span> <span class="url">https://deb.nodesource.com/setup_lts.x</span> | <span class="cmd">sudo bash</span> -
+<span class="cmd">sudo apt install</span> <span class="flag">-y</span> nodejs
+
+<span class="comment"># Then install pnpm</span>
+<span class="cmd">npm install</span> <span class="flag">-g</span> pnpm<span class="label">Bash</span></code></pre>
+            </div>
+
+            <h4>Verify</h4>
+            <pre><code><span class="cmd">node</span> <span class="flag">--version</span>     <span class="comment"># → v20.x.x or v22.x.x</span>
+<span class="cmd">pnpm</span> <span class="flag">--version</span>     <span class="comment"># → 9.x.x</span></code></pre>
+        </div>
+
+        <!-- Python -->
+        <div class="prereq-card">
+            <div class="header">
+                <span class="lang-icon">🐍</span>
+                <h4>Python</h4>
+                <span class="tag tag-optional">Optional</span>
+            </div>
+            <p>Required for: <code>pip</code>, <code>uv</code>, <code>poetry</code> ecosystems and Python bridge host.</p>
+
+            <div class="install-tabs" data-group="py-install">
+                <div class="install-tab active" data-tab="py-win">Windows</div>
+                <div class="install-tab" data-tab="py-mac">macOS</div>
+                <div class="install-tab" data-tab="py-linux">Linux</div>
+            </div>
+            <div class="install-panel active" data-panel="py-win">
+                <pre><code><span class="comment"># Via winget</span>
+<span class="cmd">winget install</span> Python.Python.3.12
+
+<span class="comment"># Install uv (fastest Python package manager)</span>
+<span class="cmd">pip install</span> uv<span class="label">PowerShell</span></code></pre>
+            </div>
+            <div class="install-panel" data-panel="py-mac">
+                <pre><code><span class="cmd">brew install</span> python@3.12
+
+<span class="comment"># Install uv</span>
+<span class="cmd">curl</span> <span class="flag">-LsSf</span> <span class="url">https://astral.sh/uv/install.sh</span> | <span class="cmd">sh</span><span class="label">Bash</span></code></pre>
+            </div>
+            <div class="install-panel" data-panel="py-linux">
+                <pre><code><span class="cmd">sudo apt install</span> python3 python3-pip python3-venv
+
+<span class="comment"># Install uv</span>
+<span class="cmd">curl</span> <span class="flag">-LsSf</span> <span class="url">https://astral.sh/uv/install.sh</span> | <span class="cmd">sh</span><span class="label">Bash</span></code></pre>
+            </div>
+
+            <h4>Verify</h4>
+            <pre><code><span class="cmd">python</span> <span class="flag">--version</span>   <span class="comment"># → Python 3.12.x</span>
+<span class="cmd">uv</span> <span class="flag">--version</span>       <span class="comment"># → uv 0.x.x</span></code></pre>
+        </div>
+
+        <!-- Go -->
+        <div class="prereq-card">
+            <div class="header">
+                <span class="lang-icon">🐹</span>
+                <h4>Go</h4>
+                <span class="tag tag-optional">Optional</span>
+            </div>
+            <p>Required for: <code>go</code> ecosystem.</p>
+
+            <div class="install-tabs" data-group="go-install">
+                <div class="install-tab active" data-tab="go-win">Windows</div>
+                <div class="install-tab" data-tab="go-other">macOS / Linux</div>
+            </div>
+            <div class="install-panel active" data-panel="go-win">
+                <pre><code><span class="cmd">winget install</span> GoLang.Go<span class="label">PowerShell</span></code></pre>
+            </div>
+            <div class="install-panel" data-panel="go-other">
+                <pre><code><span class="comment"># macOS</span>
+<span class="cmd">brew install</span> go
+
+<span class="comment"># Linux — download from https://go.dev/dl/</span>
+<span class="cmd">wget</span> <span class="url">https://go.dev/dl/go1.22.linux-amd64.tar.gz</span>
+<span class="cmd">sudo tar</span> <span class="flag">-C</span> /usr/local <span class="flag">-xzf</span> go1.22.linux-amd64.tar.gz<span class="label">Bash</span></code></pre>
+            </div>
+
+            <h4>Verify</h4>
+            <pre><code><span class="cmd">go</span> version        <span class="comment"># → go1.22.x</span></code></pre>
+        </div>
+
+        <!-- Java -->
+        <div class="prereq-card">
+            <div class="header">
+                <span class="lang-icon">☕</span>
+                <h4>Java / Kotlin</h4>
+                <span class="tag tag-optional">Optional</span>
+            </div>
+            <p>Required for: <code>maven</code>, <code>gradle</code> ecosystems.</p>
+            <pre><code><span class="comment"># Windows</span>
+<span class="cmd">winget install</span> EclipseAdoptium.Temurin.21.JDK
+
+<span class="comment"># macOS</span>
+<span class="cmd">brew install</span> openjdk@21
+
+<span class="comment"># Verify</span>
+<span class="cmd">java</span> <span class="flag">--version</span>     <span class="comment"># → openjdk 21.x</span>
+<span class="cmd">mvn</span> <span class="flag">--version</span>      <span class="comment"># → Apache Maven 3.x</span></code></pre>
+        </div>
+
+        <!-- Others summary -->
+        <h3>Other Ecosystems</h3>
+        <table>
+            <thead><tr><th>Ecosystem</th><th>Prerequisite</th><th>Install</th></tr></thead>
+            <tbody>
+                <tr><td>🐘 PHP</td><td>PHP + Composer</td><td><code>brew install php composer</code></td></tr>
+                <tr><td>💎 Ruby</td><td>Ruby + Bundler</td><td><code>brew install ruby</code></td></tr>
+                <tr><td>🔷 C# / .NET</td><td>.NET SDK</td><td><code>winget install Microsoft.DotNet.SDK.8</code></td></tr>
+                <tr><td>🎯 Dart</td><td>Dart SDK</td><td><code>brew install dart</code> or <code>choco install dart-sdk</code></td></tr>
+                <tr><td>💧 Elixir</td><td>Elixir + Erlang</td><td><code>brew install elixir</code></td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- ═══ Add Languages Anytime ═══ -->
+    <section class="section" id="add-anytime">
+        <h2><span class="icon">🔗</span> Add Languages at Any Time</h2>
+        <p>One of CPM's most powerful features: you're <strong>never locked in</strong>. Add new language ecosystems to an existing project whenever you need them.</p>
+
+        <div class="highlight-box">
+            <span class="big-icon">♾️</span>
+            <h3>No Lock-In. Add Ecosystems Anytime.</h3>
+            <p>Started with Python? Add Node.js tomorrow. Need Rust next month? Just <code>cpm add cargo:serde</code>. CPM handles it all.</p>
+        </div>
+
+        <h3>How It Works</h3>
+
+        <div class="step-list">
+            <div class="step-item">
+                <div class="step-num">1</div>
+                <div class="step-body">
+                    <h4>You start with a Python-only project</h4>
+                    <pre><code><span class="cmd">cpm init</span> <span class="flag">-l</span> python <span class="flag">-y</span>
+<span class="cmd">cpm add</span> pip:requests
+<span class="cmd">cpm add</span> pip:pandas</code></pre>
+                    <p>At this point, your project has: <code>upm.toml</code>, <code>pyproject.toml</code>, <code>main.py</code></p>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <div class="step-num">2</div>
+                <div class="step-body">
+                    <h4>Weeks later, you need Node.js for image processing</h4>
+                    <p>Just add a Node.js package — CPM automatically bootstraps the ecosystem:</p>
+                    <pre><code><span class="comment"># This works at ANY time — no re-init needed!</span>
+<span class="cmd">cpm add</span> npm:sharp
+<span class="cmd">cpm add</span> npm:puppeteer
+
+<span class="comment"># CPM will:</span>
+<span class="comment"># 1. Detect that npm/pnpm ecosystem is now needed</span>
+<span class="comment"># 2. Create package.json if it doesn't exist</span>
+<span class="comment"># 3. Run pnpm install (or npm install)</span>
+<span class="comment"># 4. Update upm.toml with the new foreign dependency</span></code></pre>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <div class="step-num">3</div>
+                <div class="step-body">
+                    <h4>Months later, you need Rust for performance</h4>
+                    <pre><code><span class="cmd">cpm add</span> cargo:serde
+<span class="cmd">cpm add</span> cargo:tokio
+
+<span class="comment"># Same thing — CPM detects cargo ecosystem</span>
+<span class="comment"># and manages it alongside Python and Node.js</span></code></pre>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <div class="step-num">4</div>
+                <div class="step-body">
+                    <h4>Check your full polyglot status</h4>
+                    <pre><code><span class="cmd">cpm status</span>
+
+<span class="comment"># ╭──────────────────────────────────────────────────────╮</span>
+<span class="comment"># │  📊 Project Status                                  │</span>
+<span class="comment"># ╰──────────────────────────────────────────────────────╯</span>
+<span class="comment">#</span>
+<span class="comment">#   Name     my-app</span>
+<span class="comment">#   Version  0.1.0</span>
+<span class="comment">#   Language python</span>
+<span class="comment">#</span>
+<span class="comment">#   Detected Ecosystems:</span>
+<span class="comment">#     ✔ 🐍 uv (Python) (pyproject.toml)</span>
+<span class="comment">#     ✔ 📦 pnpm (Node.js) (package.json)</span>
+<span class="comment">#     ✔ 🦀 cargo (Rust) (Cargo.toml)</span></code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-purple">
+            <span class="icon">🔮</span>
+            <span><strong>Key insight:</strong> Every <code>cpm add</code>, <code>cpm install</code>, <code>cpm update</code>, <code>cpm audit</code>, and <code>cpm outdated</code> automatically scans for all active ecosystems. You never need to "re-register" or "re-init" — just add packages and CPM handles the rest.</span>
+        </div>
+
+        <h3>Common "Add Later" Scenarios</h3>
+        <table>
+            <thead><tr><th>Scenario</th><th>Command</th></tr></thead>
+            <tbody>
+                <tr><td>Add Python data analysis to a Node.js app</td><td><code>cpm add pip:pandas</code></td></tr>
+                <tr><td>Add Rust performance module to Python</td><td><code>cpm add cargo:pyo3</code></td></tr>
+                <tr><td>Add Node.js build tooling to a Go project</td><td><code>cpm add npm:vite</code></td></tr>
+                <tr><td>Add Python ML to a Rust CLI</td><td><code>cpm add pip:scikit-learn</code></td></tr>
+                <tr><td>Add Go microservice to a JS monorepo</td><td><code>cpm add go:github.com/gin-gonic/gin</code></td></tr>
+                <tr><td>Remove a language you no longer need</td><td><code>cpm rm npm:express</code></td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- ═══ Verify ═══ -->
+    <section class="section" id="verify">
+        <h2><span class="icon">✅</span> Verify Your Setup</h2>
+        <p>Run these commands to confirm everything is working.</p>
+
+        <ul class="checklist">
+            <li><span class="check">✔</span> <code>cpm --version</code> — Shows version number</li>
+            <li><span class="check">✔</span> <code>cpm --help</code> — Shows full command reference with emoji icons</li>
+            <li><span class="check">✔</span> <code>cpm detect</code> — Runs the scoring engine (even if no ecosystems found)</li>
+            <li><span class="check">✔</span> <code>cpm bridge status</code> — Shows transport tiers</li>
+        </ul>
+
+        <h3>Test Bridge Communication</h3>
+        <pre><code><span class="comment"># If you have Python installed:</span>
+<span class="cmd">cpm bridge call</span> python:math.sqrt <span class="string">'[144.0]'</span>
+<span class="comment"># → 12.0</span>
+
+<span class="comment"># If you have Node.js installed:</span>
+<span class="cmd">cpm bridge call</span> node:echo <span class="string">'["hello from CPM!"]'</span>
+<span class="comment"># → "hello from CPM!"</span></code></pre>
+    </section>
+
+    <!-- ═══ First Project ═══ -->
+    <section class="section" id="first-project">
+        <h2><span class="icon">🚀</span> Your First Project</h2>
+        <p>Ready? Create your first polyglot project in under 30 seconds.</p>
+
+        <pre><code><span class="comment"># Create a Python project with Node.js support</span>
+<span class="cmd">mkdir</span> my-first-app && <span class="cmd">cd</span> my-first-app
+<span class="cmd">cpm init</span> <span class="flag">-l</span> python <span class="flag">-f</span> node <span class="flag">-y</span>
+
+<span class="comment"># Add some packages</span>
+<span class="cmd">cpm add</span> pip:requests
+<span class="cmd">cpm add</span> npm:express
+
+<span class="comment"># Install everything at once</span>
+<span class="cmd">cpm install</span>
+
+<span class="comment"># See your project status</span>
+<span class="cmd">cpm status</span>
+
+<span class="comment"># Try a cross-language bridge call</span>
+<span class="cmd">cpm bridge call</span> python:math.sqrt <span class="string">'[9]'</span></code></pre>
+
+        <div class="alert alert-green">
+            <span class="icon">🎉</span>
+            <span>That's it! You now have a polyglot project managed by one tool. Read the <a href="getting-started.html" style="color: var(--accent-green);">full Getting Started Guide</a> for language-specific examples and real-world recipes.</span>
+        </div>
+    </section>
+
+    <!-- ═══ Troubleshooting ═══ -->
+    <section class="section" id="troubleshooting">
+        <h2><span class="icon">🔍</span> Troubleshooting</h2>
+
+        <h4>❌ "command not found: cpm"</h4>
+        <p>Make sure the binary is on your PATH. Run <code>where cpm</code> (Windows) or <code>which cpm</code> (macOS/Linux) to check.</p>
+
+        <h4>❌ "Failed to spawn python host"</h4>
+        <p>Python is not installed or not on PATH. Install Python and verify with <code>python --version</code>.</p>
+
+        <h4>❌ "Unknown ecosystem adapter: 'xyz'"</h4>
+        <p>Check the <a href="#prereqs" style="color: var(--accent-blue);">supported ecosystem names</a> — use <code>npm</code>, <code>pip</code>, <code>cargo</code>, etc.</p>
+
+        <h4>❌ Build fails with "linker not found" on Windows</h4>
+        <p>Install <a href="https://visualstudio.microsoft.com/visual-cpp-build-tools/" style="color: var(--accent-blue);">Visual C++ Build Tools</a> or run <code>winget install Microsoft.VisualStudio.2022.BuildTools</code>.</p>
+
+        <h4>❌ "pnpm: command not found" after cpm install</h4>
+        <p>Install pnpm globally: <code>npm install -g pnpm</code>. CPM delegates to native package managers — they must be installed.</p>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>
+            <a href="getting-started.html">Getting Started</a> · <a href="architecture.html">Architecture</a> · <a href="bridge-specification.html">Bridge Spec</a>
+        </p>
+        <p style="margin-top: 8px;">Write in one language. Depend on all of them. ❤️</p>
+    </footer>
+
+</div>
+
+<!-- Tab switching logic -->
+<script>
+document.querySelectorAll('.install-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        const group = tab.closest('.step-body, .prereq-card');
+        const tabId = tab.dataset.tab;
+
+        group.querySelectorAll('.install-tab').forEach(t => t.classList.remove('active'));
+        group.querySelectorAll('.install-panel').forEach(p => p.classList.remove('active'));
+
+        tab.classList.add('active');
+        group.querySelector(`[data-panel="${tabId}"]`).classList.add('active');
+    });
+});
+</script>
+</body>
+</html>
