@@ -178,6 +178,11 @@ enum Commands {
         #[arg(default_value = ".")]
         path: PathBuf,
     },
+    /// 💰 Cloud cost & memory resource footprint estimator
+    Cost {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+    },
     /// 🌉 Cross-language bridge
     Bridge {
         #[command(subcommand)]
@@ -236,6 +241,7 @@ async fn main() -> anyhow::Result<()> {
         Commands::ScanSecrets { path } => execute_scan_secrets(&path)?,
         Commands::Diff { path } => execute_diff(&path)?,
         Commands::Resolve { path } => execute_resolve(&path)?,
+        Commands::Cost { path } => execute_cost(&path)?,
         Commands::Bridge { sub } => match sub {
             BridgeSubcommands::Call { target, args_json } => {
                 execute_bridge_call(&target, args_json.as_deref()).await?;
