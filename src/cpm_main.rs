@@ -1,3 +1,7 @@
+//! # CPM Binary Entry Point
+//!
+//! Command-line interface driver for `cpm` (Cross-language Package Manager).
+
 use clap::{Parser, Subcommand};
 use std::path::PathBuf;
 use upm::cli::*;

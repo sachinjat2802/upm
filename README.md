@@ -2,176 +2,160 @@
 
 > **Write in one language. Depend on all of them.**
 
-CPM (Cross-language Package Manager) is a polyglot package manager that **auto-detects** and **orchestrates** 15+ package managers across 10+ language ecosystems from a single CLI.
+CPM (Cross-language Package Manager) is a polyglot package manager that **auto-detects**, **orchestrates**, and **bridges** 15+ package managers across 10+ language ecosystems from a single CLI.
 
 ```
 ╭──────────────────────────────────────────────────────╮
-│  UPM — Universal Package Platform                    │
+│  CPM — Universal Package Platform                    │
 │  Write in one language. Depend on all of them.       │
 ╰──────────────────────────────────────────────────────╯
 ```
 
-## Why CPM?
+---
 
-| Problem | CPM Solution |
-|---------|-------------|
-| Polyglot projects require learning N package managers | **One CLI** for all ecosystems |
-| No cross-language dependency tracking | `upm.toml` unified manifest |
-| Calling Python from Node requires manual setup | `cpm bridge call python:math.sqrt '[9]'` |
-| Detecting which tools a repo uses is manual | Auto-scoring detection engine |
+## 🌟 Features at a Glance
 
-## Quick Start & Migration
+- 🔍 **Weighted Ecosystem Auto-Detection**: Scores manifest markers, lockfiles, and directory indicators.
+- 📦 **Unified Multi-Ecosystem Orchestration**: Install, update, add, remove, and audit packages across Python, Node.js, Rust, Go, Ruby, Java, C#, PHP, Elixir, and Dart.
+- 🌉 **High-Performance Cross-Language Bridge**: `upm-bridge/1` stdio RPC protocol for dynamic cross-language calls with `$blob`, `$ref`, and `$fn` codecs.
+- 🛡️ **Enterprise Security & Governance**: Secret scanner (`cpm scan-secrets`), RBAC policy checker (`cpm policy`), open-source license auditor (`cpm licenses`), and keyless signature verifier (`cpm verify-sig`).
+- ⚡ **Performance & Diagnostics**: Self-healing runtime doctor (`cpm doctor`), RPC latency benchmarker (`cpm bridge benchmark`), SVG flamegraph generator (`cpm flamegraph`), compiler build cache optimizer (`cpm sccache`), and OTLP trace exporter (`cpm trace`).
+- ☁️ **DevOps & Cloud Native**: Kubernetes Helm chart generator (`cpm helm`), Kubernetes CRD Operator manifest generator (`cpm operator`), multi-stage Dockerfile generator (`cpm dockerfile`), and cloud memory/cost estimator (`cpm cost`).
+- 🔌 **SDK & Framework Integrations**: Native SDKs and middleware for Rust, Go, Java, Python (FastAPI, Django, AWS Lambda), Node.js (NestJS, Nuxt 3, Express), Ruby (Rails Gem), and Flutter / Dart.
+- 🐙 **CI/CD & IDE Extensions**: Pre-built configurations for GitHub Actions, GitLab CI, Bitbucket Pipelines, Turborepo, Bazel, VSCode, and JetBrains.
 
-- 📖 **[Migration Guide (HTML)](file:///d:/cpm/docs/migration-guide.html)** | **[Migration Guide (Markdown)](file:///d:/cpm/docs/MIGRATION_GUIDE.md)** — Step-by-step workflow to move existing apps to CPM with zero breaking changes.
+---
+
+## 🚀 Quick Start
 
 ```bash
-# Initialize a polyglot project (interactive!)
+# Initialize a polyglot project (interactive questionnaire or non-interactive flags)
 cpm init
-
-# Or non-interactive with flags
 cpm init --base-lang python --foreign-langs node,rust -y
 
-# Detect ecosystems in any repo
+# Auto-detect ecosystems in any workspace
 cpm detect
 
-# Install everything across all ecosystems at once
+# Install dependencies across all ecosystems concurrently
 cpm install
 
-# Add a foreign dependency
+# Add dependencies with auto-inferred ecosystems
 cpm add pip:requests
 cpm add npm:express
 cpm add cargo:serde
 
-# Cross-language RPC call
+# Execute cross-language RPC bridge calls
 cpm bridge call python:math.sqrt '[144.0]'
+cpm bridge call node:crypto.sha256 '["hello world"]'
+
+# Self-healing runtime diagnostics
+cpm doctor
 ```
 
-## Supported Ecosystems
+---
 
-| Icon | Language | Package Managers |
-|------|----------|-----------------|
-| 📦 | JavaScript / TypeScript | npm, pnpm, yarn, bun |
-| 🐍 | Python | pip, uv, poetry |
-| 🦀 | Rust | cargo |
-| 🐹 | Go | go mod |
-| ☕ | Java / Kotlin | maven, gradle |
-| 🐘 | PHP | composer |
-| 💎 | Ruby | bundler |
-| 🔷 | C# / .NET | nuget (dotnet) |
-| 🎯 | Dart / Flutter | pub |
-| 💧 | Elixir | mix |
+## 📋 Comprehensive CLI Subcommand Reference
 
-## Commands
+### Core Package Operations
+| Command | Description |
+| :--- | :--- |
+| `cpm init` | 🚀 Initialize a polyglot workspace with interactive wizard or non-interactive flags |
+| `cpm detect` | 🔍 Auto-detect ecosystems with weighted signal scoring |
+| `cpm install` | 📦 Install dependencies across all ecosystems (`--parallel`, `--filter`) |
+| `cpm add <eco:pkg>` | ➕ Add dependencies with ecosystem auto-inference |
+| `cpm remove <eco:pkg>` | ➖ Remove package dependencies from manifest and native files |
+| `cpm update` | 🔄 Update dependencies (`--parallel`, `--filter`, `--auto-pr`) |
+| `cpm outdated` | 📋 Check outdated dependencies across registries |
+| `cpm status` | 📊 Display project overview and ecosystem summary |
+| `cpm run <script>` | ▶️ Run scripts across ecosystems |
 
-| Command | Alias | Description |
-|---------|-------|-------------|
-| `cpm init` | `i` | 🚀 Initialize a polyglot project |
-| `cpm detect` | `d` | 🔍 Auto-detect ecosystems with scored signals |
-| `cpm install` | `is` | 📦 Install deps across all ecosystems (`--parallel`, `--filter`) |
-| `cpm add eco:pkg` | `a` | ➕ Add a dependency (smart auto-detects prefix!) |
-| `cpm remove eco:pkg` | `rm` | ➖ Remove a package dependency |
-| `cpm update` | `up` | 🔄 Update all dependencies (`--parallel`, `--filter`) |
-| `cpm outdated` | — | 📋 Show outdated deps (`--filter`) |
-| `cpm audit` | — | 🛡️ Security audit across ecosystems (`--filter`) |
-| `cpm run <script>` | — | ▶️ Run a script across ecosystems |
-| `cpm status` | — | 📊 Project overview & ecosystem summary |
-| `cpm bridge inspect` | — | 🔍 Dynamically inspect registered host RPC methods |
-| `cpm bridge call` | — | 🌉 Cross-language RPC call |
-| `cpm bridge status` | — | 🌉 Transport tier info |
+### Security, Governance & Auditing
+| Command | Description |
+| :--- | :--- |
+| `cpm scan-secrets` | 🔑 Scan workspace for exposed API keys, RSA keys, and secrets |
+| `cpm policy` | 🛡️ Enforce enterprise RBAC security policies (`.cpm_policy.json`) |
+| `cpm licenses` | 📄 Audit open-source package licenses against organizational rules |
+| `cpm verify-sig` | 🔏 Verify Sigstore Fulcio and GPG cryptographic package signatures |
+| `cpm audit-log` | 📑 View append-only cryptographically verified audit trail (`.cpm_audit.log`) |
 
-## How Detection Works
+### Performance, Diagnostics & Profiling
+| Command | Description |
+| :--- | :--- |
+| `cpm doctor` | 🩺 Run self-healing diagnostics and automatic virtualenv repair |
+| `cpm bridge benchmark` | ⚡ Benchmark RPC latency and throughput across worker threads |
+| `cpm flamegraph` | 🔥 Export SVG call stack flamegraph performance visualizer (`cpm_flamegraph.svg`) |
+| `cpm trace` | 🔭 Export OpenTelemetry OTLP distributed trace spans (`cpm_trace_spans.json`) |
+| `cpm sccache` | 🚀 Auto-configure `sccache` or `ccache` build wrappers for 5x build speeds |
+| `cpm cache` | 🗄️ Manage global content-addressable package store (`~/.cpm/cache`) |
 
-CPM uses a **weighted scoring engine** to detect which package managers are active:
+### Advanced Tooling & Visualizers
+| Command | Description |
+| :--- | :--- |
+| `cpm generate-stubs` | 📝 Generate IDE type stubs (`.d.ts` and `.pyi`) |
+| `cpm bundle` | 📦 Package air-gapped offline dependency tarball archives |
+| `cpm repl` | 💬 Interactive polyglot REPL shell |
+| `cpm alias` | ⚡ Execute custom command aliases from `upm.toml` |
+| `cpm search` | 🔎 Search across PyPI, npm, Crates.io, and RubyGems registries |
+| `cpm rollback` | ⏪ Rollback lockfiles and manifests to previous disaster recovery states |
+| `cpm diff` | 🔀 Display universal dependency version drift and diffs |
+| `cpm resolve` | 🧩 Transitive dependency SAT solver advisor |
+| `cpm cost` | 💰 Estimate cloud memory footprint and hosting cost |
+| `cpm graph` | 🕸️ Generate interactive HTML dependency DAG visualizers (`cpm_dep_graph.html`) |
+| `cpm completion` | 🐚 Generate tab completion scripts for PowerShell, Bash, Zsh, and Fish |
 
-| Signal | Weight | Example |
-|--------|--------|---------|
-| Lockfile present | +100 | `pnpm-lock.yaml` |
-| Manifest marker | +80 | `[tool.uv]` inside `pyproject.toml` |
-| Manifest file | +40 | `package.json` exists |
-| Glob match | +30 | `*.gemspec` files found |
-| Directory indicator | +20 | `node_modules/` present |
-| Priority tie-break | +0-4 | Adapter-defined |
+### DevOps & Cloud Native
+| Command | Description |
+| :--- | :--- |
+| `cpm dockerfile` | 🐳 Auto-generate multi-stage polyglot Dockerfiles |
+| `cpm helm` | ☸️ Auto-generate Kubernetes Helm chart manifests |
+| `cpm operator` | ☸️ Auto-generate Kubernetes Custom Resource Definition (CRD) manifests |
 
-The **highest-scoring** adapter per language group wins. Multiple languages coexist naturally in polyglot workspaces.
+---
 
-## Cross-Language Bridge
+## 🌉 Cross-Language Bridge Protocol (`upm-bridge/1`)
 
-CPM includes `upm-bridge/1` — a stdio RPC protocol for calling foreign language functions:
+CPM includes `upm-bridge/1` — a stdio RPC framed protocol for executing foreign language functions:
 
 ```bash
 # Call Python's math.sqrt from the terminal
 cpm bridge call python:math.sqrt '[144.0]'
 # → 12.0
 
-# Hash data via Node.js
+# Hash data via Node.js crypto
 cpm bridge call node:crypto.sha256 '["hello world"]'
 
-# Check transport tier status
+# Inspect foreign RPC bridge hosts
 cpm bridge status
-```
-
-### Wire Protocol
-
-```
-┌───────────────┬──────────────────────┐
-│ 4 bytes BE u32│ JSON payload (UTF-8) │
-│ (body length) │                      │
-└───────────────┴──────────────────────┘
+cpm bridge inspect
 ```
 
 ### Transport Tiers
 
 | Tier | Mechanism | Latency |
-|------|-----------|---------|
-| **ffi** | dlopen + C ABI | ~0.88 µs |
+| :--- | :--- | :--- |
+| **ffi** | `dlopen` + C ABI | ~0.88 µs |
 | **embed** | CPython/V8 in-process | ~0.56-2.6 µs |
 | **rpc** *(default)* | Framed JSON over stdio | ~156 µs |
 
-## Architecture
+---
 
-```
-upm/
-├── src/
-│   ├── acquisition/        # L2 — Detection scoring, manifest, runner
-│   │   ├── adapter.rs      # 15+ ecosystem adapter definitions
-│   │   ├── scoring.rs      # Weighted detection engine
-│   │   ├── manifest.rs     # upm.toml + native manifest scaffolding
-│   │   └── runner.rs       # Native command execution
-│   ├── bridge/             # L2' — Cross-language invocation
-│   │   ├── protocol.rs     # Wire envelope types (Request/Response/Ping/Release)
-│   │   ├── transport/      # Framed stdio transport
-│   │   ├── value.rs        # UpmValue codec ($blob, $ref, $fn)
-│   │   ├── handles.rs      # Object/callback handle GC registry
-│   │   ├── peer.rs         # Bidirectional RPC peer
-│   │   └── host.rs         # Language host process supervisor
-│   ├── cli/                # CLI subcommand handlers
-│   │   ├── init_cmd.rs     # Interactive project initialization
-│   │   ├── detect_cmd.rs   # Ecosystem detection display
-│   │   └── bridge_cmd.rs   # Bridge RPC and status
-│   ├── main.rs             # `upm` binary entry point
-│   └── cpm_main.rs         # `cpm` binary entry point (same logic)
-├── hosts/
-│   ├── python_host.py      # Python language host (upm-bridge/1)
-│   └── node_host.js        # Node.js language host (upm-bridge/1)
-├── tests/
-│   ├── test_detection.rs   # Detection + init integration tests
-│   └── test_bridge_rpc.rs  # Bridge protocol + value codec tests
-└── docs/
-    ├── ARCHITECTURE.md     # Detailed design document
-    └── BRIDGE_SPECIFICATION.md  # Protocol specification
-```
+## 🛠️ SDK Adapters & Integrations
 
-## Building from Source
+- **Python**: FastAPI (`sdk/python/fastapi_cpm.py`), Django (`sdk/python/django_cpm.py`), AWS Lambda (`sdk/lambda/cpm_lambda.py`), OpenTelemetry (`sdk/telemetry/opentelemetry_cpm.py`)
+- **Node.js**: NestJS (`sdk/node/nestjs_cpm.ts`), Nuxt 3 (`sdk/node/nuxt_cpm.ts`), Express (`sdk/node/cpm_sdk.js`), Prometheus (`sdk/metrics/prometheus_cpm.js`)
+- **Languages**: Rust (`sdk/rust/`), Go (`sdk/go/cpm_sdk.go`), Java (`sdk/java/CpmBridge.java`), Ruby (`sdk/ruby/cpm_rails.rb`), Dart/Flutter (`sdk/dart/cpm_sdk.dart`)
+- **Monorepos & CI/CD**: Turborepo (`sdk/monorepo/turborepo_cpm.json`), Bazel (`sdk/bazel/rules_cpm.bzl`), VSCode (`sdk/vscode/package.json`), JetBrains (`sdk/jetbrains/plugin.xml`), GitHub Actions (`.github/workflows/cpm-ci.yml`), GitLab (`.gitlab-ci.yml`), Bitbucket (`bitbucket-pipelines.yml`)
 
-```bash
-# Prerequisites: Rust toolchain (rustup.rs)
-cargo build --release
+---
 
-# The binaries are at:
-#   target/release/upm.exe
-#   target/release/cpm.exe
-```
+## 📜 Documentation & Guides
 
-## License
+- 📖 **[Migration Guide](file:///d:/cpm/docs/migration-guide.html)**: Comprehensive guide for migrating existing apps to CPM.
+- 🌉 **[Bridge Specification](file:///d:/cpm/docs/bridge-specification.html)**: Detailed RPC protocol wire spec.
+- 🛠️ **[CPM Setup & Workflow Guide](file:///d:/cpm/.agent/skills/cpm-setup-guide.md)**: Full step-by-step developer tutorial.
+
+---
+
+## ⚖️ License
 
 Dual-licensed under [MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE).

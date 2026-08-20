@@ -1,15 +1,16 @@
 //! # Universal Package Platform (UPM / CPM)
 //!
-//! `upm` is a cross-language package platform implementation written in Rust based on the
+//! `upm` / `cpm` is a cross-language package platform implementation written in Rust based on the
 //! **Universal Package Platform · Concept & Architecture** specification.
 //!
-//! ## Core Architecture Layers
+//! ## Core Architecture Subsystems
 //!
-//! - **L2 Acquisition (`acquisition`)**: Provides multi-signal ecosystem scoring across 20 package managers
-//!   and 13 language ecosystems, `upm.toml` manifest management, and unified dependency execution.
-//! - **L2' Invocation (`bridge`)**: Provides the `upm-bridge/1` cross-language stdio RPC protocol, length-prefixed
-//!   framing, value serialization (`$blob`, `$ref`, `$fn`), object handle GC tracking, and language host supervisors.
-//! - **CLI Layer (`cli`)**: Provides terminal subcommands (`init`, `detect`, `install`, `add`, `update`, `outdated`, `audit`, `run`, `bridge`).
+//! - **L2 Acquisition (`acquisition`)**: Multi-signal ecosystem detection engine, `upm.toml` manifest management,
+//!   15+ package manager adapters (npm, pnpm, yarn, bun, pip, uv, poetry, cargo, go mod, maven, gradle, composer, bundler, nuget, pub, mix).
+//! - **L2' Cross-Language Bridge (`bridge`)**: Stdio RPC framing protocol (`upm-bridge/1`), length-prefixed transport,
+//!   `UpmValue` serialization (`$blob`, `$ref`, `$fn`), object handle GC registry, and language host process supervisors.
+//! - **CLI Engine (`cli`)**: Complete suite of 26 subcommands covering installation, detection, security audits,
+//!   diagnostics, benchmarking, flamegraphs, Kubernetes Helm/CRD generation, sccache compiler acceleration, and OTLP tracing.
 
 pub mod acquisition;
 pub mod bridge;

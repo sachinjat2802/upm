@@ -1,3 +1,7 @@
+//! # UPM Binary Entry Point
+//!
+//! Command-line interface driver for `upm` (Universal Package Platform).
+
 use clap::{Parser, Subcommand};
 use std::path::PathBuf;
 use upm::cli::*;
