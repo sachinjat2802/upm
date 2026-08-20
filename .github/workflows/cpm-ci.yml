@@ -1,0 +1,49 @@
+name: CPM Polyglot CI/CD Pipeline
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  polyglot-check:
+    name: CPM Polyglot Dependency Audit & Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Cache CPM Global Store
+        uses: actions/cache@v4
+        with:
+          path: ~/.cpm/cache
+          key: ${{ runner.os }}-cpm-${{ hashFiles('**/upm.toml') }}
+
+      - name: Build CPM Executable
+        run: cargo build --release --bin cpm
+
+      - name: Run CPM Doctor Diagnostics
+        run: ./target/release/cpm doctor
+
+      - name: Scan Secrets & Compliance Policies
+        run: |
+          ./target/release/cpm scan-secrets
+          ./target/release/cpm policy
+          ./target/release/cpm licenses
+
+      - name: Run Cargo Unit Tests
+        run: cargo test

@@ -1,0 +1,24 @@
+image: rust:latest
+
+stages:
+  - test
+  - audit
+  - build
+
+cache:
+  paths:
+    - ~/.cpm/cache
+    - target/
+
+cpm_audit_job:
+  stage: audit
+  script:
+    - cargo build --release --bin cpm
+    - ./target/release/cpm doctor
+    - ./target/release/cpm policy
+    - ./target/release/cpm scan-secrets
+
+cpm_test_job:
+  stage: test
+  script:
+    - cargo test
