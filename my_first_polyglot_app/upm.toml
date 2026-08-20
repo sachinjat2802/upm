@@ -1,19 +1,18 @@
 ecosystems = [
     "uv",
+    "maven",
     "pnpm",
     "cargo",
 ]
 
 [project]
-name = "my_first_polyglot_app"
+name = "migrated-app"
 version = "0.1.0"
 primary_language = "python"
 
 [foreign_dependencies]
-"cargo:requests" = "latest"
-"cargo:serde" = "latest"
+"cargo:serde" = "^1.0"
 "npm:express" = "^4.19.2"
-"pip:requests" = "latest"
 
 [transports]
 default_tier = "rpc"

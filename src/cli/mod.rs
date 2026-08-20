@@ -7,6 +7,7 @@
 pub mod bridge_cmd;
 pub mod detect_cmd;
 pub mod init_cmd;
+pub mod migrate_cmd;
 
 use crate::acquisition::{AcquisitionRunner, AdapterRegistry, DetectionEngine, UpmManifest};
 use colored::Colorize;
@@ -17,6 +18,7 @@ use std::time::Instant;
 pub use bridge_cmd::{execute_bridge_call, execute_bridge_inspect, execute_bridge_status};
 pub use detect_cmd::execute_detect;
 pub use init_cmd::execute_init;
+pub use migrate_cmd::execute_migrate;
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 

@@ -170,6 +170,14 @@ enum Commands {
         path: PathBuf,
     },
 
+    /// ⚡ Automated 1-command repository migration
+    #[command(visible_alias = "m")]
+    Migrate {
+        /// Workspace directory path
+        #[arg(default_value = ".")]
+        path: PathBuf,
+    },
+
     /// 🌉 Cross-language bridge: call foreign methods or view transport info
     Bridge {
         #[command(subcommand)]
@@ -220,6 +228,7 @@ async fn main() -> anyhow::Result<()> {
         Commands::Audit { path, filter } => execute_audit(&path, filter.as_deref())?,
         Commands::Run { script, path } => execute_run(&path, &script)?,
         Commands::Status { path } => execute_status(&path)?,
+        Commands::Migrate { path } => execute_migrate(&path)?,
         Commands::Bridge { sub } => match sub {
             BridgeSubcommands::Call { target, args_json } => {
                 execute_bridge_call(&target, args_json.as_deref()).await?;
