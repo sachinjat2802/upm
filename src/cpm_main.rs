@@ -163,6 +163,16 @@ enum Commands {
         #[arg(default_value = ".")]
         path: PathBuf,
     },
+    /// 🛡️ Secret & API key leak scanner
+    ScanSecrets {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+    },
+    /// 📊 Universal dependency diff viewer
+    Diff {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+    },
     /// 🌉 Cross-language bridge
     Bridge {
         #[command(subcommand)]
@@ -218,6 +228,8 @@ async fn main() -> anyhow::Result<()> {
         Commands::Search { query } => execute_search(&query)?,
         Commands::Rollback { path } => execute_rollback(&path)?,
         Commands::Licenses { path } => execute_licenses(&path)?,
+        Commands::ScanSecrets { path } => execute_scan_secrets(&path)?,
+        Commands::Diff { path } => execute_diff(&path)?,
         Commands::Bridge { sub } => match sub {
             BridgeSubcommands::Call { target, args_json } => {
                 execute_bridge_call(&target, args_json.as_deref()).await?;
