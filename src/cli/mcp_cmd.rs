@@ -1,4 +1,4 @@
-//! # mcpman Engine: Universal Model Context Protocol (MCP) Manager
+//! # CPM Universal Model Context Protocol (MCP) Manager
 //!
 //! Discovers, configures, and synchronizes MCP servers across Claude Desktop,
 //! Cursor, Antigravity IDE, VS Code, and Zed.
@@ -65,7 +65,7 @@ pub fn execute_mcp(
 
 fn list_mcp_servers(path: &Path) -> Result<()> {
     println!();
-    println!("  {}", "🔌 CPM Universal MCP Manager (mcpman Engine)".bold().cyan());
+    println!("  {}", "🔌 CPM Universal MCP Manager".bold().cyan());
     println!("  {}", "═".repeat(60).dimmed());
 
     let clients = get_known_mcp_locations(path);

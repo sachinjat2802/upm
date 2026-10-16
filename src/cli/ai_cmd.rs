@@ -1,4 +1,4 @@
-//! # OpenPackage Engine: Universal AI Configuration & Skills Manager
+//! # CPM AI Manager: Universal AI Configuration & Skills Manager
 //!
 //! Manages AI prompts, rules, skills, and subagents with universal cross-IDE auto-conversion
 //! across Cursor, Claude, Windsurf, Cline, Warp, and Antigravity.
@@ -50,7 +50,7 @@ pub fn execute_ai(path: &Path, action: Option<&str>, target_ide: Option<&str>, r
 
 fn list_ai_configs(path: &Path) -> Result<()> {
     println!();
-    println!("  {}", "🤖 CPM OpenPackage AI Manager".bold().cyan());
+    println!("  {}", "🤖 CPM Universal AI Manager".bold().cyan());
     println!("  {}", "═".repeat(55).dimmed());
 
     let mut found_configs = Vec::new();

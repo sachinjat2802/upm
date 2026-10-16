@@ -17,6 +17,7 @@
 /// workspace (e.g. pnpm wins for JS, uv wins for Python).
 
 use crate::acquisition::adapter::{AdapterRegistry, EcosystemAdapter};
+use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -68,14 +69,15 @@ impl DetectionEngine {
 
     /// Scan a directory and produce scored detection results.
     ///
-    /// Each registered adapter is evaluated against the filesystem.
-    /// The highest-scoring adapter per language group is marked as `winner`.
+    /// Time: O(A × S) where A = adapter count, S = signals per adapter
+    /// Space: O(A) for scores + O(L) for language-group map
     pub fn detect_dir(&self, path: &Path) -> DetectionResult {
-        let mut scores = Vec::new();
+        let adapters = self.registry.all();
+        let mut scores = Vec::with_capacity(adapters.len());
 
-        for adapter in self.registry.all() {
+        for adapter in adapters {
             let mut total = 0u32;
-            let mut details = Vec::new();
+            let mut details = Vec::with_capacity(6); // max 6 signals
 
             // Signal 1: Lockfile present (+100 pts)
             if let Some(ref lockfile) = adapter.lockfile_file {
@@ -120,9 +122,9 @@ impl DetectionEngine {
             // Signal 4: Glob match (+30 pts)
             if let Some(ref glob_pattern) = adapter.glob_pattern {
                 let pattern = path.join(glob_pattern);
-                if let Ok(entries) = glob::glob(&pattern.to_string_lossy()) {
-                    let count = entries.filter_map(Result::ok).count();
-                    if count > 0 {
+                if let Ok(mut entries) = glob::glob(&pattern.to_string_lossy()) {
+                    // Use .any() for O(1) best-case instead of .count() which walks all matches
+                    if entries.any(|e| e.is_ok()) {
                         total += 30;
                         details.push(ScoreDetail {
                             signal: "glob match".into(),
@@ -165,17 +167,22 @@ impl DetectionEngine {
             });
         }
 
-        // Determine highest score per language group
-        let mut max_per_lang: std::collections::HashMap<String, u32> = std::collections::HashMap::new();
+        // Determine highest score per language group — single-pass O(A)
+        let mut max_per_lang: HashMap<String, u32> = HashMap::new();
         for score in &scores {
             if score.total_score > 0 {
-                let current_max = max_per_lang.entry(score.adapter.language.clone()).or_insert(0);
-                if score.total_score > *current_max {
-                    *current_max = score.total_score;
-                }
+                max_per_lang
+                    .entry(score.adapter.language.clone())
+                    .and_modify(|max| {
+                        if score.total_score > *max {
+                            *max = score.total_score;
+                        }
+                    })
+                    .or_insert(score.total_score);
             }
         }
 
+        // Mark winners and collect — second pass O(A)
         let mut detected_ecosystems = Vec::new();
         for score in &mut scores {
             if score.total_score > 0 {
@@ -188,8 +195,8 @@ impl DetectionEngine {
             }
         }
 
-        // Sort scores descending for display with deterministic tie-breaker (#57)
-        scores.sort_by(|a, b| b.total_score.cmp(&a.total_score).then_with(|| a.adapter.name.cmp(&b.adapter.name)));
+        // Sort scores descending with deterministic tie-breaker — O(A log A)
+        scores.sort_unstable_by(|a, b| b.total_score.cmp(&a.total_score).then_with(|| a.adapter.name.cmp(&b.adapter.name)));
 
         DetectionResult {
             root_path: path.to_path_buf(),

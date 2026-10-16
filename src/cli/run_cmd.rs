@@ -1,4 +1,4 @@
-//! # GuPM Engine: Cross-Language Script & Tool Runner
+//! # CPM Cross-Language Script & Tool Runner
 //!
 //! Provides unified multi-language task execution (`cpm run <script>`) and
 //! local package binary execution (`cpm exec <tool>`).
@@ -68,7 +68,7 @@ pub fn execute_run_script(path: &Path, script_name: Option<&str>, extra_args: &[
         Some(s) if !s.is_empty() => s,
         _ => {
             println!();
-            println!("  {}", "📜 Available Project Scripts (GuPM Cross-Language Engine)".bold().cyan());
+            println!("  {}", "📜 Available Project Scripts (CPM Task Engine)".bold().cyan());
             println!("  {}", "═".repeat(60).dimmed());
             if available_scripts.is_empty() {
                 println!("  No scripts defined in upm.toml, package.json, or pyproject.toml.");

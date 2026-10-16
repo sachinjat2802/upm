@@ -14,9 +14,9 @@ use crate::bridge::transport::Transport;
 use crate::bridge::value::{UpmError, UpmValue};
 use anyhow::{anyhow, Result};
 use std::collections::HashMap;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
 use tokio::sync::{oneshot, Mutex};
-use uuid::Uuid;
 
 /// Rust-side bridge peer that manages RPC calls and incoming messages.
 pub struct BridgePeer {
@@ -24,6 +24,7 @@ pub struct BridgePeer {
     /// Public handle registry for registering objects/callbacks.
     pub handles: Arc<HandleRegistry>,
     pending_requests: Arc<Mutex<HashMap<String, oneshot::Sender<RpcResponse>>>>,
+    req_counter: AtomicU64,
 }
 
 impl BridgePeer {
@@ -33,15 +34,17 @@ impl BridgePeer {
             transport,
             handles: Arc::new(HandleRegistry::new()),
             pending_requests: Arc::new(Mutex::new(HashMap::new())),
+            req_counter: AtomicU64::new(1),
         }
     }
 
     /// Call a remote method on the foreign host and await the response.
     ///
-    /// This sends an RPC request and blocks (async) until the foreign
-    /// host responds with either a result or an error.
+    /// Time Complexity: O(1) dispatch + network/pipe latency.
+    /// Space Complexity: O(1) request record in pending map.
     pub async fn call(&self, method: &str, args: Vec<UpmValue>) -> Result<UpmValue> {
-        let req_id = Uuid::new_v4().to_string();
+        let id_val = self.req_counter.fetch_add(1, Ordering::Relaxed);
+        let req_id = format!("req_{:x}", id_val);
         let envelope = MessageEnvelope::request(&req_id, method, args);
 
         let (tx, rx) = oneshot::channel();

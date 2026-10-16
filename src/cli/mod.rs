@@ -47,6 +47,10 @@ pub mod ai_cmd;
 pub mod mcp_cmd;
 pub mod create_cmd;
 pub mod agent_cmd;
+pub mod test_cmd;
+pub mod build_cmd;
+pub mod deploy_cmd;
+pub mod env_cmd;
 
 use crate::acquisition::{AcquisitionRunner, AdapterRegistry, DetectionEngine, UpmManifest};
 use colored::Colorize;
@@ -100,6 +104,10 @@ pub use ai_cmd::execute_ai;
 pub use mcp_cmd::execute_mcp;
 pub use create_cmd::execute_create;
 pub use agent_cmd::execute_agent;
+pub use test_cmd::execute_test;
+pub use build_cmd::execute_build;
+pub use deploy_cmd::execute_deploy;
+pub use env_cmd::execute_env;
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 

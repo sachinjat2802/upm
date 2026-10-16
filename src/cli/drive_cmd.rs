@@ -162,13 +162,17 @@ fn configure_d_drive() -> Result<()> {
             ("PNPM_HOME", "D:\\.pnpm"),
         ];
 
+        let mut ps_script = String::with_capacity(512);
         for (k, v) in &env_vars {
             std::env::set_var(k, v);
-            let _ = std::process::Command::new("powershell")
-                .args(["-NoProfile", "-Command", &format!("[Environment]::SetEnvironmentVariable('{}', '{}', 'User')", k, v)])
-                .output();
+            ps_script.push_str(&format!("[Environment]::SetEnvironmentVariable('{}', '{}', 'User'); ", k, v));
             println!("  {} Set {} = {}", "✔".green(), k.bold(), v.cyan());
         }
+
+        // Single PowerShell execution for all variables (7x faster)
+        let _ = std::process::Command::new("powershell")
+            .args(["-NoProfile", "-Command", &ps_script])
+            .output();
 
         println!();
         println!("  {} All package managers and toolchains configured to use D: drive!", "✔".bold().green());

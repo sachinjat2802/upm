@@ -46,7 +46,7 @@ fn test_deterministic_lockfile_lifecycle() {
 }
 
 #[test]
-fn test_replit_upm_guess_dependencies() {
+fn test_cpm_guess_dependencies() {
     let tmp = tempdir().expect("tempdir failed");
     let app_dir = tmp.path();
 
@@ -60,7 +60,7 @@ fn test_replit_upm_guess_dependencies() {
 }
 
 #[test]
-fn test_openpackage_ai_rules_sync() {
+fn test_cpm_ai_rules_sync() {
     let tmp = tempdir().expect("tempdir failed");
     let app_dir = tmp.path();
 
@@ -80,7 +80,7 @@ fn test_openpackage_ai_rules_sync() {
 }
 
 #[test]
-fn test_mcpman_universal_mcp_manager() {
+fn test_cpm_universal_mcp_manager() {
     let tmp = tempdir().expect("tempdir failed");
     let app_dir = tmp.path();
 
@@ -122,6 +122,27 @@ fn test_agent_context_generation() {
 }
 
 #[test]
+fn test_agent_langgraph_and_chains() {
+    let tmp = tempdir().expect("tempdir failed");
+    let app_dir = tmp.path();
+
+    // Test LangGraph scaffolding
+    let g_res = execute_agent(app_dir, Some("graph"), false);
+    assert!(g_res.is_ok(), "execute_agent graph failed");
+    assert!(app_dir.join("agent_graph.py").exists());
+
+    // Test LangChain scaffolding
+    let c_res = execute_agent(app_dir, Some("chain"), false);
+    assert!(c_res.is_ok(), "execute_agent chain failed");
+    assert!(app_dir.join("agent_chain.py").exists());
+
+    // Test Multi-Agent Team scaffolding
+    let t_res = execute_agent(app_dir, Some("team"), false);
+    assert!(t_res.is_ok(), "execute_agent team failed");
+    assert!(app_dir.join("agent_team.py").exists());
+}
+
+#[test]
 fn test_high_capacity_drive_status() {
     let tmp = tempdir().expect("tempdir failed");
     let res = execute_drive(tmp.path(), Some("status"));
@@ -138,7 +159,7 @@ fn test_package_info_query() {
 }
 
 #[test]
-fn test_gupm_script_and_tool_runner() {
+fn test_cpm_script_and_tool_runner() {
     let tmp = tempdir().expect("tempdir failed");
     let app_dir = tmp.path();
 

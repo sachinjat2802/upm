@@ -34,6 +34,9 @@ pub fn execute_create(target_dir: &Path, template: Option<&str>, app_name: Optio
 
     match template_type.as_str() {
         "agentic" | "agent" | "ai" => scaffold_agentic_app(target_dir, &raw_name)?,
+        "langgraph" | "graph" => scaffold_langgraph_app(target_dir, &raw_name)?,
+        "langchain" | "chain" => scaffold_langchain_app(target_dir, &raw_name)?,
+        "multiagent" | "team" | "autogen" => scaffold_multiagent_app(target_dir, &raw_name)?,
         "polyglot" | "polyglot-ai" => scaffold_polyglot_ai_app(target_dir, &raw_name)?,
         "fullstack" | "web" => scaffold_fullstack_app(target_dir, &raw_name)?,
         "cli" => scaffold_cli_app(target_dir, &raw_name)?,
@@ -274,5 +277,75 @@ build = "cargo build --release"
 }
 "#;
     fs::write(src_dir.join("main.rs"), main_rs)?;
+    Ok(())
+}
+
+fn scaffold_langgraph_app(dir: &Path, name: &str) -> Result<()> {
+    let upm_toml = format!(
+        r#"ecosystems = ["python"]
+
+[project]
+name = "{name}"
+version = "0.1.0"
+
+[foreign_dependencies]
+"pip:langgraph" = "^0.2.0"
+"pip:langchain-core" = "^0.3.0"
+"pip:pydantic" = "^2.6.0"
+
+[scripts]
+dev = "python agent_graph.py"
+start = "python agent_graph.py"
+test = "cpm test"
+"#
+    );
+    fs::write(dir.join("upm.toml"), upm_toml)?;
+    crate::cli::agent_cmd::execute_agent(dir, Some("graph"), false)?;
+    Ok(())
+}
+
+fn scaffold_langchain_app(dir: &Path, name: &str) -> Result<()> {
+    let upm_toml = format!(
+        r#"ecosystems = ["python"]
+
+[project]
+name = "{name}"
+version = "0.1.0"
+
+[foreign_dependencies]
+"pip:langchain" = "^0.3.0"
+"pip:langchain-core" = "^0.3.0"
+
+[scripts]
+dev = "python agent_chain.py"
+start = "python agent_chain.py"
+test = "cpm test"
+"#
+    );
+    fs::write(dir.join("upm.toml"), upm_toml)?;
+    crate::cli::agent_cmd::execute_agent(dir, Some("chain"), false)?;
+    Ok(())
+}
+
+fn scaffold_multiagent_app(dir: &Path, name: &str) -> Result<()> {
+    let upm_toml = format!(
+        r#"ecosystems = ["python"]
+
+[project]
+name = "{name}"
+version = "0.1.0"
+
+[foreign_dependencies]
+"pip:pydantic" = "^2.6.0"
+
+[scripts]
+dev = "python agent_team.py"
+start = "python agent_team.py"
+test = "cpm test"
+"#
+    );
+    fs::write(dir.join("upm.toml"), upm_toml)?;
+    crate::cli::agent_cmd::execute_agent(dir, Some("team"), false)?;
+    crate::cli::agent_cmd::execute_agent(dir, Some("models"), false)?;
     Ok(())
 }

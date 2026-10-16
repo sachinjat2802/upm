@@ -1,7 +1,7 @@
 //! # Deterministic Lockfile & Integrity Verification Engine
 //!
 //! Generates and audits `cpm.lock` to guarantee reproducible builds across
-//! developer workstations and CI/CD pipelines (inspired by UPM & Flight).
+//! developer workstations and CI/CD pipelines.
 
 use crate::acquisition::cache::compute_sha256;
 use crate::acquisition::manifest::UpmManifest;
@@ -41,7 +41,7 @@ pub fn execute_lock(path: &Path, verify: bool, update: bool) -> Result<()> {
             .map_err(|e| anyhow!("Corrupt cpm.lock: {}", e))?;
 
         println!();
-        println!("  {} Verifying lockfile integrity (Flight CAS Engine)...", "🔒".cyan());
+        println!("  {} Verifying lockfile integrity (CPM CAS Engine)...", "🔒".cyan());
         println!("  {}", "═".repeat(50).dimmed());
 
         let all_valid = true;

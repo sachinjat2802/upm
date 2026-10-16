@@ -47,20 +47,21 @@ CPM synthesizes and improves upon the best ideas from across open source:
 
 ```mermaid
 graph TD
-    CPM["⚡ CPM / UPM Platform"] --> UPM["Replit UPM Engine<br/>• AST Dependency Guesser<br/>• Deterministic cpm.lock<br/>• Package Registry Inspector"]
-    CPM --> OPKG["OpenPackage Engine<br/>• Universal AI Guidelines<br/>• Cross-IDE Sync (Cursor, Claude, Cline)<br/>• Skills & Prompts Registry"]
-    CPM --> MCP["mcpman Engine<br/>• Universal MCP Server Hub<br/>• Multi-IDE Synchronization<br/>• Claude, Cursor, Antigravity, Zed"]
-    CPM --> FLIGHT["Flight Engine<br/>• Content-Addressable Cache (CAS)<br/>• SHA-256 Hash Verification<br/>• Offline Mode (--offline)"]
-    CPM --> GUPM["GuPM Engine<br/>• Multi-Language Task Runner<br/>• Local Tool Binary Exec<br/>• Cross-Language Environment Isolation"]
+    CPM["⚡ CPM / UPM Platform"] --> AST["AST Dependency Guesser<br/>• Auto-Detect Undeclared Imports<br/>• Deterministic cpm.lock<br/>• Package Registry Inspector"]
+    CPM --> AI["Universal AI Guidelines<br/>• Cross-IDE Rules Sync (Cursor, Claude, Cline)<br/>• Skills & Subagents Registry<br/>• Token-Optimized Context"]
+    CPM --> MCP["Universal MCP Server Hub<br/>• Model Context Protocol Engine<br/>• Multi-IDE Synchronization<br/>• Claude, Cursor, Antigravity, Zed"]
+    CPM --> CAS["Content-Addressable Cache (CAS)<br/>• SHA-256 Hash Verification<br/>• Deduplication Engine<br/>• Offline Mode (--offline)"]
+    CPM --> TASK["Cross-Language Task Runner<br/>• Multi-Language Script Runner<br/>• Local Tool Binary Exec<br/>• Unified Build & Test Pipeline"]
+    CPM --> AGENT["Agentic Frameworks<br/>• LangGraph StateGraphs<br/>• LangChain LCEL Pipelines<br/>• Hierarchical Nested Multi-Agent Teams"]
     CPM --> DRIVE["High-Capacity Storage<br/>• D: Drive Auto-Routing<br/>• Prevents C: Drive Exhaustion<br/>• Centralized Cache & Toolchains"]
 ```
 
-### 1. 🔍 Replit UPM Engine (`cpm guess`, `cpm lock`, `cpm info`)
+### 1. 🔍 Native AST Dependency Guesser (`cpm guess`, `cpm lock`, `cpm info`)
 - **AST Dependency Guesser:** Scans your codebase for Python `import`, Node.js `require()` / `import`, and Rust `use` statements to auto-detect undeclared dependencies.
 - **Deterministic Lockfiles:** Generates `cpm.lock` with SHA-256 cryptographic hashes for reproducible CI/CD pipelines (`cpm lock --verify`).
 - **Registry Inspector:** Inspects package specifications, metadata, and installation instructions across any language ecosystem (`cpm info pip:fastapi`).
 
-### 2. 🤖 OpenPackage Engine (`cpm ai`)
+### 2. 🤖 Universal AI Guidelines Engine (`cpm ai`)
 - **Universal AI Developer Guidelines:** Eliminates fragmented AI rules. Write your guidelines once, and CPM automatically synchronizes them across:
   - **Cursor:** `.cursorrules` and `.cursor/rules/*.mdc`
   - **Claude Desktop / Claude Code:** `CLAUDE.md`
@@ -68,18 +69,24 @@ graph TD
   - **Cline / Roo:** `.clinerules`
   - **Antigravity IDE:** `.agent/rules/` and `.agents/skills/`
 
-### 3. 🔌 mcpman Universal MCP Hub (`cpm mcp`)
+### 3. 🔌 Universal Model Context Protocol Hub (`cpm mcp`)
 - **Universal Model Context Protocol Hub:** Automatically configures and syncs MCP servers across **Claude Desktop**, **Cursor**, **VS Code**, **Zed**, and **Antigravity IDE** from a single command (`cpm mcp sync`).
 
-### 4. ⚡ Flight CAS Engine (`cpm cache`, `cpm lock --verify`)
+### 4. ⚡ Content-Addressable Storage (CAS) (`cpm cache`, `cpm lock --verify`)
 - **Ultra-Fast Content-Addressable Storage (CAS):** Packages and artifacts are hashed via SHA-256 and stored in high-speed local cache.
 - **Zero-Latency Offline Resolution:** Run `cpm install --offline` to develop air-gapped without an internet connection.
 
-### 5. 🛠️ GuPM Engine (`cpm run`, `cpm exec`)
+### 5. 🛠️ Cross-Language Task & Tool Runner (`cpm run`, `cpm exec`)
 - **Multi-Language Task Runner:** Run scripts defined in `upm.toml`, `package.json`, or `pyproject.toml` using `cpm run <script>`.
 - **Local Tool Binary Runner:** Execute binaries in `node_modules/.bin`, `.venv/Scripts`, or `target/release` with `cpm exec <tool>`.
 
-### 6. 💾 High-Capacity Drive Storage Engine (`cpm drive`)
+### 6. 🕸️ Agentic Frameworks: LangGraph, LangChain & Multi-Agent Teams (`cpm agent`, `cpm create`)
+- **LangGraph Workflows:** Scaffold stateful StateGraphs with cyclic flows, human-in-the-loop, and checkpointing (`cpm agent graph`).
+- **LangChain LCEL Pipelines:** Generate prompt-to-model-to-parser streaming pipelines (`cpm agent chain`).
+- **Hierarchical Multi-Agent Teams:** Deploy supervisor-to-worker multi-agent systems (`cpm agent team`).
+- **Open-Source & OpenRouter Models:** Switch between OpenRouter, local Ollama, vLLM, OpenAI, and Gemini (`cpm agent models`).
+
+### 7. 💾 High-Capacity Drive Storage Engine (`cpm drive`)
 - **Protects C: Drive From Exhaustion:** Automatically detects large secondary drives (`D:\` with >800 GB free) and routes all package caches, virtual environments, toolchains, Cargo, Pip, and npm stores to `D:\.cpm`.
 
 ---

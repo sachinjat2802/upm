@@ -72,9 +72,10 @@ impl Default for AdapterRegistry {
 
 impl AdapterRegistry {
     /// Create a new registry pre-loaded with all builtin adapters.
+    /// Space Complexity: O(A) where A is number of builtin adapters (~20).
     pub fn new() -> Self {
         let mut registry = Self {
-            adapters: HashMap::new(),
+            adapters: HashMap::with_capacity(24),
         };
         registry.load_builtin_adapters();
         registry
@@ -86,14 +87,17 @@ impl AdapterRegistry {
     }
 
     /// Look up an adapter by name (e.g. `"npm"`, `"cargo"`).
+    /// Time Complexity: O(1) average lookup
     pub fn get(&self, name: &str) -> Option<&EcosystemAdapter> {
         self.adapters.get(name)
     }
 
     /// Return all registered adapters in deterministic order (#57).
+    /// Time Complexity: O(A log A) where A = adapter count.
+    /// Space Complexity: O(A) slice of references.
     pub fn all(&self) -> Vec<&EcosystemAdapter> {
         let mut list: Vec<&EcosystemAdapter> = self.adapters.values().collect();
-        list.sort_by(|a, b| a.name.cmp(&b.name));
+        list.sort_unstable_by(|a, b| a.name.cmp(&b.name));
         list
     }
 

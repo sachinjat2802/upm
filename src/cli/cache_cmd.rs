@@ -1,6 +1,6 @@
 /// # `cpm cache` CLI Subcommand — Global Content-Addressable Cache Manager
 ///
-/// Inspects, cleans, and prunes the global content-addressable package store (Flight CAS Engine).
+/// Inspects, cleans, and prunes the global content-addressable package store (CPM CAS Engine).
 
 use std::path::Path;
 

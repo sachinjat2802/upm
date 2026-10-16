@@ -1,4 +1,4 @@
-//! # Flight Engine: High-Speed Cache & Content-Addressable Storage
+//! # CPM Global Cache Engine: High-Speed Content-Addressable Storage
 //!
 //! Provides ultra-fast local dependency caching on high-capacity storage (`D:\.cpm_cache`),
 //! SHA-256 integrity verification, offline resolution, and deduplication.
@@ -93,67 +93,79 @@ fn dirs_next() -> Option<PathBuf> {
 }
 
 /// Store a downloaded package / artifact in the content-addressable cache.
+///
+/// Time: O(n) where n = content length (hash computation)
+/// Space: O(1) additional beyond the file I/O buffers
 pub fn cache_package(ecosystem: &str, name: &str, version: &str, content: &[u8]) -> Result<PathBuf> {
     let cache_root = get_cache_dir();
-    let safe_name = name.replace('/', "__").replace('\\', "__");
+    let safe_name = sanitize_name(name);
     let pkg_dir = cache_root.join(ecosystem).join(&safe_name);
     fs::create_dir_all(&pkg_dir)?;
 
-    let target_file = pkg_dir.join(format!("{}-{}.cpm_pkg", safe_name, version));
+    let base = format!("{}-{}", safe_name, version);
+    let target_file = pkg_dir.join(format!("{}.cpm_pkg", base));
     fs::write(&target_file, content)?;
 
     // Write SHA-256 integrity file alongside
     let sha256_hash = compute_sha256(content);
-    let meta_file = pkg_dir.join(format!("{}-{}.sha256", safe_name, version));
-    fs::write(&meta_file, sha256_hash)?;
+    fs::write(pkg_dir.join(format!("{}.sha256", base)), sha256_hash)?;
 
     Ok(target_file)
 }
 
+/// Sanitize a package name for safe filesystem paths.
+/// Time: O(n) where n = name length
+#[inline]
+fn sanitize_name(name: &str) -> String {
+    name.replace(['/', '\\'], "__")
+}
+
 /// Look up a cached package.
+/// Time: O(1) — single filesystem stat
 pub fn get_cached_package(ecosystem: &str, name: &str, version: &str) -> Option<PathBuf> {
-    let cache_root = get_cache_dir();
-    let safe_name = name.replace('/', "__").replace('\\', "__");
-    let target_file = cache_root
+    let safe_name = sanitize_name(name);
+    let target_file = get_cache_dir()
         .join(ecosystem)
         .join(&safe_name)
         .join(format!("{}-{}.cpm_pkg", safe_name, version));
 
-    if target_file.exists() {
-        Some(target_file)
-    } else {
-        None
-    }
+    target_file.exists().then_some(target_file)
 }
 
-/// Compute a fast cryptographic SHA-256 hash representation of bytes.
+/// Compute a deterministic 256-bit hash of bytes.
+///
+/// Uses a 4-lane FNV-1a variant producing 256-bit output for fast
+/// content-addressable storage integrity checks.
+///
+/// Time: O(n) where n = data.len() — single pass, no allocations in hot loop
+/// Space: O(1) — 4 × u64 accumulators
 pub fn compute_sha256(data: &[u8]) -> String {
-    // Standard FNV-1a + 64-bit multi-round digest for fast deterministic hashing
-    let mut h1: u64 = 0xcbf29ce484222325;
-    let mut h2: u64 = 0x100000001b3;
-    let mut h3: u64 = 0x84222325cbf29ce4;
-    let mut h4: u64 = 0x517cc1b727220a95;
+    const P1: u64 = 0x100000001b3;
+    const P2: u64 = 0x517cc1b727220a95;
+    const P3: u64 = 0xcbf29ce484222325;
 
-    for (i, &b) in data.iter().enumerate() {
-        match i % 4 {
-            0 => {
-                h1 ^= b as u64;
-                h1 = h1.wrapping_mul(0x100000001b3);
-            }
-            1 => {
-                h2 ^= b as u64;
-                h2 = h2.wrapping_mul(0x517cc1b727220a95);
-            }
-            2 => {
-                h3 ^= b as u64;
-                h3 = h3.wrapping_mul(0xcbf29ce484222325);
-            }
-            _ => {
-                h4 ^= b as u64;
-                h4 = h4.wrapping_mul(0x100000001b3);
-            }
-        }
+    let mut h1: u64 = 0xcbf29ce484222325;
+    let mut h2: u64 = P1;
+    let mut h3: u64 = 0x84222325cbf29ce4;
+    let mut h4: u64 = P2;
+
+    // Process 4 bytes at a time for better ILP (instruction-level parallelism)
+    let chunks = data.chunks_exact(4);
+    let remainder = chunks.remainder();
+
+    for chunk in chunks {
+        h1 = (h1 ^ chunk[0] as u64).wrapping_mul(P1);
+        h2 = (h2 ^ chunk[1] as u64).wrapping_mul(P2);
+        h3 = (h3 ^ chunk[2] as u64).wrapping_mul(P3);
+        h4 = (h4 ^ chunk[3] as u64).wrapping_mul(P1);
     }
+
+    // Handle remaining bytes
+    let lanes = [&mut h1, &mut h2, &mut h3, &mut h4];
+    for (i, &b) in remainder.iter().enumerate() {
+        *lanes[i] = (*lanes[i] ^ b as u64).wrapping_mul(P1);
+    }
+
     format!("{:016x}{:016x}{:016x}{:016x}", h1, h2, h3, h4)
 }
 
@@ -168,15 +180,23 @@ pub fn verify_package_integrity(path: &Path, expected_hash: &str) -> Result<bool
 }
 
 /// Calculate cache disk usage statistics.
+///
+/// Time: O(n) where n = total files in cache tree
+/// Space: O(d) where d = max directory depth (iterative stack, not recursive)
 pub fn get_cache_stats() -> CacheStats {
     let cache_dir = get_cache_dir();
     let mut total_size = 0u64;
     let mut count = 0usize;
 
-    if let Ok(entries) = walk_dir(&cache_dir) {
-        for entry in entries {
-            if let Ok(meta) = entry.metadata() {
-                if meta.is_file() {
+    // Iterative directory walk — avoids stack overflow on deep trees
+    let mut stack = vec![cache_dir.clone()];
+    while let Some(dir) = stack.pop() {
+        if let Ok(entries) = fs::read_dir(&dir) {
+            for entry in entries.flatten() {
+                let path = entry.path();
+                if path.is_dir() {
+                    stack.push(path);
+                } else if let Ok(meta) = entry.metadata() {
                     total_size += meta.len();
                     count += 1;
                 }
@@ -185,45 +205,43 @@ pub fn get_cache_stats() -> CacheStats {
     }
 
     let drive = if cache_dir.starts_with("D:\\") {
-        "D: (High-Capacity NVMe/SSD)".to_string()
+        "D: (High-Capacity NVMe/SSD)"
     } else {
-        "C: (System Drive)".to_string()
+        "C: (System Drive)"
     };
 
     CacheStats {
         location: cache_dir,
         total_size_bytes: total_size,
         file_count: count,
-        drive,
+        drive: drive.to_string(),
     }
-}
-
-/// Recursively collect all files in a directory.
-fn walk_dir(dir: &Path) -> Result<Vec<PathBuf>> {
-    let mut files = Vec::new();
-    if dir.is_dir() {
-        for entry in fs::read_dir(dir)? {
-            let entry = entry?;
-            let path = entry.path();
-            if path.is_dir() {
-                files.extend(walk_dir(&path)?);
-            } else {
-                files.push(path);
-            }
-        }
-    }
-    Ok(files)
 }
 
 /// Purge the global cache and return freed bytes.
+/// Time: O(n) where n = cached files (stat + delete)
 pub fn purge_cache() -> Result<u64> {
-    let stats = get_cache_stats();
     let cache_dir = get_cache_dir();
+    // Calculate size before deleting to avoid double-walk
+    let mut freed = 0u64;
+    let mut stack = vec![cache_dir.clone()];
+    while let Some(dir) = stack.pop() {
+        if let Ok(entries) = fs::read_dir(&dir) {
+            for entry in entries.flatten() {
+                let path = entry.path();
+                if path.is_dir() {
+                    stack.push(path);
+                } else if let Ok(meta) = entry.metadata() {
+                    freed += meta.len();
+                }
+            }
+        }
+    }
     if cache_dir.exists() {
         fs::remove_dir_all(&cache_dir)?;
         fs::create_dir_all(&cache_dir)?;
     }
-    Ok(stats.total_size_bytes)
+    Ok(freed)
 }
 
 /// CLI command execution for cache management.
@@ -232,7 +250,7 @@ pub fn execute_cache(action: Option<&str>) -> Result<()> {
         "stats" | "info" => {
             let stats = get_cache_stats();
             println!();
-            println!("  {}", "⚡ CPM Flight Global Cache Engine".bold().cyan());
+            println!("  {}", "⚡ CPM Global Cache Engine".bold().cyan());
             println!("  {}", "═".repeat(45).dimmed());
             println!("  Storage Drive:  {}", stats.drive.green().bold());
             println!("  Location:       {}", stats.location.display().to_string().yellow());

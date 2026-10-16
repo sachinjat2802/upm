@@ -132,7 +132,7 @@ pub enum Commands {
         #[arg(short = 'n', long, value_name = "NAME")]
         name: Option<String>,
     },
-    /// ▶️ Run a script across ecosystems or from upm.toml (GuPM Engine)
+    /// ▶️ Run a script across ecosystems or from upm.toml (Task Engine)
     #[command(next_help_heading = "Core Commands")]
     Run {
         script: Option<String>,
@@ -141,7 +141,7 @@ pub enum Commands {
         #[arg(last = true)]
         args: Vec<String>,
     },
-    /// 🔨 Execute local project binary or package tool (GuPM Engine)
+    /// 🔨 Execute local project binary or package tool
     #[command(next_help_heading = "Core Commands", visible_alias = "x")]
     Exec {
         tool: String,
@@ -150,7 +150,7 @@ pub enum Commands {
         #[arg(last = true)]
         args: Vec<String>,
     },
-    /// 🔒 Generate or verify deterministic cpm.lock lockfile (Flight CAS Engine)
+    /// 🔒 Generate or verify deterministic cpm.lock lockfile (CAS Engine)
     #[command(next_help_heading = "Core Commands")]
     Lock {
         #[arg(default_value = ".")]
@@ -160,7 +160,7 @@ pub enum Commands {
         #[arg(short = 'u', long)]
         update: bool,
     },
-    /// 🔍 Scan source code to guess undeclared dependencies (UPM Engine)
+    /// 🔍 Scan source code to guess undeclared dependencies
     #[command(next_help_heading = "Core Commands")]
     Guess {
         #[arg(default_value = ".")]
@@ -173,7 +173,7 @@ pub enum Commands {
     Info {
         package: String,
     },
-    /// 🤖 Universal AI configuration & skills manager (OpenPackage Engine)
+    /// 🤖 Universal AI configuration & skills manager
     #[command(next_help_heading = "AI & Agentic Operations")]
     Ai {
         #[arg(default_value = ".")]
@@ -184,7 +184,7 @@ pub enum Commands {
         #[arg(short = 'r', long)]
         rule: Option<String>,
     },
-    /// 🔌 Universal Model Context Protocol manager (mcpman Engine)
+    /// 🔌 Universal Model Context Protocol manager
     #[command(next_help_heading = "AI & Agentic Operations")]
     Mcp {
         #[arg(default_value = ".")]
@@ -441,6 +441,49 @@ pub enum Commands {
         #[arg(short = 'o', long)]
         out: Option<String>,
     },
+    /// 🧪 Run test suites across all detected ecosystems (Multi-Ecosystem Test Runner)
+    #[command(next_help_heading = "Core Commands", visible_alias = "t")]
+    Test {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(short = 'f', long)]
+        filter: Option<String>,
+        #[arg(short = 'w', long)]
+        watch: bool,
+        #[arg(short = 'c', long)]
+        coverage: bool,
+    },
+    /// 🔨 Build projects and bundles across all detected ecosystems
+    #[command(next_help_heading = "Core Commands", visible_alias = "b")]
+    Build {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(short = 'r', long)]
+        release: bool,
+        #[arg(short = 't', long)]
+        target: Option<String>,
+    },
+    /// 🚀 Deploy application to Docker, Vercel, Netlify, Cloud Run, or AWS
+    #[command(next_help_heading = "DevOps & Cloud Native")]
+    Deploy {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(short = 'p', long)]
+        provider: Option<String>,
+        #[arg(short = 'e', long)]
+        env: Option<String>,
+        #[arg(long)]
+        dry_run: bool,
+    },
+    /// 🔑 Manage multi-environment variables and secrets (.env)
+    #[command(next_help_heading = "DevOps & Cloud Native")]
+    Env {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        action: Option<String>,
+        key: Option<String>,
+        value: Option<String>,
+    },
 }
 
 #[derive(Subcommand)]
@@ -527,6 +570,10 @@ pub async fn run_cli_app(_bin_name: &str) -> anyhow::Result<()> {
         Commands::Trace { path, out } => execute_trace(&path, out.as_deref())?,
         Commands::Graph { path, out } => execute_graph(&path, out.as_deref())?,
         Commands::Completion { path, shell } => execute_completion(&path, shell.as_deref())?,
+        Commands::Test { path, filter, watch, coverage } => execute_test(&path, filter.as_deref(), watch, coverage)?,
+        Commands::Build { path, release, target } => execute_build(&path, release, target.as_deref())?,
+        Commands::Deploy { path, provider, env, dry_run } => execute_deploy(&path, provider.as_deref(), env.as_deref(), dry_run)?,
+        Commands::Env { path, action, key, value } => execute_env(&path, action.as_deref(), key.as_deref(), value.as_deref())?,
         Commands::Bridge { sub } => match sub {
             BridgeSubcommands::Call { target, args_json } => {
                 execute_bridge_call(&target, args_json.as_deref()).await?;
