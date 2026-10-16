@@ -1,0 +1,150 @@
+use std::fs;
+use tempfile::tempdir;
+use upm::cli::{
+    execute_agent, execute_ai, execute_create, execute_drive, execute_guess, execute_info,
+    execute_lock, execute_mcp, execute_run_script,
+};
+
+#[test]
+fn test_agentic_app_scaffold() {
+    let tmp = tempdir().expect("tempdir failed");
+    let app_dir = tmp.path().join("my-agent");
+
+    // Scaffold agentic application
+    let res = execute_create(&app_dir, Some("agentic"), Some("my-agent"));
+    assert!(res.is_ok(), "execute_create failed: {:?}", res);
+
+    assert!(app_dir.join("upm.toml").exists(), "upm.toml missing");
+    assert!(app_dir.join("server.py").exists(), "server.py missing");
+    assert!(app_dir.join("mcp.json").exists(), "mcp.json missing");
+    assert!(app_dir.join("CLAUDE.md").exists(), "CLAUDE.md missing");
+    assert!(app_dir.join(".cursorrules").exists(), ".cursorrules missing");
+}
+
+#[test]
+fn test_deterministic_lockfile_lifecycle() {
+    let tmp = tempdir().expect("tempdir failed");
+    let app_dir = tmp.path();
+
+    // Scaffold app first
+    execute_create(app_dir, Some("agentic"), Some("lock-test")).unwrap();
+
+    // Generate cpm.lock
+    let res = execute_lock(app_dir, false, false);
+    assert!(res.is_ok(), "cpm lock generation failed: {:?}", res);
+
+    let lock_file = app_dir.join("cpm.lock");
+    assert!(lock_file.exists(), "cpm.lock was not generated");
+
+    let lock_content = fs::read_to_string(&lock_file).unwrap();
+    assert!(lock_content.contains("lockfile_version = 1"));
+    assert!(lock_content.contains("sha256-"));
+
+    // Verify cpm.lock
+    let verify_res = execute_lock(app_dir, true, false);
+    assert!(verify_res.is_ok(), "cpm lock --verify failed: {:?}", verify_res);
+}
+
+#[test]
+fn test_replit_upm_guess_dependencies() {
+    let tmp = tempdir().expect("tempdir failed");
+    let app_dir = tmp.path();
+
+    // Create a Python source file importing third-party libraries
+    let py_file = app_dir.join("main.py");
+    fs::write(&py_file, "import requests\nfrom fastapi import FastAPI\nimport os\n").unwrap();
+
+    // Guess dependencies
+    let res = execute_guess(app_dir, false);
+    assert!(res.is_ok(), "execute_guess failed: {:?}", res);
+}
+
+#[test]
+fn test_openpackage_ai_rules_sync() {
+    let tmp = tempdir().expect("tempdir failed");
+    let app_dir = tmp.path();
+
+    // Write custom CLAUDE.md
+    fs::write(app_dir.join("CLAUDE.md"), "# Project Standards\n- Keep code clean and modular.\n").unwrap();
+
+    // Run AI sync
+    let sync_res = execute_ai(app_dir, Some("sync"), None, None);
+    assert!(sync_res.is_ok(), "execute_ai sync failed: {:?}", sync_res);
+
+    assert!(app_dir.join(".cursorrules").exists(), ".cursorrules should be generated");
+    assert!(app_dir.join(".windsurfrules").exists(), ".windsurfrules should be generated");
+    assert!(app_dir.join(".clinerules").exists(), ".clinerules should be generated");
+
+    let cursor_content = fs::read_to_string(app_dir.join(".cursorrules")).unwrap();
+    assert!(cursor_content.contains("Keep code clean and modular"));
+}
+
+#[test]
+fn test_mcpman_universal_mcp_manager() {
+    let tmp = tempdir().expect("tempdir failed");
+    let app_dir = tmp.path();
+
+    // Add an MCP server
+    let add_res = execute_mcp(
+        app_dir,
+        Some("add"),
+        Some("weather-service"),
+        Some("python"),
+        &["weather.py".to_string()],
+    );
+    assert!(add_res.is_ok(), "execute_mcp add failed: {:?}", add_res);
+
+    let mcp_json = app_dir.join("mcp.json");
+    assert!(mcp_json.exists(), "mcp.json should exist");
+
+    let content = fs::read_to_string(mcp_json).unwrap();
+    assert!(content.contains("weather-service"));
+
+    // List MCP servers
+    let list_res = execute_mcp(app_dir, Some("list"), None, None, &[]);
+    assert!(list_res.is_ok(), "execute_mcp list failed: {:?}", list_res);
+}
+
+#[test]
+fn test_agent_context_generation() {
+    let tmp = tempdir().expect("tempdir failed");
+    let app_dir = tmp.path();
+
+    execute_create(app_dir, Some("agentic"), Some("agent-ctx-test")).unwrap();
+
+    // Generate human context
+    let ctx_res = execute_agent(app_dir, Some("context"), false);
+    assert!(ctx_res.is_ok(), "execute_agent context failed: {:?}", ctx_res);
+
+    // Generate JSON context
+    let json_res = execute_agent(app_dir, Some("context"), true);
+    assert!(json_res.is_ok(), "execute_agent context --json failed: {:?}", json_res);
+}
+
+#[test]
+fn test_high_capacity_drive_status() {
+    let tmp = tempdir().expect("tempdir failed");
+    let res = execute_drive(tmp.path(), Some("status"));
+    assert!(res.is_ok(), "execute_drive status failed: {:?}", res);
+}
+
+#[test]
+fn test_package_info_query() {
+    let res = execute_info("pip:fastapi");
+    assert!(res.is_ok(), "execute_info pip:fastapi failed: {:?}", res);
+
+    let res2 = execute_info("npm:express");
+    assert!(res2.is_ok(), "execute_info npm:express failed: {:?}", res2);
+}
+
+#[test]
+fn test_gupm_script_and_tool_runner() {
+    let tmp = tempdir().expect("tempdir failed");
+    let app_dir = tmp.path();
+
+    execute_create(app_dir, Some("agentic"), Some("script-test")).unwrap();
+
+    // List available scripts
+    let list_res = execute_run_script(app_dir, None, &[]);
+    assert!(list_res.is_ok(), "execute_run_script list failed: {:?}", list_res);
+}

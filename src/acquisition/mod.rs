@@ -5,11 +5,13 @@
 //! (`install`, `add`, `update`, `outdated`, `audit`, `run`).
 
 pub mod adapter;
+pub mod cache;
 pub mod manifest;
 pub mod runner;
 pub mod scoring;
 
 pub use adapter::{AdapterRegistry, EcosystemAdapter};
+pub use cache::*;
 pub use manifest::UpmManifest;
 pub use runner::AcquisitionRunner;
 pub use scoring::{DetectionEngine, DetectionResult, EcosystemScore};

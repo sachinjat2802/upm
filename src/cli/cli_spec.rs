@@ -122,12 +122,94 @@ pub enum Commands {
         #[arg(short = 'f', long)]
         filter: Option<String>,
     },
-    /// ▶️ Run a script across ecosystems
-    #[command(next_help_heading = "Core Commands")]
-    Run {
-        script: String,
+    /// 🚀 Rapidly scaffold a production agentic AI or polyglot application
+    #[command(next_help_heading = "Core Commands", visible_alias = "new")]
+    Create {
         #[arg(default_value = ".")]
         path: PathBuf,
+        #[arg(short = 't', long, value_name = "TEMPLATE")]
+        template: Option<String>,
+        #[arg(short = 'n', long, value_name = "NAME")]
+        name: Option<String>,
+    },
+    /// ▶️ Run a script across ecosystems or from upm.toml (GuPM Engine)
+    #[command(next_help_heading = "Core Commands")]
+    Run {
+        script: Option<String>,
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(last = true)]
+        args: Vec<String>,
+    },
+    /// 🔨 Execute local project binary or package tool (GuPM Engine)
+    #[command(next_help_heading = "Core Commands", visible_alias = "x")]
+    Exec {
+        tool: String,
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(last = true)]
+        args: Vec<String>,
+    },
+    /// 🔒 Generate or verify deterministic cpm.lock lockfile (Flight CAS Engine)
+    #[command(next_help_heading = "Core Commands")]
+    Lock {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(short = 'v', long)]
+        verify: bool,
+        #[arg(short = 'u', long)]
+        update: bool,
+    },
+    /// 🔍 Scan source code to guess undeclared dependencies (UPM Engine)
+    #[command(next_help_heading = "Core Commands")]
+    Guess {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(short = 'a', long)]
+        apply: bool,
+    },
+    /// ℹ️ Display package metadata and registry details
+    #[command(next_help_heading = "Core Commands")]
+    Info {
+        package: String,
+    },
+    /// 🤖 Universal AI configuration & skills manager (OpenPackage Engine)
+    #[command(next_help_heading = "AI & Agentic Operations")]
+    Ai {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        action: Option<String>,
+        #[arg(short = 't', long)]
+        target: Option<String>,
+        #[arg(short = 'r', long)]
+        rule: Option<String>,
+    },
+    /// 🔌 Universal Model Context Protocol manager (mcpman Engine)
+    #[command(next_help_heading = "AI & Agentic Operations")]
+    Mcp {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        action: Option<String>,
+        #[arg(short = 'n', long)]
+        name: Option<String>,
+        #[arg(short = 'c', long)]
+        cmd: Option<String>,
+        #[arg(last = true)]
+        args: Vec<String>,
+    },
+    /// 🧠 Token-optimized workspace context and interface for AI coding agents
+    #[command(next_help_heading = "AI & Agentic Operations")]
+    Agent {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        action: Option<String>,
+    },
+    /// 💾 High-capacity storage allocation & environment manager
+    #[command(next_help_heading = "Diagnostics & Performance")]
+    Drive {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        action: Option<String>,
     },
     /// 📊 Show project status and ecosystem overview
     #[command(next_help_heading = "Core Commands")]
@@ -401,7 +483,16 @@ pub async fn run_cli_app(_bin_name: &str) -> anyhow::Result<()> {
         Commands::Update { path, dry_run, parallel, filter } => execute_update(&path, dry_run, parallel, filter.as_deref())?,
         Commands::Outdated { path, filter } => execute_outdated(&path, filter.as_deref())?,
         Commands::Audit { path, filter } => execute_audit(&path, filter.as_deref())?,
-        Commands::Run { script, path } => execute_run(&path, &script)?,
+        Commands::Create { path, template, name } => execute_create(&path, template.as_deref(), name.as_deref())?,
+        Commands::Run { script, path, args } => execute_run_script(&path, script.as_deref(), &args)?,
+        Commands::Exec { tool, path, args } => execute_tool(&path, &tool, &args)?,
+        Commands::Lock { path, verify, update } => execute_lock(&path, verify, update)?,
+        Commands::Guess { path, apply } => execute_guess(&path, apply)?,
+        Commands::Info { package } => execute_info(&package)?,
+        Commands::Ai { path, action, target, rule } => execute_ai(&path, action.as_deref(), target.as_deref(), rule.as_deref())?,
+        Commands::Mcp { path, action, name, cmd, args } => execute_mcp(&path, action.as_deref(), name.as_deref(), cmd.as_deref(), &args)?,
+        Commands::Agent { path, action } => execute_agent(&path, action.as_deref(), cli.json)?,
+        Commands::Drive { path, action } => execute_drive(&path, action.as_deref())?,
         Commands::Status { path } => execute_status(&path)?,
         Commands::Migrate { path } => execute_migrate(&path)?,
         Commands::List { path, filter } => execute_list(&path, filter.as_deref())?,

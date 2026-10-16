@@ -8,6 +8,8 @@ pub struct ProjectConfig {
     pub name: String,
     pub version: String,
     pub primary_language: Option<String>,
+    #[serde(default)]
+    pub authors: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -18,11 +20,16 @@ pub struct TransportConfig {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UpmManifest {
     pub project: ProjectConfig,
+    #[serde(default)]
     pub ecosystems: Vec<String>,
     #[serde(default)]
     pub foreign_dependencies: BTreeMap<String, String>,
     #[serde(default)]
     pub transports: Option<TransportConfig>,
+    #[serde(default)]
+    pub scripts: BTreeMap<String, String>,
+    #[serde(default)]
+    pub env: BTreeMap<String, String>,
 }
 
 impl UpmManifest {
@@ -32,12 +39,15 @@ impl UpmManifest {
                 name: name.to_string(),
                 version: version.to_string(),
                 primary_language: primary_lang.map(|s| s.to_string()),
+                authors: Vec::new(),
             },
             ecosystems,
             foreign_dependencies: BTreeMap::new(),
             transports: Some(TransportConfig {
                 default_tier: "rpc".to_string(),
             }),
+            scripts: BTreeMap::new(),
+            env: BTreeMap::new(),
         }
     }
 

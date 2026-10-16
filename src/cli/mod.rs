@@ -38,6 +38,15 @@ pub mod list_cmd;
 pub mod quickstart_cmd;
 pub mod why_cmd;
 pub mod trace_cmd;
+pub mod run_cmd;
+pub mod lock_cmd;
+pub mod guess_cmd;
+pub mod info_cmd;
+pub mod drive_cmd;
+pub mod ai_cmd;
+pub mod mcp_cmd;
+pub mod create_cmd;
+pub mod agent_cmd;
 
 use crate::acquisition::{AcquisitionRunner, AdapterRegistry, DetectionEngine, UpmManifest};
 use colored::Colorize;
@@ -82,6 +91,15 @@ pub use secrets_cmd::execute_scan_secrets;
 pub use sig_cmd::execute_verify_sig;
 pub use stubs_cmd::execute_generate_stubs;
 pub use trace_cmd::execute_trace;
+pub use run_cmd::{execute_run_script, execute_tool};
+pub use lock_cmd::execute_lock;
+pub use guess_cmd::execute_guess;
+pub use info_cmd::execute_info;
+pub use drive_cmd::execute_drive;
+pub use ai_cmd::execute_ai;
+pub use mcp_cmd::execute_mcp;
+pub use create_cmd::execute_create;
+pub use agent_cmd::execute_agent;
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 
@@ -438,61 +456,9 @@ pub fn execute_audit(path: &Path, filter: Option<&str>) -> anyhow::Result<()> {
 
 // ─── run ──────────────────────────────────────────────────────────────────────
 
-/// Run a named script across all detected ecosystems.
+/// Run a named script across all detected ecosystems or from `upm.toml`.
 pub fn execute_run(path: &Path, script: &str) -> anyhow::Result<()> {
-    let result = detect_workspace(path);
-
-    if result.detected_ecosystems.is_empty() {
-        println!();
-        println!("  {} No ecosystems detected. Nothing to run.", "!".bold().yellow());
-        println!("  {} Run {} first.", "›".dimmed(), "cpm init".bold().cyan());
-        println!();
-        return Ok(());
-    }
-
-    println!();
-    println!(
-        "  {} Running '{}' across {} ecosystem(s)...",
-        "▶".bold().cyan(),
-        script.bold().magenta(),
-        result.detected_ecosystems.len().to_string().bold()
-    );
-    println!();
-
-    for eco in &result.detected_ecosystems {
-        let mut cmd = eco.run_cmd.clone();
-        cmd.push(script.to_string());
-
-        println!(
-            "  {} [{}] {}",
-            "›".bold().cyan(),
-            eco.display_name.bold(),
-            cmd.join(" ").yellow()
-        );
-
-        let program = &cmd[0];
-        let args = &cmd[1..];
-        match Command::new(program).args(args).current_dir(path).status() {
-            Ok(status) if status.success() => {
-                println!("  {} [{}] completed successfully.", "✔".green(), eco.display_name);
-            }
-            Ok(status) => {
-                println!("  {} [{}] exited with {}", "!".yellow(), eco.display_name, status);
-            }
-            Err(e) => {
-                println!(
-                    "  {} [{}] '{}' not found: {}",
-                    "⚠".yellow().dimmed(),
-                    eco.display_name.dimmed(),
-                    program.dimmed(),
-                    e.to_string().dimmed()
-                );
-            }
-        }
-        println!();
-    }
-
-    Ok(())
+    execute_run_script(path, Some(script), &[])
 }
 
 // ─── status ───────────────────────────────────────────────────────────────────
