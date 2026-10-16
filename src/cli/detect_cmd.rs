@@ -5,6 +5,7 @@
 /// and which signals contributed to each score.
 
 use crate::acquisition::{AdapterRegistry, DetectionEngine};
+use super::lang_icon;
 use colored::Colorize;
 use std::path::Path;
 
@@ -51,19 +52,7 @@ pub fn execute_detect(path: &Path) -> anyhow::Result<()> {
             "·".dimmed()
         };
 
-        let lang_icon = match score.adapter.language.as_str() {
-            "javascript" => "📦",
-            "python" => "🐍",
-            "rust" => "🦀",
-            "go" => "🐹",
-            "java" => "☕",
-            "php" => "🐘",
-            "ruby" => "💎",
-            "csharp" => "🔷",
-            "dart" => "🎯",
-            "elixir" => "💧",
-            _ => "📦",
-        };
+        let li = lang_icon(&score.adapter.language);
 
         let score_display = if score.winner {
             score.total_score.to_string().green().bold()
@@ -84,7 +73,7 @@ pub fn execute_detect(path: &Path) -> anyhow::Result<()> {
             "  {} {:<18} {} {:<9} {:>6}  {}",
             icon,
             score.adapter.display_name,
-            lang_icon,
+            li,
             score.adapter.language,
             score_display,
             signals_str.dimmed()
@@ -101,14 +90,14 @@ pub fn execute_detect(path: &Path) -> anyhow::Result<()> {
     } else {
         println!("  {} {}:", "✔".green().bold(), "Active ecosystem(s)".bold());
         for eco in &result.detected_ecosystems {
-            let icon = match eco.language.as_str() {
-                "javascript" => "📦",
-                "python" => "🐍",
-                "rust" => "🦀",
-                "go" => "🐹",
-                "java" => "☕",
-                _ => "📦",
+            let icon = lang_icon(&eco.language);
+            let score_info = result.scores.iter().find(|s| s.adapter.name == eco.name);
+            let reason = if let Some(si) = score_info {
+                si.details.iter().map(|d| format!("+{} {}", d.weight, d.signal)).collect::<Vec<_>>().join(", ")
+            } else {
+                "Highest confidence score".to_string()
             };
+
             println!(
                 "    {} {} {} → {}",
                 icon,
@@ -116,6 +105,7 @@ pub fn execute_detect(path: &Path) -> anyhow::Result<()> {
                 format!("({})", eco.manifest_file).dimmed(),
                 eco.install_cmd.join(" ").cyan()
             );
+            println!("      └── {}", format!("Winning rationale: {} ({})", reason, eco.install_cmd.join(" ")).dimmed());
         }
     }
     println!();

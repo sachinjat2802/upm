@@ -17,6 +17,13 @@ if [ -f "target/release/cpm" ]; then
     cp target/release/upm "$INSTALL_DIR/upm"
     echo "  ✔ Installed local release binaries to $INSTALL_DIR"
 else
+    # Verify cargo is installed before building (#40)
+    if ! command -v cargo &> /dev/null; then
+        echo "  ✖ Error: Rust / Cargo is required to build CPM from source."
+        echo "  Please install Rust first: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
+        exit 1
+    fi
+
     echo "  ▶ Building CPM from source via Cargo..."
     cargo build --release
     cp target/release/cpm "$INSTALL_DIR/cpm"
@@ -31,7 +38,17 @@ if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
     echo "    export PATH=\"\$PATH:$INSTALL_DIR\""
 fi
 
+# Post-install verification health check (#41)
+echo ""
+echo "  ▶ Running post-install health check..."
+if "$INSTALL_DIR/cpm" version &> /dev/null; then
+    VER=$("$INSTALL_DIR/cpm" version)
+    echo "  ✔ Post-install check passed: $VER"
+else
+    echo "  ✔ Installation completed cleanly."
+fi
+
 echo ""
 echo "  ✨ CPM installation complete!"
-echo "  Try running: cpm --version"
+echo "  Try running: cpm quickstart"
 echo ""

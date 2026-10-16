@@ -51,6 +51,7 @@ fn test_custom_adapter_registration() {
         outdated_cmd: vec!["zig".into(), "build".into()],
         audit_cmd: vec!["zig".into(), "build".into()],
         run_cmd: vec!["zig".into(), "run".into()],
+        remove_cmd: vec!["zig".into(), "fetch".into()],
     };
 
     registry.register(custom_zig);

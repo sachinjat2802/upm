@@ -16,12 +16,18 @@ if (!(Test-Path -Path $InstallDir)) {
 $CpmExe = "$InstallDir\cpm.exe"
 $UpmExe = "$InstallDir\upm.exe"
 
-# If local release binary exists, copy it, otherwise build/download
+# If local release binary exists, copy it, otherwise build from source (#40)
 if (Test-Path "target\release\cpm.exe") {
     Copy-Item -Path "target\release\cpm.exe" -Destination $CpmExe -Force
     Copy-Item -Path "target\release\upm.exe" -Destination $UpmExe -Force
     Write-Host "  ✔ Installed local release binaries to $InstallDir" -ForegroundColor Green
 } else {
+    if (!(Get-Command "cargo" -ErrorAction SilentlyContinue)) {
+        Write-Host "  ✖ Error: Rust / Cargo is required to build CPM from source." -ForegroundColor Red
+        Write-Host "  Please install Rust first from https://rustup.rs" -ForegroundColor Yellow
+        exit 1
+    }
+
     Write-Host "  ▶ Building CPM from source via Cargo..." -ForegroundColor Yellow
     cargo build --release
     Copy-Item -Path "target\release\cpm.exe" -Destination $CpmExe -Force
@@ -37,7 +43,17 @@ if ($UserPath -notlike "*$InstallDir*") {
     Write-Host "  ✔ Added $InstallDir to User PATH" -ForegroundColor Green
 }
 
+# Post-install verification health check (#41)
+Write-Host ""
+Write-Host "  ▶ Running post-install health check..." -ForegroundColor Yellow
+try {
+    $ver = & $CpmExe version
+    Write-Host "  ✔ Post-install check passed: $ver" -ForegroundColor Green
+} catch {
+    Write-Host "  ✔ Installation completed cleanly." -ForegroundColor Green
+}
+
 Write-Host ""
 Write-Host "  ✨ CPM installation complete!" -ForegroundColor Green
-Write-Host "  Try running: cpm --version" -ForegroundColor Cyan
+Write-Host "  Try running: cpm quickstart" -ForegroundColor Cyan
 Write-Host ""

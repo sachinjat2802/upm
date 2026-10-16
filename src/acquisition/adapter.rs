@@ -51,6 +51,8 @@ pub struct EcosystemAdapter {
     pub audit_cmd: Vec<String>,
     /// CLI command to run a named script.
     pub run_cmd: Vec<String>,
+    /// CLI command to remove a single dependency.
+    pub remove_cmd: Vec<String>,
 }
 
 /// Registry of all known ecosystem adapters.
@@ -88,9 +90,11 @@ impl AdapterRegistry {
         self.adapters.get(name)
     }
 
-    /// Return all registered adapters.
+    /// Return all registered adapters in deterministic order (#57).
     pub fn all(&self) -> Vec<&EcosystemAdapter> {
-        self.adapters.values().collect()
+        let mut list: Vec<&EcosystemAdapter> = self.adapters.values().collect();
+        list.sort_by(|a, b| a.name.cmp(&b.name));
+        list
     }
 
     fn load_builtin_adapters(&mut self) {
@@ -112,6 +116,7 @@ impl AdapterRegistry {
                 outdated_cmd: vec!["pnpm".into(), "outdated".into()],
                 audit_cmd: vec!["pnpm".into(), "audit".into()],
                 run_cmd: vec!["pnpm".into(), "run".into()],
+                remove_cmd: vec!["pnpm".into(), "remove".into()],
             },
             EcosystemAdapter {
                 name: "npm".into(),
@@ -129,6 +134,7 @@ impl AdapterRegistry {
                 outdated_cmd: vec!["npm".into(), "outdated".into()],
                 audit_cmd: vec!["npm".into(), "audit".into()],
                 run_cmd: vec!["npm".into(), "run".into()],
+                remove_cmd: vec!["npm".into(), "uninstall".into()],
             },
             EcosystemAdapter {
                 name: "yarn".into(),
@@ -146,6 +152,7 @@ impl AdapterRegistry {
                 outdated_cmd: vec!["yarn".into(), "outdated".into()],
                 audit_cmd: vec!["yarn".into(), "audit".into()],
                 run_cmd: vec!["yarn".into(), "run".into()],
+                remove_cmd: vec!["yarn".into(), "remove".into()],
             },
             EcosystemAdapter {
                 name: "bun".into(),
@@ -163,6 +170,7 @@ impl AdapterRegistry {
                 outdated_cmd: vec!["bun".into(), "outdated".into()],
                 audit_cmd: vec!["bun".into(), "pm".into(), "audit".into()],
                 run_cmd: vec!["bun".into(), "run".into()],
+                remove_cmd: vec!["bun".into(), "remove".into()],
             },
 
             // ── Python ────────────────────────────────────────────────────
@@ -182,6 +190,7 @@ impl AdapterRegistry {
                 outdated_cmd: vec!["uv".into(), "tree".into()],
                 audit_cmd: vec!["uv".into(), "pip".into(), "audit".into()],
                 run_cmd: vec!["uv".into(), "run".into()],
+                remove_cmd: vec!["uv".into(), "remove".into()],
             },
             EcosystemAdapter {
                 name: "poetry".into(),
@@ -199,6 +208,7 @@ impl AdapterRegistry {
                 outdated_cmd: vec!["poetry".into(), "show".into(), "--outdated".into()],
                 audit_cmd: vec!["poetry".into(), "run".into(), "pip-audit".into()],
                 run_cmd: vec!["poetry".into(), "run".into()],
+                remove_cmd: vec!["poetry".into(), "remove".into()],
             },
             EcosystemAdapter {
                 name: "pip".into(),
@@ -216,6 +226,7 @@ impl AdapterRegistry {
                 outdated_cmd: vec!["pip".into(), "list".into(), "--outdated".into()],
                 audit_cmd: vec!["pip-audit".into()],
                 run_cmd: vec!["python".into()],
+                remove_cmd: vec!["pip".into(), "uninstall".into(), "-y".into()],
             },
 
             // ── Rust ──────────────────────────────────────────────────────
@@ -235,6 +246,7 @@ impl AdapterRegistry {
                 outdated_cmd: vec!["cargo".into(), "outdated".into()],
                 audit_cmd: vec!["cargo".into(), "audit".into()],
                 run_cmd: vec!["cargo".into(), "run".into(), "--bin".into()],
+                remove_cmd: vec!["cargo".into(), "remove".into()],
             },
 
             // ── Go ────────────────────────────────────────────────────────
@@ -254,6 +266,7 @@ impl AdapterRegistry {
                 outdated_cmd: vec!["go".into(), "list".into(), "-m".into(), "-u".into(), "all".into()],
                 audit_cmd: vec!["govulncheck".into(), "./...".into()],
                 run_cmd: vec!["go".into(), "run".into()],
+                remove_cmd: vec!["go".into(), "get".into()],
             },
 
             // ── JVM ───────────────────────────────────────────────────────
@@ -273,6 +286,7 @@ impl AdapterRegistry {
                 outdated_cmd: vec!["mvn".into(), "versions:display-dependency-updates".into()],
                 audit_cmd: vec!["mvn".into(), "org.owasp:dependency-check-maven:check".into()],
                 run_cmd: vec!["mvn".into(), "exec:java".into()],
+                remove_cmd: vec!["mvn".into(), "dependency:purge-local-repository".into()],
             },
             EcosystemAdapter {
                 name: "gradle".into(),
@@ -290,6 +304,7 @@ impl AdapterRegistry {
                 outdated_cmd: vec!["gradle".into(), "dependencyUpdates".into()],
                 audit_cmd: vec!["gradle".into(), "check".into()],
                 run_cmd: vec!["gradle".into(), "run".into()],
+                remove_cmd: vec!["gradle".into(), "removeDependency".into()],
             },
 
             // ── PHP ───────────────────────────────────────────────────────
@@ -309,6 +324,7 @@ impl AdapterRegistry {
                 outdated_cmd: vec!["composer".into(), "outdated".into()],
                 audit_cmd: vec!["composer".into(), "audit".into()],
                 run_cmd: vec!["composer".into(), "run-script".into()],
+                remove_cmd: vec!["composer".into(), "remove".into()],
             },
 
             // ── Ruby ──────────────────────────────────────────────────────
@@ -328,6 +344,7 @@ impl AdapterRegistry {
                 outdated_cmd: vec!["bundle".into(), "outdated".into()],
                 audit_cmd: vec!["bundle".into(), "exec".into(), "bundle-audit".into()],
                 run_cmd: vec!["bundle".into(), "exec".into()],
+                remove_cmd: vec!["bundle".into(), "remove".into()],
             },
 
             // ── .NET ──────────────────────────────────────────────────────
@@ -347,6 +364,7 @@ impl AdapterRegistry {
                 outdated_cmd: vec!["dotnet".into(), "list".into(), "package".into(), "--outdated".into()],
                 audit_cmd: vec!["dotnet".into(), "list".into(), "package".into(), "--vulnerable".into()],
                 run_cmd: vec!["dotnet".into(), "run".into()],
+                remove_cmd: vec!["dotnet".into(), "remove".into(), "package".into()],
             },
 
             // ── Dart / Flutter ────────────────────────────────────────────
@@ -366,6 +384,7 @@ impl AdapterRegistry {
                 outdated_cmd: vec!["dart".into(), "pub".into(), "outdated".into()],
                 audit_cmd: vec!["dart".into(), "pub".into(), "deps".into()],
                 run_cmd: vec!["dart".into(), "run".into()],
+                remove_cmd: vec!["dart".into(), "pub".into(), "remove".into()],
             },
 
             // ── Elixir ────────────────────────────────────────────────────
@@ -385,6 +404,7 @@ impl AdapterRegistry {
                 outdated_cmd: vec!["mix".into(), "hex.outdated".into()],
                 audit_cmd: vec!["mix".into(), "hex.audit".into()],
                 run_cmd: vec!["mix".into(), "run".into()],
+                remove_cmd: vec!["mix".into(), "deps.clean".into()],
             },
         ];
 

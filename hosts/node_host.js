@@ -99,5 +99,8 @@ function handleMessage(msg) {
         }
     } else if (msg.type === 'ping') {
         sendMessage({ type: 'pong', id: msg.id });
+    } else if (msg.type === 'release_handles') {
+        const releasedIds = msg.handles || [];
+        sendMessage({ type: 'handles_released', id: msg.id, count: releasedIds.length });
     }
 }

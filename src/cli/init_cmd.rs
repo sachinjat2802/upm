@@ -24,7 +24,7 @@ const SUPPORTED_LANGUAGES: &[(&str, &str, &str)] = &[
 ];
 
 /// Prompt the user with a question and return their trimmed input.
-/// If `default` is provided and the user presses Enter, return the default.
+/// If `default` is provided and the user presses Enter or stdin is non-TTY/EOF, return the default.
 fn prompt(question: &str, default: Option<&str>) -> String {
     if let Some(def) = default {
         print!("  {} {} [{}]: ", "?".bold().green(), question, def.dimmed());
@@ -34,9 +34,12 @@ fn prompt(question: &str, default: Option<&str>) -> String {
     io::stdout().flush().unwrap_or(());
 
     let mut input = String::new();
-    io::stdin().read_line(&mut input).unwrap_or(0);
-    let trimmed = input.trim().to_string();
+    let bytes_read = io::stdin().read_line(&mut input).unwrap_or(0);
+    if bytes_read == 0 {
+        return default.unwrap_or("").to_string();
+    }
 
+    let trimmed = input.trim().to_string();
     if trimmed.is_empty() {
         default.unwrap_or("").to_string()
     } else {
@@ -60,9 +63,12 @@ fn prompt_select(question: &str, options: &[(&str, &str, &str)], default_idx: us
     io::stdout().flush().unwrap_or(());
 
     let mut input = String::new();
-    io::stdin().read_line(&mut input).unwrap_or(0);
-    let trimmed = input.trim();
+    let bytes_read = io::stdin().read_line(&mut input).unwrap_or(0);
+    if bytes_read == 0 {
+        return options[default_idx].0.to_string();
+    }
 
+    let trimmed = input.trim();
     if trimmed.is_empty() {
         return options[default_idx].0.to_string();
     }
@@ -98,9 +104,12 @@ fn prompt_multi_select(question: &str, options: &[(&str, &str, &str)], exclude: 
     io::stdout().flush().unwrap_or(());
 
     let mut input = String::new();
-    io::stdin().read_line(&mut input).unwrap_or(0);
-    let trimmed = input.trim();
+    let bytes_read = io::stdin().read_line(&mut input).unwrap_or(0);
+    if bytes_read == 0 {
+        return vec![];
+    }
 
+    let trimmed = input.trim();
     if trimmed.is_empty() {
         return vec![];
     }
@@ -163,7 +172,26 @@ pub fn execute_init(
     let primary_lang = if let Some(l) = base_lang {
         l.to_lowercase()
     } else if yes {
-        "javascript".to_string()
+        // #34: Auto-detect language from existing files instead of hardcoding JavaScript
+        if path.join("pyproject.toml").exists() || path.join("requirements.txt").exists() {
+            "python".to_string()
+        } else if path.join("Cargo.toml").exists() {
+            "rust".to_string()
+        } else if path.join("go.mod").exists() {
+            "go".to_string()
+        } else if path.join("pom.xml").exists() || path.join("build.gradle").exists() {
+            "java".to_string()
+        } else if path.join("Gemfile").exists() {
+            "ruby".to_string()
+        } else if path.join("composer.json").exists() {
+            "php".to_string()
+        } else if path.join("pubspec.yaml").exists() {
+            "dart".to_string()
+        } else if path.join("mix.exs").exists() {
+            "elixir".to_string()
+        } else {
+            "javascript".to_string()
+        }
     } else {
         prompt_select(
             "What is your base language?",
@@ -221,11 +249,20 @@ pub fn execute_init(
         }
     }
 
-    // Step 1: Scaffold native manifests
     print!("  {} Scaffolding native manifests... ", "⠋".cyan());
     io::stdout().flush().unwrap_or(());
     UpmManifest::bootstrap_native_manifests(path, &proj_name, &all_langs)?;
     println!("{}", "done".green().bold());
+
+    // Step 1b: Generate .gitignore (#37)
+    let gitignore_path = path.join(".gitignore");
+    if !gitignore_path.exists() {
+        print!("  {} Generating .gitignore... ", "⠋".cyan());
+        io::stdout().flush().unwrap_or(());
+        let gitignore_content = generate_gitignore(&all_langs);
+        std::fs::write(&gitignore_path, gitignore_content)?;
+        println!("{}", "done".green().bold());
+    }
 
     // Map language names to default ecosystem package manager adapters
     let mut ecosystem_adapters = Vec::new();
@@ -266,7 +303,9 @@ pub fn execute_init(
 
     if !detection.detected_ecosystems.is_empty() {
         println!();
-        AcquisitionRunner::run_install(path, &detection.detected_ecosystems, false, false, None)?;
+        if let Err(e) = AcquisitionRunner::run_install(path, &detection.detected_ecosystems, false, false, None) {
+            println!("  {} Dependency acquisition note: {}", "!".yellow(), e);
+        }
     }
 
     // Success footer
@@ -286,4 +325,47 @@ pub fn execute_init(
     println!();
 
     Ok(())
+}
+
+/// Generate .gitignore content based on selected languages (#37).
+fn generate_gitignore(langs: &[String]) -> String {
+    let mut gitignore = String::from("# CPM / UPM Polyglot Workspace\n.cpm_backup/\n.cpm_bundle_manifest\n\n");
+
+    for lang in langs {
+        match lang.to_lowercase().as_str() {
+            "javascript" | "typescript" | "node" => {
+                gitignore.push_str("# Node.js\nnode_modules/\nnpm-debug.log*\nyarn-debug.log*\nyarn-error.log*\n.pnpm-debug.log*\n\n");
+            }
+            "python" => {
+                gitignore.push_str("# Python\n.venv/\nvenv/\n__pycache__/\n*.pyc\n.pytest_cache/\n.uv/\n\n");
+            }
+            "rust" => {
+                gitignore.push_str("# Rust\ntarget/\n**/*.rs.bk\n\n");
+            }
+            "go" => {
+                gitignore.push_str("# Go\nvendor/\n*.exe\n*.exe.bin\n\n");
+            }
+            "java" => {
+                gitignore.push_str("# Java / Kotlin\ntarget/\n.gradle/\nbuild/\n*.class\n\n");
+            }
+            "php" => {
+                gitignore.push_str("# PHP\nvendor/\n.phpunit.result.cache\n\n");
+            }
+            "ruby" => {
+                gitignore.push_str("# Ruby\nvendor/bundle/\n.bundle/\n\n");
+            }
+            "csharp" => {
+                gitignore.push_str("# .NET / C#\nbin/\nobj/\n.vs/\n\n");
+            }
+            "dart" => {
+                gitignore.push_str("# Dart / Flutter\n.dart_tool/\nbuild/\n.packages\n\n");
+            }
+            "elixir" => {
+                gitignore.push_str("# Elixir\n_build/\ndeps/\n\n");
+            }
+            _ => {}
+        }
+    }
+
+    gitignore
 }

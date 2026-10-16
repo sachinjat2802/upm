@@ -5,6 +5,7 @@
 
 use crate::bridge::host::HostSupervisor;
 use crate::bridge::value::UpmValue;
+use super::lang_icon;
 use colored::Colorize;
 use std::path::Path;
 use std::time::Instant;
@@ -46,7 +47,17 @@ pub async fn execute_bridge_call(target: &str, args_json: Option<&str>) -> anyho
     }
 
     let args: Vec<UpmValue> = if let Some(json_str) = args_json {
-        serde_json::from_str(json_str)?
+        match serde_json::from_str(json_str) {
+            Ok(v) => v,
+            Err(e) => {
+                println!();
+                println!("  {} Invalid JSON arguments array: '{}'", "✖".bold().red(), json_str.bold());
+                println!("  {} Arguments must be a valid JSON array, e.g. '[9]' or '[\"hello\", 42]'", "💡".yellow());
+                println!("  {} Error: {}", "  ".dimmed(), e);
+                println!();
+                anyhow::bail!("Invalid JSON arguments format: {}", e);
+            }
+        }
     } else {
         vec![]
     };
@@ -60,7 +71,7 @@ pub async fn execute_bridge_call(target: &str, args_json: Option<&str>) -> anyho
     );
     println!("  {}", "╰──────────────────────────────────────────────────────╯".cyan());
     println!();
-    println!("  {} {} {}",  "Host".dimmed(), get_lang_icon(language), language.bold().magenta());
+    println!("  {} {} {}",  "Host".dimmed(), lang_icon(language), language.bold().magenta());
     println!("  {} {}",     "Method".dimmed(), method.bold().yellow());
     println!("  {} {}",     "Args".dimmed(), serde_json::to_string(&args)?.dimmed());
     println!("  {} {}",     "Transport".dimmed(), "stdio (upm-bridge/1, 4-byte BE framing)".dimmed());
@@ -72,20 +83,35 @@ pub async fn execute_bridge_call(target: &str, args_json: Option<&str>) -> anyho
         "python" | "py" => {
             let host_path = Path::new("hosts/python_host.py");
             if !host_path.exists() {
-                println!("  {} Python host not found at {}", "✖".bold().red(), "hosts/python_host.py".bold());
-                println!("  {} Make sure the hosts directory contains the language host script.", "›".dimmed());
+                println!("  {} Python host script not found at {}", "✖".bold().red(), "hosts/python_host.py".bold());
+                println!("  {} Actionable Remediation: Restore hosts/python_host.py from the CPM repository.", "💡".yellow());
                 anyhow::bail!("Python host script not found at hosts/python_host.py");
             }
-            let host_proc = HostSupervisor::spawn_host("python", host_path).await?;
+            let host_proc = match HostSupervisor::spawn_host("python", host_path).await {
+                Ok(proc) => proc,
+                Err(e) => {
+                    println!("  {} Failed to launch Python host process.", "✖".bold().red());
+                    println!("  {} Actionable Remediation: Install Python 3.8+ from https://python.org or run `uv python install`.", "💡".yellow());
+                    return Err(e);
+                }
+            };
             host_proc.peer.call(method, args).await?
         }
         "node" | "js" | "ts" => {
             let host_path = Path::new("hosts/node_host.js");
             if !host_path.exists() {
-                println!("  {} Node host not found at {}", "✖".bold().red(), "hosts/node_host.js".bold());
+                println!("  {} Node.js host script not found at {}", "✖".bold().red(), "hosts/node_host.js".bold());
+                println!("  {} Actionable Remediation: Restore hosts/node_host.js from the CPM repository.", "💡".yellow());
                 anyhow::bail!("Node host script not found at hosts/node_host.js");
             }
-            let host_proc = HostSupervisor::spawn_host("node", host_path).await?;
+            let host_proc = match HostSupervisor::spawn_host("node", host_path).await {
+                Ok(proc) => proc,
+                Err(e) => {
+                    println!("  {} Failed to launch Node.js host process.", "✖".bold().red());
+                    println!("  {} Actionable Remediation: Install Node.js v16+ from https://nodejs.org or run `nvm install lts`.", "💡".yellow());
+                    return Err(e);
+                }
+            };
             host_proc.peer.call(method, args).await?
         }
         _ => {
@@ -104,10 +130,23 @@ pub async fn execute_bridge_call(target: &str, args_json: Option<&str>) -> anyho
 
     println!("  {} {}", "✔".green().bold(), "Response received:".bold());
     println!();
-    println!(
-        "  {}",
-        serde_json::to_string_pretty(&result)?.bold().white()
-    );
+    match &result {
+        UpmValue::Map(m) if m.contains_key("$blob") => {
+            println!("  {} {}", "📦 Blob payload:".bold().cyan(), serde_json::to_string_pretty(&result)?.white());
+        }
+        UpmValue::Map(m) if m.contains_key("$ref") => {
+            println!("  {} {}", "🔗 Object handle:".bold().yellow(), serde_json::to_string_pretty(&result)?.white());
+        }
+        UpmValue::Number(n) => {
+            println!("  {} {}", "🔢 Number:".bold().green(), n.to_string().bold().white());
+        }
+        UpmValue::String(s) => {
+            println!("  {} {}", "🔤 String:".bold().green(), format!("\"{}\"", s).white());
+        }
+        _ => {
+            println!("  {}", serde_json::to_string_pretty(&result)?.bold().white());
+        }
+    }
     println!();
     println!(
         "  {} {:.0}µs round-trip via stdio RPC",
@@ -179,7 +218,7 @@ pub async fn execute_bridge_inspect(language: &str) -> anyhow::Result<()> {
         }
     };
 
-    println!("  {} Registered methods for {}:", get_lang_icon(language), language.bold().magenta());
+    println!("  {} Registered methods for {}:", lang_icon(language), language.bold().magenta());
     println!();
 
     if let UpmValue::Array(items) = result {
@@ -263,16 +302,4 @@ pub fn execute_bridge_status() -> anyhow::Result<()> {
     println!();
 
     Ok(())
-}
-
-/// Get a display icon for a language.
-fn get_lang_icon(lang: &str) -> &'static str {
-    match lang {
-        "python" | "py" => "🐍",
-        "node" | "js" | "ts" => "📦",
-        "rust" => "🦀",
-        "go" => "🐹",
-        "java" => "☕",
-        _ => "🔧",
-    }
 }

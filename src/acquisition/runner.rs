@@ -166,11 +166,13 @@ impl AcquisitionRunner {
 
         if parallel && !dry_run && filtered.len() > 1 {
             let path_buf = path.to_path_buf();
+            let errors = Arc::new(Mutex::new(Vec::new()));
             let mut handles = Vec::new();
 
             for adapter in filtered {
                 let adapter_clone = adapter.clone();
                 let path_clone = path_buf.clone();
+                let errors_clone = errors.clone();
                 let icon = Self::lang_icon(&adapter.language);
 
                 println!(
@@ -182,13 +184,23 @@ impl AcquisitionRunner {
                 );
 
                 let handle = thread::spawn(move || {
-                    let _ = Self::execute_command(&path_clone, &adapter_clone.update_cmd);
+                    if let Err(e) = Self::execute_command(&path_clone, &adapter_clone.update_cmd) {
+                        let mut errs = errors_clone.lock().unwrap();
+                        errs.push((adapter_clone.display_name.clone(), e));
+                    }
                 });
                 handles.push(handle);
             }
 
             for handle in handles {
                 let _ = handle.join();
+            }
+
+            let errs = errors.lock().unwrap();
+            if !errs.is_empty() {
+                for (name, err) in errs.iter() {
+                    println!("  {} Failed updating {}: {}", "✖".bold().red(), name, err);
+                }
             }
         } else {
             for adapter in filtered {
@@ -261,7 +273,7 @@ impl AcquisitionRunner {
                     Ok(())
                 } else {
                     println!("    {} exited with {}", "!".yellow(), status);
-                    Ok(())
+                    Err(anyhow!("Command '{}' failed with status {}", program, status))
                 }
             }
             Err(e) => {
@@ -271,7 +283,7 @@ impl AcquisitionRunner {
                     program.dimmed(),
                     e.to_string().dimmed()
                 );
-                Ok(())
+                Err(anyhow!("Command '{}' not found: {}", program, e))
             }
         }
     }

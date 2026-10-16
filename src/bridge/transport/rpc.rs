@@ -54,12 +54,14 @@ where
     async fn send_message(&self, msg: &MessageEnvelope) -> Result<()> {
         let json_bytes = serde_json::to_vec(msg)?;
         let len = json_bytes.len() as u32;
-        let mut header = [0u8; 4];
-        header.copy_from_slice(&len.to_be_bytes());
+
+        // Single buffer allocation combining header + payload to halve OS write syscalls
+        let mut buf = Vec::with_capacity(4 + json_bytes.len());
+        buf.extend_from_slice(&len.to_be_bytes());
+        buf.extend_from_slice(&json_bytes);
 
         let mut writer = self.writer.lock().await;
-        writer.write_all(&header).await?;
-        writer.write_all(&json_bytes).await?;
+        writer.write_all(&buf).await?;
         writer.flush().await?;
         Ok(())
     }

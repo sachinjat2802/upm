@@ -33,6 +33,10 @@ pub mod search_cmd;
 pub mod secrets_cmd;
 pub mod sig_cmd;
 pub mod stubs_cmd;
+pub mod clean_cmd;
+pub mod list_cmd;
+pub mod quickstart_cmd;
+pub mod why_cmd;
 pub mod trace_cmd;
 
 use crate::acquisition::{AcquisitionRunner, AdapterRegistry, DetectionEngine, UpmManifest};
@@ -41,6 +45,13 @@ use std::path::Path;
 use std::process::Command;
 use std::time::Instant;
 
+pub mod cli_spec;
+pub use cli_spec::*;
+
+pub use clean_cmd::execute_clean;
+pub use list_cmd::execute_list;
+pub use quickstart_cmd::execute_quickstart;
+pub use why_cmd::execute_why;
 pub use alias_cmd::execute_alias;
 pub use audit_log_cmd::execute_audit_log;
 pub use benchmark_cmd::execute_benchmark;
@@ -76,9 +87,76 @@ pub use trace_cmd::execute_trace;
 
 /// Build the detection result for a workspace path (reused by many commands).
 fn detect_workspace(path: &Path) -> crate::acquisition::DetectionResult {
+    // Fast path: If upm.toml exists and declares ecosystems, resolve instantly (<1ms) (#53)
+    if let Some(manifest) = UpmManifest::load_from_dir(path) {
+        if !manifest.ecosystems.is_empty() {
+            let registry = AdapterRegistry::new();
+            let mut detected_ecosystems = Vec::new();
+            for eco_name in &manifest.ecosystems {
+                if let Some(adapter) = registry.get(eco_name) {
+                    detected_ecosystems.push(adapter.clone());
+                }
+            }
+            if !detected_ecosystems.is_empty() {
+                return crate::acquisition::DetectionResult {
+                    root_path: path.to_path_buf(),
+                    scores: vec![],
+                    detected_ecosystems,
+                };
+            }
+        }
+    }
+
     let registry = AdapterRegistry::new();
     let engine = DetectionEngine::new(registry);
     engine.detect_dir(path)
+}
+
+/// Get a display emoji icon for a language ecosystem.
+///
+/// This is the **single source of truth** for language-to-icon mapping,
+/// shared across all CLI commands to avoid inconsistencies (#6).
+pub fn lang_icon(lang: &str) -> &'static str {
+    match lang {
+        "javascript" | "typescript" | "node" | "js" | "ts" => "📦",
+        "python" | "py" => "🐍",
+        "rust" => "🦀",
+        "go" | "golang" => "🐹",
+        "java" | "kotlin" => "☕",
+        "php" => "🐘",
+        "ruby" | "rb" => "💎",
+        "csharp" | "dotnet" => "🔷",
+        "dart" | "flutter" => "🎯",
+        "elixir" => "💧",
+        _ => "📦",
+    }
+}
+
+/// Print a consistent box-drawing header with dynamic padding (#5).
+///
+/// Produces output like:
+/// ```text
+///   ╭──────────────────────────────────────────────────────╮
+///   │  🚀 Title Text Here                                  │
+///   ╰──────────────────────────────────────────────────────╯
+/// ```
+pub fn print_header(icon: &str, title: &str) {
+    let box_width = 56; // inner width between │ and │
+    let content = format!("  {} {}", icon, title);
+    let padding = if content.len() < box_width {
+        " ".repeat(box_width - content.len())
+    } else {
+        String::new()
+    };
+    println!();
+    println!("  {}", "╭──────────────────────────────────────────────────────╮".cyan());
+    println!("  {}{}{}",
+        "│".cyan(),
+        format!("{}{}", content, padding).bold().white(),
+        "│".cyan(),
+    );
+    println!("  {}", "╰──────────────────────────────────────────────────────╯".cyan());
+    println!();
 }
 
 // ─── install ──────────────────────────────────────────────────────────────────
@@ -108,10 +186,58 @@ pub fn execute_install(path: &Path, dry_run: bool, parallel: bool, filter: Optio
 
 // ─── add ──────────────────────────────────────────────────────────────────────
 
-/// Add a foreign package dependency (format: ecosystem:package).
+/// Calculate Levenshtein distance between two strings for did-you-mean suggestions (#12).
+fn levenshtein_distance(a: &str, b: &str) -> usize {
+    let a_chars: Vec<_> = a.chars().collect();
+    let b_chars: Vec<_> = b.chars().collect();
+    let mut distances = vec![vec![0; b_chars.len() + 1]; a_chars.len() + 1];
+
+    for i in 0..=a_chars.len() {
+        distances[i][0] = i;
+    }
+    for j in 0..=b_chars.len() {
+        distances[0][j] = j;
+    }
+
+    for i in 1..=a_chars.len() {
+        for j in 1..=b_chars.len() {
+            let cost = if a_chars[i - 1] == b_chars[j - 1] { 0 } else { 1 };
+            distances[i][j] = (distances[i - 1][j] + 1)
+                .min(distances[i][j - 1] + 1)
+                .min(distances[i - 1][j - 1] + cost);
+        }
+    }
+    distances[a_chars.len()][b_chars.len()]
+}
+
+/// Find the closest matching string candidate for a typo suggestion (#12).
+fn find_closest_match<'a>(input: &str, candidates: &'a [&'a str]) -> Option<&'a str> {
+    candidates
+        .iter()
+        .map(|&c| (c, levenshtein_distance(input, c)))
+        .filter(|&(_, dist)| dist <= 3)
+        .min_by_key(|&(_, dist)| dist)
+        .map(|(c, _)| c)
+}
+
+/// Backup upm.toml manifest before modifying it (#66).
+fn backup_manifest_before_save(path: &Path) {
+    let manifest_file = path.join("upm.toml");
+    if manifest_file.exists() {
+        let backup_dir = path.join(".cpm_backup");
+        let _ = std::fs::create_dir_all(&backup_dir);
+        let _ = std::fs::copy(&manifest_file, backup_dir.join("upm.toml.bak"));
+    }
+}
+
+// ─── add ──────────────────────────────────────────────────────────────────────
+
+/// Add a foreign package dependency (format: ecosystem:package@version or package@version).
 pub fn execute_add(path: &Path, package: &str, dry_run: bool) -> anyhow::Result<()> {
     let registry = AdapterRegistry::new();
-    let (eco_name, pkg_name) = if let Some((eco, pkg)) = package.split_once(':') {
+    let known_ecosystems = ["npm", "pnpm", "yarn", "bun", "pip", "uv", "poetry", "cargo", "go", "maven", "gradle", "composer", "bundler", "nuget", "pub", "mix"];
+
+    let (eco_name, raw_pkg) = if let Some((eco, pkg)) = package.split_once(':') {
         (eco.to_string(), pkg.to_string())
     } else {
         // Infer ecosystem from workspace detection if not explicitly prefixed
@@ -136,30 +262,42 @@ pub fn execute_add(path: &Path, package: &str, dry_run: bool) -> anyhow::Result<
         (default_eco, package.to_string())
     };
 
+    // Support @version syntax (#13)
+    let (pkg_name, pkg_version) = if let Some((name, ver)) = raw_pkg.split_once('@') {
+        (name.to_string(), if ver.starts_with('^') || ver.starts_with('~') || ver.starts_with('>') || ver.starts_with('=') { ver.to_string() } else { format!("^{}", ver) })
+    } else {
+        (raw_pkg.clone(), "^latest".to_string()) // #61: Record version specification format
+    };
+
     if let Some(adapter) = registry.get(&eco_name) {
         println!();
-        AcquisitionRunner::run_add(path, adapter, &pkg_name, dry_run)?;
+        AcquisitionRunner::run_add(path, adapter, &raw_pkg, dry_run)?;
 
-        // Update upm.toml manifest
+        // Backup manifest before updating (#66)
+        backup_manifest_before_save(path);
+
+        // Update upm.toml manifest (#61, #13)
         let mut manifest = UpmManifest::load_from_dir(path)
             .unwrap_or_else(|| UpmManifest::default_for("polyglot-app", vec![eco_name.clone()]));
         manifest
             .foreign_dependencies
-            .insert(format!("{}:{}", eco_name, pkg_name), "latest".into());
+            .insert(format!("{}:{}", eco_name, pkg_name), pkg_version.clone());
         manifest.save_to_dir(path)?;
-        println!("  {} Updated {} with {}:{} dependency.", "✔".green(), "upm.toml".bold(), eco_name.cyan(), pkg_name.bold().yellow());
+        println!("  {} Updated {} with {}:{} ({}) dependency.", "✔".green(), "upm.toml".bold(), eco_name.cyan(), pkg_name.bold().yellow(), pkg_version.dimmed());
         println!();
     } else {
         println!();
         println!("  {} Unknown ecosystem: '{}'", "✖".bold().red(), eco_name.bold());
+        if let Some(suggestion) = find_closest_match(&eco_name, &known_ecosystems) {
+            println!("  {} Did you mean '{}'?", "💡".yellow(), suggestion.bold().cyan());
+        }
         println!();
         println!("  {} Supported ecosystems:", "?".bold().green());
-        let known = ["npm", "pnpm", "yarn", "bun", "pip", "uv", "poetry", "cargo", "go", "maven", "gradle", "composer", "bundler", "nuget", "pub", "mix"];
-        for name in &known {
+        for name in &known_ecosystems {
             println!("    {} {}", "·".dimmed(), name.cyan());
         }
         println!();
-        println!("  {} Use {} format, e.g. {}", "Tip".bold(), "ecosystem:package".bold(), "pip:requests".bold().yellow());
+        println!("  {} Use {} format, e.g. {}", "Tip".bold(), "ecosystem:package@version".bold(), "pip:requests@2.31.0".bold().yellow());
         println!();
         anyhow::bail!("Unknown ecosystem adapter: '{}'", eco_name);
     }
@@ -196,23 +334,9 @@ pub fn execute_remove(path: &Path, package: &str, dry_run: bool) -> anyhow::Resu
     };
 
     if let Some(adapter) = registry.get(&eco_name) {
-        // Build the remove command based on ecosystem
-        let remove_cmd = match eco_name.as_str() {
-            "npm" => vec!["npm".into(), "uninstall".into(), pkg_name.clone()],
-            "pnpm" => vec!["pnpm".into(), "remove".into(), pkg_name.clone()],
-            "yarn" => vec!["yarn".into(), "remove".into(), pkg_name.clone()],
-            "bun" => vec!["bun".into(), "remove".into(), pkg_name.clone()],
-            "pip" | "uv" => vec!["uv".into(), "remove".into(), pkg_name.clone()],
-            "poetry" => vec!["poetry".into(), "remove".into(), pkg_name.clone()],
-            "cargo" => vec!["cargo".into(), "remove".into(), pkg_name.clone()],
-            "go" => vec!["go".into(), "get".into(), format!("{}@none", pkg_name)],
-            "composer" => vec!["composer".into(), "remove".into(), pkg_name.clone()],
-            "bundler" => vec!["bundle".into(), "remove".into(), pkg_name.clone()],
-            "nuget" => vec!["dotnet".into(), "remove".into(), "package".into(), pkg_name.clone()],
-            "pub" => vec!["dart".into(), "pub".into(), "remove".into(), pkg_name.clone()],
-            "mix" => vec!["mix".into(), "deps.clean".into(), pkg_name.clone()],
-            _ => vec![],
-        };
+        // Build the remove command from the adapter definition (#28)
+        let mut remove_cmd = adapter.remove_cmd.clone();
+        remove_cmd.push(pkg_name.clone());
 
         println!();
         println!(
@@ -238,6 +362,9 @@ pub fn execute_remove(path: &Path, package: &str, dry_run: bool) -> anyhow::Resu
                 }
             }
         }
+
+        // Backup manifest before updating (#66)
+        backup_manifest_before_save(path);
 
         // Update upm.toml manifest
         let mut manifest = UpmManifest::load_from_dir(path)
@@ -406,19 +533,7 @@ pub fn execute_status(path: &Path) -> anyhow::Result<()> {
     } else {
         println!("  {}", "Detected Ecosystems:".bold());
         for eco in &result.detected_ecosystems {
-            let icon = match eco.language.as_str() {
-                "javascript" => "📦",
-                "python" => "🐍",
-                "rust" => "🦀",
-                "go" => "🐹",
-                "java" => "☕",
-                "php" => "🐘",
-                "ruby" => "💎",
-                "csharp" => "🔷",
-                "dart" => "🎯",
-                "elixir" => "💧",
-                _ => "📦",
-            };
+            let icon = lang_icon(&eco.language);
             println!(
                 "    {} {} {} {}",
                 "✔".green(),

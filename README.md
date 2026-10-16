@@ -64,7 +64,7 @@ cpm doctor
 | `cpm install` | 📦 Install dependencies across all ecosystems (`--parallel`, `--filter`) |
 | `cpm add <eco:pkg>` | ➕ Add dependencies with ecosystem auto-inference |
 | `cpm remove <eco:pkg>` | ➖ Remove package dependencies from manifest and native files |
-| `cpm update` | 🔄 Update dependencies (`--parallel`, `--filter`, `--auto-pr`) |
+| `cpm update` | 🔄 Update dependencies (`--parallel`, `--filter`) |
 | `cpm outdated` | 📋 Check outdated dependencies across registries |
 | `cpm status` | 📊 Display project overview and ecosystem summary |
 | `cpm run <script>` | ▶️ Run scripts across ecosystems |

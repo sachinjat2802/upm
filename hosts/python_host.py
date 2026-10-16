@@ -105,6 +105,10 @@ def main():
                 handle_request(msg)
             elif msg_type == "ping":
                 send_message({"type": "pong", "id": msg.get("id")})
+            elif msg_type == "release_handles":
+                # Acknowledge handle release for GC (#51)
+                released_ids = msg.get("handles", [])
+                send_message({"type": "handles_released", "id": msg.get("id"), "count": len(released_ids)})
         except Exception:
             break
 

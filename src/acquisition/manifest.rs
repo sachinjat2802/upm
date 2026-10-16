@@ -27,28 +27,6 @@ pub struct UpmManifest {
 
 impl UpmManifest {
     pub fn new(name: &str, version: &str, primary_lang: Option<&str>, ecosystems: Vec<String>) -> Self {
-        let mut foreign_deps = BTreeMap::new();
-        for eco in &ecosystems {
-            match eco.as_str() {
-                "node" | "pnpm" | "npm" | "yarn" | "bun" => {
-                    if primary_lang != Some("javascript") && primary_lang != Some("typescript") && primary_lang != Some("node") {
-                        foreign_deps.insert("npm:express".into(), "^4.19.2".into());
-                    }
-                }
-                "python" | "pip" | "uv" | "poetry" => {
-                    if primary_lang != Some("python") {
-                        foreign_deps.insert("pip:docling".into(), "^2.0.0".into());
-                    }
-                }
-                "rust" | "cargo" => {
-                    if primary_lang != Some("rust") {
-                        foreign_deps.insert("cargo:serde".into(), "^1.0".into());
-                    }
-                }
-                _ => {}
-            }
-        }
-
         Self {
             project: ProjectConfig {
                 name: name.to_string(),
@@ -56,7 +34,7 @@ impl UpmManifest {
                 primary_language: primary_lang.map(|s| s.to_string()),
             },
             ecosystems,
-            foreign_dependencies: foreign_deps,
+            foreign_dependencies: BTreeMap::new(),
             transports: Some(TransportConfig {
                 default_tier: "rpc".to_string(),
             }),
@@ -64,19 +42,25 @@ impl UpmManifest {
     }
 
     pub fn default_for(name: &str, ecosystems: Vec<String>) -> Self {
-        Self::new(name, "0.1.0", Some("javascript"), ecosystems)
+        Self::new(name, "0.1.0", None, ecosystems)
     }
 
     pub fn load_from_dir(path: &Path) -> Option<Self> {
+        Self::try_load_from_dir(path).unwrap_or_else(|e| {
+            eprintln!("  ⚠ Warning: Could not parse upm.toml: {}", e);
+            None
+        })
+    }
+
+    pub fn try_load_from_dir(path: &Path) -> anyhow::Result<Option<Self>> {
         let manifest_path = path.join("upm.toml");
         if manifest_path.exists() {
-            if let Ok(content) = fs::read_to_string(&manifest_path) {
-                if let Ok(manifest) = toml::from_str(&content) {
-                    return Some(manifest);
-                }
-            }
+            let content = fs::read_to_string(&manifest_path)?;
+            let manifest: UpmManifest = toml::from_str(&content)?;
+            Ok(Some(manifest))
+        } else {
+            Ok(None)
         }
-        None
     }
 
     pub fn save_to_dir(&self, path: &Path) -> anyhow::Result<()> {

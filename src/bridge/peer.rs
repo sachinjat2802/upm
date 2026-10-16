@@ -52,7 +52,17 @@ impl BridgePeer {
 
         self.transport.send_message(&envelope).await?;
 
-        let response = rx.await.map_err(|_| anyhow!("RPC response channel closed"))?;
+        let response = match tokio::time::timeout(std::time::Duration::from_secs(15), rx).await {
+            Ok(Ok(resp)) => resp,
+            Ok(Err(_)) => {
+                return Err(anyhow!("RPC channel closed: host process terminated or disconnected"));
+            }
+            Err(_) => {
+                let mut pending = self.pending_requests.lock().await;
+                pending.remove(&req_id);
+                return Err(anyhow!("RPC call '{}' timed out after 15s waiting for response from host", method));
+            }
+        };
 
         if let Some(err) = response.error {
             Err(anyhow!("[{}] {}", err.error_type, err.message))
@@ -128,5 +138,8 @@ impl BridgePeer {
                 }
             }
         }
+        // Connection closed or failed: unblock any callers waiting for responses
+        let mut pending = self.pending_requests.lock().await;
+        pending.clear();
     }
 }

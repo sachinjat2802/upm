@@ -188,8 +188,8 @@ impl DetectionEngine {
             }
         }
 
-        // Sort scores descending for display
-        scores.sort_by(|a, b| b.total_score.cmp(&a.total_score));
+        // Sort scores descending for display with deterministic tie-breaker (#57)
+        scores.sort_by(|a, b| b.total_score.cmp(&a.total_score).then_with(|| a.adapter.name.cmp(&b.adapter.name)));
 
         DetectionResult {
             root_path: path.to_path_buf(),

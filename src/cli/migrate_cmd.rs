@@ -36,8 +36,31 @@ pub fn execute_migrate(path: &Path) -> anyhow::Result<()> {
 
     // Step 2: Bootstrap upm.toml manifest
     println!("  {} {}", "Step 2/5:".bold().cyan(), "Bootstrapping upm.toml manifest (Zero Breaking Changes)...".bold());
+    // Infer project name from existing manifests or directory name
+    let canonical = path.canonicalize().unwrap_or_else(|_| path.to_path_buf());
+    let folder_name = canonical
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("migrated-app");
+
+    let inferred_name = if let Ok(content) = std::fs::read_to_string(path.join("package.json")) {
+        serde_json::from_str::<serde_json::Value>(&content)
+            .ok()
+            .and_then(|v| v.get("name").and_then(|n| n.as_str().map(|s| s.to_string())))
+            .unwrap_or_else(|| folder_name.to_string())
+    } else if let Ok(content) = std::fs::read_to_string(path.join("pyproject.toml")) {
+        if let Some(start) = content.find("name = \"") {
+            let rest = &content[start + 8..];
+            rest.find('"').map(|end| rest[..end].to_string()).unwrap_or_else(|| folder_name.to_string())
+        } else {
+            folder_name.to_string()
+        }
+    } else {
+        folder_name.to_string()
+    };
+
     let primary_lang = result.detected_ecosystems.first().map(|e| e.language.as_str()).unwrap_or("javascript");
-    let manifest = UpmManifest::new("migrated-app", "0.1.0", Some(primary_lang), detected_names.clone());
+    let manifest = UpmManifest::new(&inferred_name, "0.1.0", Some(primary_lang), detected_names.clone());
     manifest.save_to_dir(path)?;
     println!("  {} upm.toml manifest created.", "✔".green());
     println!();
