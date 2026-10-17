@@ -198,6 +198,7 @@ All package stores are centralized on high-capacity storage.
 | `cpm agent graph` | 🕸️ Scaffold LangGraph state machine with cyclic graph and checkpoints |
 | `cpm agent chain` | ⛓️ Scaffold LangChain LCEL streaming prompt-to-model pipeline |
 | `cpm agent team` | 👥 Deploy hierarchical supervisor-to-worker multi-agent teams |
+| `cpm agent cron` | ⏱️ Schedule autonomous background tasks, audits, and health monitoring |
 | `cpm agent models` | 🤖 Configure OpenRouter, Ollama, vLLM, OpenAI, and Gemini models |
 | `cpm ai sync` | 🔄 Synchronize rules across Cursor, Claude, Windsurf, Cline, and Antigravity |
 | `cpm ai add <rule>` | ➕ Add an AI rule to the workspace and sync to all IDEs |
