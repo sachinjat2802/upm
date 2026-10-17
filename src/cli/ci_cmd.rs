@@ -26,12 +26,12 @@ pub fn execute_ci(path: &Path, provider: Option<&str>, out: Option<&str>) -> Res
             let _ = fs::create_dir_all(&workflows_dir);
             let file_path = out
                 .map(|o| path.join(o))
-                .unwrap_or_else(|| workflows_dir.join("cpm-ci.yml"));
+                .unwrap_or_else(|| workflows_dir.join("upm-ci.yml"));
             if let Some(parent) = file_path.parent() {
                 let _ = fs::create_dir_all(parent);
             }
 
-            let content = r#"name: CPM Polyglot CI
+            let content = r#"name: UPM Polyglot CI
 
 on:
   push:
@@ -59,20 +59,20 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install CPM
+      - name: Install UPM
         run: cargo install --path .
 
       - name: Verify Workspace
-        run: cpm detect
+        run: upm detect
 
       - name: Install All Dependencies
-        run: cpm install --parallel
+        run: upm install --parallel
 
       - name: Audit Security
-        run: cpm audit
+        run: upm audit
 
       - name: Run Test Suites
-        run: cpm test
+        run: upm test
 "#;
             fs::write(&file_path, content)?;
             println!("  {} Generated GitHub Actions CI workflow:", "✔".bold().green());

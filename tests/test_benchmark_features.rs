@@ -218,7 +218,7 @@ fn test_cpm_ci_generation() {
     let tmp = tempdir().expect("tempdir failed");
     let res = upm::cli::execute_ci(tmp.path(), Some("github"), None);
     assert!(res.is_ok(), "execute_ci failed: {:?}", res);
-    assert!(tmp.path().join(".github").join("workflows").join("cpm-ci.yml").exists());
+    assert!(tmp.path().join(".github").join("workflows").join("upm-ci.yml").exists());
 }
 
 #[test]

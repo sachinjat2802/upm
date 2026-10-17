@@ -1,19 +1,19 @@
-# Skill: CPM / UPM Polyglot Repository Guide
+# Skill: UPM Polyglot Repository Guide
 
-> **Authoritative guide for developers and AI agents working on the CPM (Cross-language Package Manager) codebase.**
+> **Authoritative guide for developers and AI agents working on the UPM (Universal Package Manager) codebase.**
 
 ---
 
 ## 1. Quick Overview
 
-CPM (Universal Package Platform / UPM) is a Rust-based polyglot package manager and cross-language runtime bridge based on the **Universal Package Platform Concept & Architecture** specification.
+UPM (Universal Package Manager) is a Rust-based polyglot package manager and cross-language runtime bridge based on the **Universal Package Platform Concept & Architecture** specification.
 
 ### Two Core Engine Layers:
 1. **L2 Universal Acquisition Engine (`src/acquisition/`)**:
    - Multi-signal weighted detection scoring across 15+ package managers and 10+ languages (+100 lockfile, +80 marker, +40 manifest, +30 glob, +20 dir, 0-4 priority).
    - Deterministic tie-breaker sorting and adapter iteration.
    - Unified dependency orchestration (`install`, `add`, `remove`, `update`, `outdated`, `audit`, `run`, `list`, `clean`, `why`).
-   - `upm.toml` manifest management, automatic `.cpm_backup/` snapshots, and `.gitignore` generation.
+   - `upm.toml` manifest management, automatic `.upm_backup/` snapshots, and `.gitignore` generation.
 2. **L2' Cross-Language Invocation Bridge (`src/bridge/`)**:
    - `upm-bridge/1` stdio RPC protocol with 4-byte Big-Endian uint32 length framing.
    - `UpmValue` codec supporting Base64 binary (`$blob`), opaque object handles (`$ref`), and callbacks (`$fn`).
@@ -25,19 +25,19 @@ CPM (Universal Package Platform / UPM) is a Rust-based polyglot package manager 
 ## 2. One-Command Setup & Verification
 
 ```bash
-# Build the project (creates target/debug/cpm.exe and upm.exe)
+# Build the project (creates target/debug/upm.exe)
 cargo build
 
-# Run full test suite (27 unit & integration tests)
+# Run full test suite (67 unit & integration tests + 1,000k fuzz tests)
 cargo test
 
 # Run CLI commands
-cargo run --bin cpm -- status
-cargo run --bin cpm -- detect
-cargo run --bin cpm -- list
-cargo run --bin cpm -- quickstart
-cargo run --bin cpm -- bridge inspect python
-cargo run --bin cpm -- bridge call python:math.sqrt '[144.0]'
+cargo run --bin upm -- status
+cargo run --bin upm -- detect
+cargo run --bin upm -- list
+cargo run --bin upm -- quickstart
+cargo run --bin upm -- bridge inspect python
+cargo run --bin upm -- bridge call python:math.sqrt '[144.0]'
 ```
 
 ---
@@ -55,7 +55,6 @@ d:/cpm/
 ├── src/
 │   ├── lib.rs                 # Core library re-exports
 │   ├── main.rs                # `upm` binary entry point (delegates to shared cli_spec)
-│   ├── cpm_main.rs            # `cpm` binary entry point (delegates to shared cli_spec)
 │   ├── acquisition/           # L2 Acquisition Engine
 │   │   ├── adapter.rs         # 15+ ecosystem adapter definitions & remove_cmd
 │   │   ├── scoring.rs         # Deterministic multi-signal weighted detection engine

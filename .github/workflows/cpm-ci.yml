@@ -1,4 +1,4 @@
-name: CPM Polyglot CI/CD Pipeline
+name: UPM Polyglot CI/CD Pipeline
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   polyglot-check:
-    name: CPM Polyglot Dependency Audit & Build
+    name: UPM Polyglot Dependency Audit & Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -27,23 +27,23 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Cache CPM Global Store
+      - name: Cache UPM Global Store
         uses: actions/cache@v4
         with:
-          path: ~/.cpm/cache
-          key: ${{ runner.os }}-cpm-${{ hashFiles('**/upm.toml') }}
+          path: ~/.upm/cache
+          key: ${{ runner.os }}-upm-${{ hashFiles('**/upm.toml') }}
 
-      - name: Build CPM Executable
-        run: cargo build --release --bin cpm
+      - name: Build UPM Executable
+        run: cargo build --release --bin upm
 
-      - name: Run CPM Doctor Diagnostics
-        run: ./target/release/cpm doctor
+      - name: Run UPM Doctor Diagnostics
+        run: ./target/release/upm doctor
 
       - name: Scan Secrets & Compliance Policies
         run: |
-          ./target/release/cpm scan-secrets
-          ./target/release/cpm policy
-          ./target/release/cpm licenses
+          ./target/release/upm scan-secrets
+          ./target/release/upm policy
+          ./target/release/upm licenses
 
       - name: Run Cargo Unit Tests
         run: cargo test

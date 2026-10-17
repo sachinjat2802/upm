@@ -3,11 +3,11 @@ image: rust:latest
 pipelines:
   default:
     - step:
-        name: Build and Audit CPM Workspace
+        name: Build and Audit UPM Workspace
         caches:
           - cargo
         script:
-          - cargo build --release --bin cpm
-          - ./target/release/cpm doctor
-          - ./target/release/cpm policy
+          - cargo build --release --bin upm
+          - ./target/release/upm doctor
+          - ./target/release/upm policy
           - cargo test
