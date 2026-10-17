@@ -79,6 +79,39 @@ pub fn execute_guess(path: &Path, apply: bool) -> Result<()> {
                         }
                     }
                 }
+                SourceLang::Go => {
+                    let mut in_multiline_import = false;
+                    for line in content.lines() {
+                        let trimmed = line.trim();
+                        if trimmed == "import (" {
+                            in_multiline_import = true;
+                            continue;
+                        }
+                        if in_multiline_import {
+                            if trimmed == ")" {
+                                in_multiline_import = false;
+                                continue;
+                            }
+                            if let Some(pkg) = extract_go_package(trimmed) {
+                                if is_third_party_go(&pkg) {
+                                    guessed_dependencies
+                                        .entry(format!("go:{}", pkg))
+                                        .or_insert_with(BTreeSet::new)
+                                        .insert(file.display().to_string());
+                                }
+                            }
+                        } else if trimmed.starts_with("import ") {
+                            if let Some(pkg) = extract_go_package(trimmed.trim_start_matches("import ")) {
+                                if is_third_party_go(&pkg) {
+                                    guessed_dependencies
+                                        .entry(format!("go:{}", pkg))
+                                        .or_insert_with(BTreeSet::new)
+                                        .insert(file.display().to_string());
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -131,6 +164,29 @@ enum SourceLang {
     Python,
     JavaScript,
     Rust,
+    Go,
+}
+
+fn extract_go_package(line: &str) -> Option<String> {
+    let trimmed = line.trim();
+    if let Some(start) = trimmed.find('"') {
+        if let Some(end) = trimmed[start + 1..].find('"') {
+            let pkg = &trimmed[start + 1..start + 1 + end];
+            if !pkg.is_empty() {
+                return Some(pkg.to_string());
+            }
+        }
+    }
+    None
+}
+
+fn is_third_party_go(pkg: &str) -> bool {
+    // Go stdlib packages do not contain '.' in the first path segment
+    if let Some(first_seg) = pkg.split('/').next() {
+        first_seg.contains('.')
+    } else {
+        false
+    }
 }
 
 fn extract_js_package(line: &str) -> Option<String> {
@@ -152,7 +208,9 @@ fn is_third_party_python(name: &str) -> bool {
     let stdlib = [
         "os", "sys", "re", "json", "math", "time", "datetime", "pathlib", "collections",
         "itertools", "functools", "typing", "subprocess", "unittest", "logging", "asyncio",
-        "http", "urllib", "threading", "multiprocessing", "hashlib", "tempfile", "io"
+        "http", "urllib", "threading", "multiprocessing", "hashlib", "tempfile", "io",
+        "dataclasses", "enum", "secrets", "uuid", "shutil", "glob", "traceback", "copy",
+        "inspect", "contextlib", "argparse", "socket", "ssl", "platform", "signal"
     ];
     !stdlib.contains(&name) && !name.is_empty()
 }
@@ -160,7 +218,8 @@ fn is_third_party_python(name: &str) -> bool {
 fn is_third_party_node(name: &str) -> bool {
     let builtins = [
         "fs", "path", "http", "https", "url", "os", "crypto", "stream", "events", "util",
-        "child_process", "buffer", "process", "cluster", "net", "tls", "zlib", "assert"
+        "child_process", "buffer", "process", "cluster", "net", "tls", "zlib", "assert",
+        "worker_threads", "perf_hooks", "v8", "vm", "readline", "string_decoder", "constants"
     ];
     !builtins.contains(&name)
 }
@@ -189,6 +248,7 @@ fn collect_source_files(dir: &Path) -> Result<Vec<(std::path::PathBuf, SourceLan
                         "py" => Some(SourceLang::Python),
                         "js" | "ts" | "jsx" | "tsx" | "mjs" => Some(SourceLang::JavaScript),
                         "rs" => Some(SourceLang::Rust),
+                        "go" => Some(SourceLang::Go),
                         _ => None,
                     };
                     if let Some(l) = lang {

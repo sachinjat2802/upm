@@ -19,6 +19,9 @@ pub fn execute_flamegraph(path: &Path, out_file: Option<&str>) -> anyhow::Result
 
     let target_name = out_file.unwrap_or("cpm_flamegraph.svg");
     let target_path = path.join(target_name);
+    if let Some(parent) = target_path.parent() {
+        let _ = std::fs::create_dir_all(parent);
+    }
 
     println!("  ▶ Sampling cross-language RPC stack frames...");
     println!("  ▶ Aggregating execution times for Python, Node, and Rust worker threads...");

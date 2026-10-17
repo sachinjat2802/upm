@@ -54,6 +54,10 @@ fn test_cpm_guess_dependencies() {
     let py_file = app_dir.join("main.py");
     fs::write(&py_file, "import requests\nfrom fastapi import FastAPI\nimport os\n").unwrap();
 
+    // Create a Go source file importing third-party packages
+    let go_file = app_dir.join("server.go");
+    fs::write(&go_file, "package main\n\nimport (\n\t\"fmt\"\n\t\"github.com/gin-gonic/gin\"\n)\n").unwrap();
+
     // Guess dependencies
     let res = execute_guess(app_dir, false);
     assert!(res.is_ok(), "execute_guess failed: {:?}", res);
@@ -326,11 +330,11 @@ fn test_cpm_bundle_and_trace() {
     assert!(bundle_res.is_ok(), "execute_bundle failed: {:?}", bundle_res);
     assert!(path.join("bundle.tar.gz").exists());
 
-    let trace_res = upm::cli::execute_trace(path, Some("trace.json"));
+    let trace_res = upm::cli::execute_trace(path, Some("nested/dir/trace.json"));
     assert!(trace_res.is_ok(), "execute_trace failed: {:?}", trace_res);
-    assert!(path.join("trace.json").exists());
+    assert!(path.join("nested").join("dir").join("trace.json").exists());
 
-    let flame_res = upm::cli::execute_flamegraph(path, Some("flame.svg"));
+    let flame_res = upm::cli::execute_flamegraph(path, Some("nested/dir/flame.svg"));
     assert!(flame_res.is_ok(), "execute_flamegraph failed: {:?}", flame_res);
-    assert!(path.join("flame.svg").exists());
+    assert!(path.join("nested").join("dir").join("flame.svg").exists());
 }
