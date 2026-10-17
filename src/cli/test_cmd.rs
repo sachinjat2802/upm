@@ -25,7 +25,8 @@ pub fn execute_test(path: &Path, filter: Option<&str>, watch: bool, coverage: bo
     if path.join("Cargo.toml").exists() {
         executed_any = true;
         println!("  {} Running Rust tests (cargo test)...", "🦀".yellow());
-        let mut cmd = Command::new("cargo");
+        let resolved = crate::acquisition::AcquisitionRunner::resolve_executable("cargo");
+        let mut cmd = Command::new(&resolved);
         if watch {
             cmd.arg("watch").arg("-x").arg("test");
         } else {
@@ -64,7 +65,8 @@ pub fn execute_test(path: &Path, filter: Option<&str>, watch: bool, coverage: bo
             args.push("--watch");
         }
 
-        let mut cmd = Command::new(pm);
+        let resolved_pm = crate::acquisition::AcquisitionRunner::resolve_executable(pm);
+        let mut cmd = Command::new(&resolved_pm);
         cmd.args(&args).current_dir(path);
         let status = cmd.status().map_err(|e| anyhow!("Failed to execute {} test: {}", pm, e))?;
         if !status.success() {
@@ -76,7 +78,8 @@ pub fn execute_test(path: &Path, filter: Option<&str>, watch: bool, coverage: bo
     if path.join("pyproject.toml").exists() || path.join("requirements.txt").exists() || path.join("tests").is_dir() {
         executed_any = true;
         println!("  {} Running Python tests (pytest)...", "🐍".yellow());
-        let mut cmd = Command::new("pytest");
+        let resolved_pytest = crate::acquisition::AcquisitionRunner::resolve_executable("pytest");
+        let mut cmd = Command::new(&resolved_pytest);
         if coverage {
             cmd.arg("--cov");
         }
@@ -90,7 +93,8 @@ pub fn execute_test(path: &Path, filter: Option<&str>, watch: bool, coverage: bo
             }
             Err(_) => {
                 // Fallback to python -m unittest
-                let mut fallback = Command::new("python");
+                let resolved_py = crate::acquisition::AcquisitionRunner::resolve_executable("python");
+                let mut fallback = Command::new(&resolved_py);
                 fallback.arg("-m").arg("unittest").current_dir(path);
                 let _ = fallback.status();
             }
@@ -102,7 +106,8 @@ pub fn execute_test(path: &Path, filter: Option<&str>, watch: bool, coverage: bo
     if path.join("go.mod").exists() {
         executed_any = true;
         println!("  {} Running Go tests (go test)...", "🐹".yellow());
-        let mut cmd = Command::new("go");
+        let resolved_go = crate::acquisition::AcquisitionRunner::resolve_executable("go");
+        let mut cmd = Command::new(&resolved_go);
         cmd.arg("test");
         if coverage {
             cmd.arg("-cover");

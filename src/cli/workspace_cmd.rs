@@ -107,7 +107,8 @@ pub fn discover_packages(root: &Path) -> Result<Vec<WorkspacePackage>> {
         }
     }
 
-    // Deduplicate in case root was visited
+    // Sort and deduplicate in case paths were visited from multiple roots
+    packages.sort_by(|a, b| a.path.cmp(&b.path));
     packages.dedup_by(|a, b| a.path == b.path);
     Ok(packages)
 }

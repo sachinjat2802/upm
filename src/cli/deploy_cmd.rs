@@ -33,7 +33,8 @@ pub fn execute_deploy(path: &Path, provider: Option<&str>, env: Option<&str>, dr
     match target.as_str() {
         "vercel" => {
             println!("  {} Deploying to Vercel...", "▲".white().bold());
-            let mut cmd = Command::new("npx");
+            let resolved = crate::acquisition::AcquisitionRunner::resolve_executable("npx");
+            let mut cmd = Command::new(&resolved);
             cmd.args(["-y", "vercel", "--prod"]).current_dir(path);
             let status = cmd.status().map_err(|e| anyhow!("Failed to run Vercel CLI: {}", e))?;
             if !status.success() {
@@ -42,7 +43,8 @@ pub fn execute_deploy(path: &Path, provider: Option<&str>, env: Option<&str>, dr
         }
         "netlify" => {
             println!("  {} Deploying to Netlify...", "🌐".cyan());
-            let mut cmd = Command::new("npx");
+            let resolved = crate::acquisition::AcquisitionRunner::resolve_executable("npx");
+            let mut cmd = Command::new(&resolved);
             cmd.args(["-y", "netlify-cli", "deploy", "--prod"]).current_dir(path);
             let status = cmd.status().map_err(|e| anyhow!("Failed to run Netlify CLI: {}", e))?;
             if !status.success() {
@@ -51,7 +53,8 @@ pub fn execute_deploy(path: &Path, provider: Option<&str>, env: Option<&str>, dr
         }
         "cloudrun" | "gcp" => {
             println!("  {} Deploying to Google Cloud Run...", "☁".blue());
-            let mut cmd = Command::new("gcloud");
+            let resolved = crate::acquisition::AcquisitionRunner::resolve_executable("gcloud");
+            let mut cmd = Command::new(&resolved);
             cmd.args(["run", "deploy", "--source", "."]).current_dir(path);
             let status = cmd.status().map_err(|e| anyhow!("Failed to run gcloud CLI: {}", e))?;
             if !status.success() {
@@ -60,7 +63,8 @@ pub fn execute_deploy(path: &Path, provider: Option<&str>, env: Option<&str>, dr
         }
         "lambda" | "aws" => {
             println!("  {} Deploying to AWS via SAM/Serverless...", "⚡".yellow());
-            let mut cmd = Command::new("sam");
+            let resolved = crate::acquisition::AcquisitionRunner::resolve_executable("sam");
+            let mut cmd = Command::new(&resolved);
             cmd.args(["deploy", "--guided"]).current_dir(path);
             let status = cmd.status().map_err(|e| anyhow!("Failed to run AWS SAM: {}", e))?;
             if !status.success() {
@@ -76,7 +80,8 @@ pub fn execute_deploy(path: &Path, provider: Option<&str>, env: Option<&str>, dr
                 .to_lowercase();
             let image_tag = format!("{}:{}", pkg_name, environment);
 
-            let mut cmd = Command::new("docker");
+            let resolved = crate::acquisition::AcquisitionRunner::resolve_executable("docker");
+            let mut cmd = Command::new(&resolved);
             cmd.args(["build", "-t", &image_tag, "."]).current_dir(path);
             let status = cmd.status().map_err(|e| anyhow!("Failed to execute docker build: {}", e))?;
             if !status.success() {

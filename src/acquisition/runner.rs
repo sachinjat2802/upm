@@ -255,16 +255,38 @@ impl AcquisitionRunner {
         Ok(())
     }
 
+    /// Resolve binary/command name to handle Windows .cmd/.bat/.exe extensions.
+    pub fn resolve_executable(program: &str) -> String {
+        #[cfg(target_os = "windows")]
+        {
+            if program.ends_with(".exe") || program.ends_with(".cmd") || program.ends_with(".bat") {
+                return program.to_string();
+            }
+            if let Ok(path_var) = std::env::var("PATH") {
+                for dir in std::env::split_paths(&path_var) {
+                    for ext in &[".cmd", ".exe", ".bat"] {
+                        let candidate = dir.join(format!("{}{}", program, ext));
+                        if candidate.is_file() {
+                            return candidate.to_string_lossy().to_string();
+                        }
+                    }
+                }
+            }
+        }
+        program.to_string()
+    }
+
     /// Execute a shell command, printing results inline.
     fn execute_command(path: &Path, cmd_args: &[String]) -> Result<()> {
         if cmd_args.is_empty() {
             return Err(anyhow!("Empty command"));
         }
 
-        let program = &cmd_args[0];
+        let raw_program = &cmd_args[0];
         let args = &cmd_args[1..];
+        let resolved = Self::resolve_executable(raw_program);
 
-        let mut command = Command::new(program);
+        let mut command = Command::new(&resolved);
         command.args(args).current_dir(path);
 
         match command.status() {
@@ -273,17 +295,17 @@ impl AcquisitionRunner {
                     Ok(())
                 } else {
                     println!("    {} exited with {}", "!".yellow(), status);
-                    Err(anyhow!("Command '{}' failed with status {}", program, status))
+                    Err(anyhow!("Command '{}' failed with status {}", raw_program, status))
                 }
             }
             Err(e) => {
                 println!(
                     "    {} '{}' not found: {}",
                     "⚠".dimmed(),
-                    program.dimmed(),
+                    raw_program.dimmed(),
                     e.to_string().dimmed()
                 );
-                Err(anyhow!("Command '{}' not found: {}", program, e))
+                Err(anyhow!("Command '{}' not found: {}", raw_program, e))
             }
         }
     }

@@ -28,7 +28,8 @@ pub fn execute_upgrade(check_only: bool) -> Result<()> {
     }
 
     println!("  {} Checking for updates via cargo install...", "⚡".cyan());
-    let mut cmd = Command::new("cargo");
+    let resolved = crate::acquisition::AcquisitionRunner::resolve_executable("cargo");
+    let mut cmd = Command::new(&resolved);
     cmd.args(["install", "--path", ".", "--force"]);
 
     match cmd.status() {

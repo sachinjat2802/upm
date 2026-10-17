@@ -24,7 +24,8 @@ pub fn execute_build(path: &Path, release: bool, target: Option<&str>) -> Result
     if path.join("Cargo.toml").exists() {
         built_any = true;
         println!("  {} Building Rust artifacts...", "🦀".yellow());
-        let mut cmd = Command::new("cargo");
+        let resolved = crate::acquisition::AcquisitionRunner::resolve_executable("cargo");
+        let mut cmd = Command::new(&resolved);
         cmd.arg("build");
         if release {
             cmd.arg("--release");
@@ -53,7 +54,8 @@ pub fn execute_build(path: &Path, release: bool, target: Option<&str>) -> Result
             "npm"
         };
 
-        let mut cmd = Command::new(pm);
+        let resolved_pm = crate::acquisition::AcquisitionRunner::resolve_executable(pm);
+        let mut cmd = Command::new(&resolved_pm);
         cmd.arg("run").arg("build").current_dir(path);
         let status = cmd.status().map_err(|e| anyhow!("Failed to execute {} run build: {}", pm, e))?;
         if !status.success() {
@@ -65,7 +67,8 @@ pub fn execute_build(path: &Path, release: bool, target: Option<&str>) -> Result
     if path.join("go.mod").exists() {
         built_any = true;
         println!("  {} Compiling Go binary...", "🐹".yellow());
-        let mut cmd = Command::new("go");
+        let resolved_go = crate::acquisition::AcquisitionRunner::resolve_executable("go");
+        let mut cmd = Command::new(&resolved_go);
         cmd.arg("build").arg("-v").arg("./...").current_dir(path);
         let status = cmd.status().map_err(|e| anyhow!("Failed to execute go build: {}", e))?;
         if !status.success() {
@@ -77,7 +80,8 @@ pub fn execute_build(path: &Path, release: bool, target: Option<&str>) -> Result
     if path.join("pyproject.toml").exists() {
         built_any = true;
         println!("  {} Building Python package distribution...", "🐍".yellow());
-        let mut cmd = Command::new("python");
+        let resolved_py = crate::acquisition::AcquisitionRunner::resolve_executable("python");
+        let mut cmd = Command::new(&resolved_py);
         cmd.arg("-m").arg("build").current_dir(path);
         let _ = cmd.status(); // best effort
     }

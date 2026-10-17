@@ -388,7 +388,8 @@ pub fn execute_remove(path: &Path, package: &str, dry_run: bool) -> anyhow::Resu
         if !dry_run && !remove_cmd.is_empty() {
             let program = &remove_cmd[0];
             let args = &remove_cmd[1..];
-            match Command::new(program).args(args).current_dir(path).status() {
+            let resolved = AcquisitionRunner::resolve_executable(program);
+            match Command::new(&resolved).args(args).current_dir(path).status() {
                 Ok(status) if status.success() => {
                     println!("  {} Successfully removed {}.", "✔".green(), pkg_name.bold());
                 }

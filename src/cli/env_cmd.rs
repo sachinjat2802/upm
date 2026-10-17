@@ -143,16 +143,20 @@ fn parse_env_file(path: &Path) -> Result<BTreeMap<String, String>> {
 fn save_env_file(path: &Path, entries: &BTreeMap<String, String>) -> Result<()> {
     let mut out = String::with_capacity(entries.len() * 32);
     for (k, v) in entries {
-        out.push_str(&format!("{}=\"{}\"\n", k, v));
+        let escaped = v.replace('\\', "\\\\").replace('"', "\\\"");
+        out.push_str(&format!("{}=\"{}\"\n", k, escaped));
     }
     fs::write(path, out)?;
     Ok(())
 }
 
 fn mask_secret(val: &str) -> String {
-    if val.len() <= 4 {
+    let char_count = val.chars().count();
+    if char_count <= 4 {
         "****".to_string()
     } else {
-        format!("{}...{}", &val[..2], &val[val.len() - 2..])
+        let prefix: String = val.chars().take(2).collect();
+        let suffix: String = val.chars().rev().take(2).collect::<Vec<_>>().into_iter().rev().collect();
+        format!("{}...{}", prefix, suffix)
     }
 }

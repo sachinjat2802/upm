@@ -200,3 +200,47 @@ fn test_cpm_ci_generation() {
     assert!(res.is_ok(), "execute_ci failed: {:?}", res);
     assert!(tmp.path().join(".github").join("workflows").join("cpm-ci.yml").exists());
 }
+
+#[test]
+fn test_cpm_env_management() {
+    let tmp = tempdir().expect("tempdir failed");
+    let path = tmp.path();
+
+    // Set variable
+    let set_res = upm::cli::execute_env(path, Some("set"), Some("DATABASE_URL"), Some("postgres://localhost:5432/db"));
+    assert!(set_res.is_ok(), "execute_env set failed: {:?}", set_res);
+
+    // Get variable
+    let get_res = upm::cli::execute_env(path, Some("get"), Some("DATABASE_URL"), None);
+    assert!(get_res.is_ok(), "execute_env get failed: {:?}", get_res);
+
+    // List variables (masked)
+    let list_res = upm::cli::execute_env(path, Some("list"), None, None);
+    assert!(list_res.is_ok(), "execute_env list failed: {:?}", list_res);
+}
+
+#[test]
+fn test_cpm_plugin_lifecycle() {
+    let list_res = upm::cli::execute_plugin(Some("list"), None);
+    assert!(list_res.is_ok(), "execute_plugin list failed: {:?}", list_res);
+}
+
+#[test]
+fn test_cpm_deploy_dry_run() {
+    let tmp = tempdir().expect("tempdir failed");
+    let res = upm::cli::execute_deploy(tmp.path(), Some("docker"), Some("staging"), true);
+    assert!(res.is_ok(), "execute_deploy dry-run failed: {:?}", res);
+}
+
+#[test]
+fn test_cpm_publish_dry_run() {
+    let tmp = tempdir().expect("tempdir failed");
+    let res = upm::cli::execute_publish(tmp.path(), true, None, None);
+    assert!(res.is_ok(), "execute_publish dry-run failed: {:?}", res);
+}
+
+#[test]
+fn test_cpm_upgrade_check() {
+    let res = upm::cli::execute_upgrade(true);
+    assert!(res.is_ok(), "execute_upgrade check failed: {:?}", res);
+}

@@ -27,6 +27,9 @@ pub fn execute_ci(path: &Path, provider: Option<&str>, out: Option<&str>) -> Res
             let file_path = out
                 .map(|o| path.join(o))
                 .unwrap_or_else(|| workflows_dir.join("cpm-ci.yml"));
+            if let Some(parent) = file_path.parent() {
+                let _ = fs::create_dir_all(parent);
+            }
 
             let content = r#"name: CPM Polyglot CI
 
@@ -77,6 +80,9 @@ jobs:
         }
         "gitlab" => {
             let file_path = out.map(|o| path.join(o)).unwrap_or_else(|| path.join(".gitlab-ci.yml"));
+            if let Some(parent) = file_path.parent() {
+                let _ = fs::create_dir_all(parent);
+            }
             let content = r#"stages:
   - test
   - build
@@ -96,6 +102,9 @@ test:
             let circle_dir = path.join(".circleci");
             let _ = fs::create_dir_all(&circle_dir);
             let file_path = out.map(|o| path.join(o)).unwrap_or_else(|| circle_dir.join("config.yml"));
+            if let Some(parent) = file_path.parent() {
+                let _ = fs::create_dir_all(parent);
+            }
             let content = r#"version: 2.1
 jobs:
   build-and-test:

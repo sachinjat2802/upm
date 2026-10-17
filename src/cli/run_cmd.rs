@@ -109,7 +109,7 @@ pub fn execute_run_script(path: &Path, script_name: Option<&str>, extra_args: &[
         // Apply manifest environment variables if defined
         let mut cmd = if cfg!(target_os = "windows") {
             let mut c = Command::new("powershell");
-            c.arg("-Command").arg(&full_cmd);
+            c.arg("-NoProfile").arg("-ExecutionPolicy").arg("Bypass").arg("-Command").arg(&full_cmd);
             c
         } else {
             let mut c = Command::new("sh");
@@ -181,8 +181,19 @@ pub fn execute_tool(path: &Path, tool_name: &str, args: &[String]) -> Result<()>
     let exe_path = executable.unwrap_or_else(|| std::path::PathBuf::from(tool_name));
     println!("  {} Executing tool '{}'...", "▶".cyan(), exe_path.display());
 
-    let mut cmd = Command::new(&exe_path);
-    cmd.args(args).current_dir(path);
+    let mut cmd = if cfg!(target_os = "windows")
+        && exe_path.extension().and_then(|s| s.to_str()).map(|ext| ext.eq_ignore_ascii_case("ps1")).unwrap_or(false)
+    {
+        let mut c = Command::new("powershell");
+        c.arg("-NoProfile").arg("-ExecutionPolicy").arg("Bypass").arg("-File").arg(&exe_path);
+        c.args(args);
+        c
+    } else {
+        let mut c = Command::new(&exe_path);
+        c.args(args);
+        c
+    };
+    cmd.current_dir(path);
 
     let status = cmd.status().map_err(|e| anyhow!("Failed to execute tool '{}': {}", tool_name, e))?;
     if !status.success() {

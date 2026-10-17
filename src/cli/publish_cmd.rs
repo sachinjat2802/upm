@@ -33,7 +33,8 @@ pub fn execute_publish(path: &Path, dry_run: bool, bump: Option<&str>, tag: Opti
     if path.join("Cargo.toml").exists() {
         published = true;
         println!("  {} Publishing to Crates.io...", "🦀".yellow());
-        let mut cmd = Command::new("cargo");
+        let resolved = crate::acquisition::AcquisitionRunner::resolve_executable("cargo");
+        let mut cmd = Command::new(&resolved);
         cmd.arg("publish");
         if dry_run {
             cmd.arg("--dry-run");
@@ -49,7 +50,8 @@ pub fn execute_publish(path: &Path, dry_run: bool, bump: Option<&str>, tag: Opti
     if path.join("package.json").exists() {
         published = true;
         println!("  {} Publishing to npm Registry...", "📦".yellow());
-        let mut cmd = Command::new("npm");
+        let resolved = crate::acquisition::AcquisitionRunner::resolve_executable("npm");
+        let mut cmd = Command::new(&resolved);
         cmd.arg("publish");
         if let Some(t) = tag {
             cmd.arg("--tag").arg(t);
@@ -68,7 +70,8 @@ pub fn execute_publish(path: &Path, dry_run: bool, bump: Option<&str>, tag: Opti
     if path.join("pyproject.toml").exists() {
         published = true;
         println!("  {} Publishing to PyPI via twine...", "🐍".yellow());
-        let mut cmd = Command::new("twine");
+        let resolved = crate::acquisition::AcquisitionRunner::resolve_executable("twine");
+        let mut cmd = Command::new(&resolved);
         cmd.arg("upload").arg("dist/*");
         if dry_run {
             println!("  [dry-run] twine upload dist/* skipped.");
@@ -91,7 +94,8 @@ pub fn execute_publish(path: &Path, dry_run: bool, bump: Option<&str>, tag: Opti
 fn bump_version(path: &Path, bump_type: &str) -> Result<()> {
     let pkg_json = path.join("package.json");
     if pkg_json.exists() {
-        let _ = Command::new("npm")
+        let resolved = crate::acquisition::AcquisitionRunner::resolve_executable("npm");
+        let _ = Command::new(&resolved)
             .args(["version", bump_type, "--no-git-tag-version"])
             .current_dir(path)
             .status();
