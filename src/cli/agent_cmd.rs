@@ -166,7 +166,7 @@ fn print_agent_system_prompt() {
     println!("  {}", "📋 AI System Prompt Snippet (Copy into your AI Agent / IDE):".bold().cyan());
     println!("  {}", "═".repeat(70).dimmed());
     println!(
-        r#"You are an AI coding assistant working in a CPM / UPM universal package workspace.
+        r#"You are an AI coding assistant working in a CPM cross-language package workspace.
 Always use `cpm` for package management and tasks:
 - Run commands: `cpm run <script>` (e.g. `cpm run dev`, `cpm run test`)
 - Add dependencies: `cpm add <ecosystem>:<package>` (e.g. `cpm add pip:fastapi`)

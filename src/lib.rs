@@ -1,7 +1,8 @@
-//! # Universal Package Platform (UPM / CPM)
+//! # Cross-Language Package Manager (CPM)
 //!
-//! `upm` / `cpm` is a cross-language package platform implementation written in Rust based on the
-//! **Universal Package Platform · Concept & Architecture** specification.
+//! `cpm` is a high-performance cross-language package manager written in Rust.
+//! It allows developers and autonomous AI agents to write in any language and seamlessly
+//! depend on libraries across all ecosystems.
 //!
 //! ## Core Architecture Subsystems
 //!

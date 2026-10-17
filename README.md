@@ -47,7 +47,7 @@ CPM synthesizes and improves upon the best ideas from across open source:
 
 ```mermaid
 graph TD
-    CPM["⚡ CPM / UPM Platform"] --> AST["AST Dependency Guesser<br/>• Auto-Detect Undeclared Imports<br/>• Deterministic cpm.lock<br/>• Package Registry Inspector"]
+    CPM["⚡ CPM Polyglot Platform"] --> AST["AST Dependency Guesser<br/>• Auto-Detect Undeclared Imports<br/>• Deterministic cpm.lock<br/>• Package Registry Inspector"]
     CPM --> AI["Universal AI Guidelines<br/>• Cross-IDE Rules Sync (Cursor, Claude, Cline)<br/>• Skills & Subagents Registry<br/>• Token-Optimized Context"]
     CPM --> MCP["Universal MCP Server Hub<br/>• Model Context Protocol Engine<br/>• Multi-IDE Synchronization<br/>• Claude, Cursor, Antigravity, Zed"]
     CPM --> CAS["Content-Addressable Cache (CAS)<br/>• SHA-256 Hash Verification<br/>• Deduplication Engine<br/>• Offline Mode (--offline)"]
@@ -57,7 +57,7 @@ graph TD
 ```
 
 ### 1. 🔍 Native AST Dependency Guesser (`cpm guess`, `cpm lock`, `cpm info`)
-- **AST Dependency Guesser:** Scans your codebase for Python `import`, Node.js `require()` / `import`, and Rust `use` statements to auto-detect undeclared dependencies.
+- **AST Dependency Guesser:** Scans your codebase for Python `import`, Node.js `require()` / `import`, Rust `use`, and Go `import` statements to auto-detect undeclared dependencies.
 - **Deterministic Lockfiles:** Generates `cpm.lock` with SHA-256 cryptographic hashes for reproducible CI/CD pipelines (`cpm lock --verify`).
 - **Registry Inspector:** Inspects package specifications, metadata, and installation instructions across any language ecosystem (`cpm info pip:fastapi`).
 

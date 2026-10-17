@@ -96,7 +96,7 @@ CPM_ENV = "development"
     let server_py = format!(
         r#"""
 {name} — Agentic AI Microservice
-Managed by CPM / UPM Platform
+Managed by CPM Polyglot Platform
 """
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel

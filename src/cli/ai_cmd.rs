@@ -113,7 +113,7 @@ fn sync_ai_rules(path: &Path) -> Result<()> {
     if rule_content.trim().is_empty() {
         rule_content = format!(
             "# AI Coding Assistant Guidelines\n\n\
-             - Project managed by CPM / UPM universal package platform.\n\
+             - Project managed by CPM cross-language package platform.\n\
              - Storage: High-capacity D: drive utilized for cache and builds.\n\
              - Follow language best practices, modularity, and reproducible dependency specs.\n"
         );

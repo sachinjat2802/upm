@@ -329,7 +329,7 @@ pub fn execute_init(
 
 /// Generate .gitignore content based on selected languages (#37).
 fn generate_gitignore(langs: &[String]) -> String {
-    let mut gitignore = String::from("# CPM / UPM Polyglot Workspace\n.cpm_backup/\n.cpm_bundle_manifest\n\n");
+    let mut gitignore = String::from("# CPM Polyglot Workspace\n.cpm_backup/\n.cpm_bundle_manifest\n\n");
 
     for lang in langs {
         match lang.to_lowercase().as_str() {

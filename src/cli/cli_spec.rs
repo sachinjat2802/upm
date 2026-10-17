@@ -10,15 +10,15 @@ use colored::control;
 use crate::cli::*;
 
 /// ╭──────────────────────────────────────────────────────╮
-/// │  CPM / UPM — Universal Package Platform              │
+/// │  CPM — Cross-Language Package Manager                 │
 /// │  Write in one language. Depend on all of them.       │
 /// ╰──────────────────────────────────────────────────────╯
 #[derive(Parser)]
 #[command(
     name = "cpm",
-    about = "\n  ╭──────────────────────────────────────────────────────╮\n  │  CPM / UPM — Universal Package Platform              │\n  │  Write in one language. Depend on all of them.       │\n  ╰──────────────────────────────────────────────────────╯\n\n  A polyglot package manager that auto-detects and orchestrates\n  npm, pnpm, pip, uv, cargo, go, and 14 more ecosystems.\n\n  Quick start:\n    cpm init                    Create a new polyglot project\n    cpm detect                  Show detected ecosystems\n    cpm install                 Install all dependencies\n    cpm add pip:requests        Add a foreign dependency\n    cpm bridge call python:math.sqrt '[9]'",
+    about = "\n  ╭──────────────────────────────────────────────────────╮\n  │  CPM — Cross-Language Package Manager                 │\n  │  Write in one language. Depend on all of them.       │\n  ╰──────────────────────────────────────────────────────╯\n\n  A polyglot package manager that auto-detects and orchestrates\n  npm, pnpm, pip, uv, cargo, go, and 14 more ecosystems.\n\n  Quick start:\n    cpm init                    Create a new polyglot project\n    cpm detect                  Show detected ecosystems\n    cpm install                 Install all dependencies\n    cpm add pip:requests        Add a foreign dependency\n    cpm bridge call python:math.sqrt '[9]'",
     version = env!("CARGO_PKG_VERSION"),
-    after_help = "  Aliases: Available as both `cpm` and `upm`.\n  Docs:    https://github.com/sachinjat2802/cpm\n"
+    after_help = "  Docs:    https://github.com/sachinjat2802/cpm\n"
 )]
 pub struct Cli {
     /// Format all command output as JSON (#2)
