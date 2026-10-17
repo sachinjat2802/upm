@@ -154,8 +154,8 @@ pub fn execute_init(
     println!("  {}", "╭──────────────────────────────────────────────────────╮".cyan());
     println!("  {}  🚀 {}{}",
         "│".cyan(),
-        "UPM Project Initializer".bold().white(),
-        "                         │".cyan(),
+        "CPM Universal Polyglot Initializer".bold().white(),
+        "                  │".cyan(),
     );
     println!("  {}", "╰──────────────────────────────────────────────────────╯".cyan());
     println!();

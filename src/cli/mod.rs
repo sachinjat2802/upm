@@ -224,28 +224,37 @@ pub fn execute_install(path: &Path, dry_run: bool, parallel: bool, filter: Optio
 
 // ─── add ──────────────────────────────────────────────────────────────────────
 
-/// Calculate Levenshtein distance between two strings for did-you-mean suggestions (#12).
+/// Calculate Levenshtein distance between two strings with O(min(|A|, |B|)) space complexity.
 fn levenshtein_distance(a: &str, b: &str) -> usize {
-    let a_chars: Vec<_> = a.chars().collect();
-    let b_chars: Vec<_> = b.chars().collect();
-    let mut distances = vec![vec![0; b_chars.len() + 1]; a_chars.len() + 1];
+    let mut a_chars: Vec<char> = a.chars().collect();
+    let mut b_chars: Vec<char> = b.chars().collect();
 
-    for i in 0..=a_chars.len() {
-        distances[i][0] = i;
-    }
-    for j in 0..=b_chars.len() {
-        distances[0][j] = j;
+    // Ensure b is the shorter string for minimum space allocation
+    if a_chars.len() < b_chars.len() {
+        std::mem::swap(&mut a_chars, &mut b_chars);
     }
 
-    for i in 1..=a_chars.len() {
-        for j in 1..=b_chars.len() {
+    let m = a_chars.len();
+    let n = b_chars.len();
+
+    if n == 0 {
+        return m;
+    }
+
+    let mut prev: Vec<usize> = (0..=n).collect();
+    let mut curr = vec![0; n + 1];
+
+    for i in 1..=m {
+        curr[0] = i;
+        for j in 1..=n {
             let cost = if a_chars[i - 1] == b_chars[j - 1] { 0 } else { 1 };
-            distances[i][j] = (distances[i - 1][j] + 1)
-                .min(distances[i][j - 1] + 1)
-                .min(distances[i - 1][j - 1] + cost);
+            curr[j] = (prev[j] + 1)
+                .min(curr[j - 1] + 1)
+                .min(prev[j - 1] + cost);
         }
+        std::mem::swap(&mut prev, &mut curr);
     }
-    distances[a_chars.len()][b_chars.len()]
+    prev[n]
 }
 
 /// Find the closest matching string candidate for a typo suggestion (#12).
@@ -544,10 +553,16 @@ pub fn execute_status(path: &Path) -> anyhow::Result<()> {
     }
 
     // Footer
-    println!("  {} Scanned in {}ms across {} adapter(s).",
+    let active_count = if result.scores.is_empty() {
+        result.detected_ecosystems.len()
+    } else {
+        result.scores.iter().filter(|s| s.total_score > 0).count()
+    };
+
+    println!("  {} Scanned in {}ms across {} active ecosystem(s).",
         "⏱".dimmed(),
         scan_ms,
-        result.scores.iter().filter(|s| s.total_score > 0).count()
+        active_count
     );
     println!();
 

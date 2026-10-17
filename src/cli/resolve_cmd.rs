@@ -51,6 +51,7 @@ pub fn execute_resolve(path: &Path) -> anyhow::Result<()> {
         }
     }
 
+    let mut displayed_conflicts = std::collections::HashSet::new();
     for eco in &result.detected_ecosystems {
         println!("  {} {} {}", "✔".green(), eco.display_name.bold().magenta(), format!("({})", eco.language).dimmed());
 
@@ -63,9 +64,24 @@ pub fn execute_resolve(path: &Path) -> anyhow::Result<()> {
             println!("    └── SAT solver verified: 0 conflicting semver constraints found.");
         } else {
             for c in eco_conflicts {
+                displayed_conflicts.insert(c.package.clone());
                 println!("    └── {} [{}] {}", "⚠".yellow(), c.ecosystem.magenta(), c.issue.bold().yellow());
                 println!("        └── Recommendation: {}", c.recommendation.cyan());
             }
+        }
+        println!();
+    }
+
+    let unhandled: Vec<&ConflictInfo> = conflicts
+        .iter()
+        .filter(|c| !displayed_conflicts.contains(&c.package))
+        .collect();
+
+    if !unhandled.is_empty() {
+        println!("  {} {} {}", "✔".green(), "Workspace Dependencies".bold().magenta(), "(upm.toml)".dimmed());
+        for c in unhandled {
+            println!("    └── {} [{}] {}", "⚠".yellow(), c.package.yellow(), c.issue.bold().yellow());
+            println!("        └── Recommendation: {}", c.recommendation.cyan());
         }
         println!();
     }
