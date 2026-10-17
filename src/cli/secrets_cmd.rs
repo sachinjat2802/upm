@@ -34,7 +34,27 @@ const DETECTORS: &[SecretDetector] = &[
     },
     SecretDetector {
         name: "OpenAI API Key",
-        checker: |line| line.contains("sk-") && line.len() > 30,
+        checker: |line| {
+            if let Some(idx) = line.find("sk-") {
+                let tail = &line[idx + 3..];
+                (tail.starts_with("proj-") && tail.len() >= 25)
+                    || (tail.chars().take(20).all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-') && tail.len() >= 25)
+            } else {
+                false
+            }
+        },
+    },
+    SecretDetector {
+        name: "Anthropic API Key",
+        checker: |line| line.contains("sk-ant-api") || line.contains("sk-ant-sid"),
+    },
+    SecretDetector {
+        name: "OpenRouter API Key",
+        checker: |line| line.contains("sk-or-v1-"),
+    },
+    SecretDetector {
+        name: "HuggingFace Token",
+        checker: |line| line.contains("hf_") && line.chars().skip_while(|c| *c != 'h').take(36).count() >= 34,
     },
     SecretDetector {
         name: "Slack Token",
@@ -71,9 +91,10 @@ const SCANNABLE_EXTENSIONS: &[&str] = &[
 
 /// Directories to skip during scanning.
 const SKIP_DIRS: &[&str] = &[
-    "node_modules", ".venv", "venv", "target", ".git", ".hg",
+    "node_modules", ".venv", "venv", "target", ".git", ".hg", ".svn",
     "__pycache__", ".tox", "dist", "build", "vendor", ".gradle",
-    "_build", "deps", ".dart_tool", "obj", "bin",
+    "_build", "deps", ".dart_tool", "obj", "bin", ".cpm_backup", ".cpm",
+    ".next", ".nuxt",
 ];
 
 struct SecretFinding {

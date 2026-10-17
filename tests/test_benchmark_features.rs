@@ -344,3 +344,29 @@ fn test_cpm_bundle_and_trace() {
     assert!(flame_res.is_ok(), "execute_flamegraph failed: {:?}", flame_res);
     assert!(path.join("nested").join("dir").join("flame.svg").exists());
 }
+
+#[test]
+fn test_cpm_scan_secrets() {
+    let tmp = tempdir().expect("tempdir failed");
+    let path = tmp.path();
+
+    // Clean workspace scan
+    let scan_res = upm::cli::execute_scan_secrets(path);
+    assert!(scan_res.is_ok(), "execute_scan_secrets failed: {:?}", scan_res);
+
+    // Write file with dummy secret
+    let secret_file = path.join("config.env");
+    fs::write(&secret_file, "API_KEY=\"AKIAIOSFODNN7EXAMPLE\"\n").unwrap();
+
+    let scan_res2 = upm::cli::execute_scan_secrets(path);
+    assert!(scan_res2.is_ok(), "execute_scan_secrets with secrets failed: {:?}", scan_res2);
+}
+
+#[test]
+fn test_cpm_cache_operations() {
+    let stats_res = upm::cli::execute_cache(std::path::Path::new("."), Some("stats"));
+    assert!(stats_res.is_ok(), "execute_cache stats failed: {:?}", stats_res);
+
+    let clean_res = upm::cli::execute_cache(std::path::Path::new("."), Some("clean"));
+    assert!(clean_res.is_ok(), "execute_cache clean failed: {:?}", clean_res);
+}
