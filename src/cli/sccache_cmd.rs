@@ -19,8 +19,12 @@ pub fn execute_sccache(_path: &Path) -> anyhow::Result<()> {
     println!("  {}", "╰──────────────────────────────────────────────────────╯".cyan());
     println!();
 
-    let sccache_installed = Command::new("sccache").arg("--version").output().is_ok();
-    let ccache_installed = Command::new("ccache").arg("--version").output().is_ok();
+    use crate::acquisition::runner::AcquisitionRunner;
+    let sccache_bin = AcquisitionRunner::resolve_executable("sccache");
+    let ccache_bin = AcquisitionRunner::resolve_executable("ccache");
+
+    let sccache_installed = Command::new(&sccache_bin).arg("--version").output().is_ok();
+    let ccache_installed = Command::new(&ccache_bin).arg("--version").output().is_ok();
 
     if sccache_installed {
         println!("  {} Detected sccache compiler cache binary.", "✔".green());

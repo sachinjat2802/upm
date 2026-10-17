@@ -3,11 +3,27 @@
 /// Provides a real-time interactive shell for calling foreign RPC methods,
 /// inspecting bridge hosts, and exploring cross-language functionality.
 
-use crate::bridge::host::HostSupervisor;
+use crate::bridge::host::HostPool;
 use crate::bridge::value::UpmValue;
 use colored::Colorize;
 use std::io::{self, Write};
-use std::path::Path;
+use std::path::{Path, PathBuf};
+
+fn find_host_path(host_name: &str) -> Option<PathBuf> {
+    let candidate1 = Path::new("hosts").join(host_name);
+    if candidate1.exists() {
+        return Some(candidate1);
+    }
+    if let Ok(exe) = std::env::current_exe() {
+        if let Some(parent) = exe.parent() {
+            let candidate2 = parent.join("hosts").join(host_name);
+            if candidate2.exists() {
+                return Some(candidate2);
+            }
+        }
+    }
+    None
+}
 
 /// Launch the interactive polyglot REPL.
 pub async fn execute_repl() -> anyhow::Result<()> {
@@ -23,6 +39,7 @@ pub async fn execute_repl() -> anyhow::Result<()> {
     println!("  Type {} to see examples, or {} to quit.", "help".bold().yellow(), "exit".bold().red());
     println!();
 
+    let pool = HostPool::new();
     let stdin = io::stdin();
 
     loop {
@@ -56,19 +73,25 @@ pub async fn execute_repl() -> anyhow::Result<()> {
             input if input.starts_with("inspect ") => {
                 let lang = input.trim_start_matches("inspect ").trim();
                 let host_file = match lang {
-                    "python" | "py" => "hosts/python_host.py",
-                    "node" | "js" => "hosts/node_host.js",
-                    "go" => "hosts/go_host.go",
-                    "ruby" | "rb" => "hosts/ruby_host.rb",
+                    "python" | "py" => "python_host.py",
+                    "node" | "js" => "node_host.js",
+                    "go" => "go_host.go",
+                    "ruby" | "rb" => "ruby_host.rb",
                     _ => "",
                 };
                 if host_file.is_empty() {
                     println!("  {} Unknown language '{}'", "✖".bold().red(), lang);
-                } else if let Ok(host) = HostSupervisor::spawn_host(lang, Path::new(host_file)).await {
-                    if let Ok(res) = host.peer.call("__inspect__", vec![]).await {
-                        println!("  {} Inspect result for [{}]:", "✔".green(), lang.bold());
-                        println!("    {}", serde_json::to_string_pretty(&res).unwrap_or_default().white());
+                } else if let Some(host_path) = find_host_path(host_file) {
+                    if let Ok(host) = pool.get_or_spawn(lang, &host_path).await {
+                        if let Ok(res) = host.peer.call("__inspect__", vec![]).await {
+                            println!("  {} Inspect result for [{}]:", "✔".green(), lang.bold());
+                            println!("    {}", serde_json::to_string_pretty(&res).unwrap_or_default().white());
+                        }
+                    } else {
+                        println!("  {} Could not spawn {} host", "✖".bold().red(), lang);
                     }
+                } else {
+                    println!("  {} Host script '{}' not found in ./hosts or binary directory", "✖".bold().red(), host_file);
                 }
                 println!();
             }
@@ -82,10 +105,10 @@ pub async fn execute_repl() -> anyhow::Result<()> {
                 let method = target_parts[1];
 
                 let host_file = match lang {
-                    "python" | "py" => "hosts/python_host.py",
-                    "node" | "js" => "hosts/node_host.js",
-                    "go" => "hosts/go_host.go",
-                    "ruby" | "rb" => "hosts/ruby_host.rb",
+                    "python" | "py" => "python_host.py",
+                    "node" | "js" => "node_host.js",
+                    "go" => "go_host.go",
+                    "ruby" | "rb" => "ruby_host.rb",
                     _ => "",
                 };
 
@@ -94,10 +117,18 @@ pub async fn execute_repl() -> anyhow::Result<()> {
                     continue;
                 }
 
+                let host_path = match find_host_path(host_file) {
+                    Some(p) => p,
+                    None => {
+                        println!("  {} Host script '{}' not found in ./hosts or binary directory", "✖".bold().red(), host_file);
+                        continue;
+                    }
+                };
+
                 let args: Vec<UpmValue> = serde_json::from_str(json_args_str).unwrap_or_else(|_| vec![]);
 
                 let t0 = std::time::Instant::now();
-                if let Ok(host) = HostSupervisor::spawn_host(lang, Path::new(host_file)).await {
+                if let Ok(host) = pool.get_or_spawn(lang, &host_path).await {
                     match host.peer.call(method, args).await {
                         Ok(res) => {
                             let elapsed = t0.elapsed().as_micros();

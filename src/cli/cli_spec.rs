@@ -197,7 +197,7 @@ pub enum Commands {
         #[arg(last = true)]
         args: Vec<String>,
     },
-    /// 🧠 Token-optimized workspace context and interface for AI coding agents
+    /// 🧠 Token-optimized AI agent context, LangGraph workflows, LangChain pipelines, OpenRouter models & nested teams
     #[command(next_help_heading = "AI & Agentic Operations")]
     Agent {
         #[arg(default_value = ".")]

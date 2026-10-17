@@ -49,13 +49,32 @@ pub fn execute_bundle(path: &Path, out_file: Option<&str>) -> anyhow::Result<()>
     // Include SDK files if present
     if path.join("sdk").is_dir() {
         println!("    ✔ SDK Helpers: ./sdk/");
-        asset_paths.push("sdk".to_string());
+        let mut stack = vec![path.join("sdk")];
+        while let Some(dir) = stack.pop() {
+            if let Ok(entries) = std::fs::read_dir(dir) {
+                for entry in entries.flatten() {
+                    let p = entry.path();
+                    if p.is_dir() {
+                        stack.push(p);
+                    } else if p.is_file() {
+                        if let Ok(rel) = p.strip_prefix(path) {
+                            asset_paths.push(rel.to_string_lossy().replace('\\', "/"));
+                        }
+                    }
+                }
+            }
+        }
     }
+
+    let timestamp_secs = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_secs())
+        .unwrap_or(0);
 
     let bundle_manifest_path = path.join(".cpm_bundle_manifest");
     let bundle_info = format!(
-        "cpm_bundle_version=0.1.0\ncreated_at={:?}\nassets_count={}\necosystems={}\nfiles={}\n",
-        std::time::SystemTime::now(),
+        "cpm_bundle_version=0.1.0\ncreated_epoch={}\nassets_count={}\necosystems={}\nfiles={}\n",
+        timestamp_secs,
         asset_paths.len(),
         result.detected_ecosystems.len(),
         asset_paths.join(",")

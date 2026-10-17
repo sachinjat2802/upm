@@ -62,6 +62,7 @@ pub fn execute_licenses(path: &Path) -> anyhow::Result<()> {
     }
 
     // Audit native manifests
+    let mut handled_packages = std::collections::HashSet::new();
     for eco in &result.detected_ecosystems {
         println!("  {} {} {}", "•".cyan(), eco.display_name.bold().magenta(), format!("({})", eco.language).dimmed());
 
@@ -74,6 +75,7 @@ pub fn execute_licenses(path: &Path) -> anyhow::Result<()> {
             println!("    └── Standard permissive licenses detected in {}.", eco.manifest_file.cyan());
         } else {
             for (idx, pkg) in eco_packages.iter().enumerate() {
+                handled_packages.insert((pkg.ecosystem.clone(), pkg.package.clone()));
                 let prefix = if idx == eco_packages.len() - 1 { "└──" } else { "├──" };
                 let lic_display = if pkg.is_copyleft {
                     pkg.license.bold().red()
@@ -82,6 +84,25 @@ pub fn execute_licenses(path: &Path) -> anyhow::Result<()> {
                 };
                 println!("    {} {} → {}", prefix, pkg.package.bold(), lic_display);
             }
+        }
+        println!();
+    }
+
+    let unhandled: Vec<&PackageLicense> = audited_packages
+        .iter()
+        .filter(|p| !handled_packages.contains(&(p.ecosystem.clone(), p.package.clone())))
+        .collect();
+
+    if !unhandled.is_empty() {
+        println!("  {} {} {}", "•".cyan(), "Workspace Dependencies".bold().magenta(), "(upm.toml)".dimmed());
+        for (idx, pkg) in unhandled.iter().enumerate() {
+            let prefix = if idx == unhandled.len() - 1 { "└──" } else { "├──" };
+            let lic_display = if pkg.is_copyleft {
+                pkg.license.bold().red()
+            } else {
+                pkg.license.cyan()
+            };
+            println!("    {} {}:{} → {}", prefix, pkg.ecosystem.yellow(), pkg.package.bold(), lic_display);
         }
         println!();
     }

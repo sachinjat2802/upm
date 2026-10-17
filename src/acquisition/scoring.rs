@@ -74,6 +74,8 @@ impl DetectionEngine {
     pub fn detect_dir(&self, path: &Path) -> DetectionResult {
         let adapters = self.registry.all();
         let mut scores = Vec::with_capacity(adapters.len());
+        let mut manifest_cache: HashMap<&str, Option<String>> = HashMap::with_capacity(8);
+        let mut dir_cache: HashMap<&str, bool> = HashMap::with_capacity(8);
 
         for adapter in adapters {
             let mut total = 0u32;
@@ -93,22 +95,26 @@ impl DetectionEngine {
             }
 
             // Signal 3: Manifest file present (+40 pts)
-            let manifest_path = path.join(&adapter.manifest_file);
-            let mut manifest_content = None;
-            if manifest_path.exists() {
+            let manifest_content = manifest_cache.entry(&adapter.manifest_file).or_insert_with(|| {
+                let manifest_path = path.join(&adapter.manifest_file);
+                if manifest_path.is_file() {
+                    fs::read_to_string(&manifest_path).ok()
+                } else {
+                    None
+                }
+            });
+
+            if manifest_content.is_some() {
                 total += 40;
                 details.push(ScoreDetail {
                     signal: "manifest present".into(),
                     weight: 40,
                     example: format!("{} present", adapter.manifest_file),
                 });
-                if let Ok(content) = fs::read_to_string(&manifest_path) {
-                    manifest_content = Some(content);
-                }
             }
 
             // Signal 2: Marker string inside manifest (+80 pts)
-            if let (Some(content), Some(ref marker)) = (&manifest_content, &adapter.manifest_marker) {
+            if let (Some(content), Some(ref marker)) = (manifest_content.as_deref(), &adapter.manifest_marker) {
                 if content.contains(marker) {
                     total += 80;
                     details.push(ScoreDetail {
@@ -137,8 +143,10 @@ impl DetectionEngine {
 
             // Signal 5: Directory present (+20 pts)
             if let Some(ref dir_name) = adapter.directory_indicator {
-                let dir_path = path.join(dir_name);
-                if dir_path.is_dir() {
+                let is_dir = *dir_cache.entry(dir_name.as_str()).or_insert_with(|| {
+                    path.join(dir_name).is_dir()
+                });
+                if is_dir {
                     total += 20;
                     details.push(ScoreDetail {
                         signal: "directory present".into(),

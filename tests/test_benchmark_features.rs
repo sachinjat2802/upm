@@ -140,6 +140,16 @@ fn test_agent_langgraph_and_chains() {
     let t_res = execute_agent(app_dir, Some("team"), false);
     assert!(t_res.is_ok(), "execute_agent team failed");
     assert!(app_dir.join("agent_team.py").exists());
+
+    // Test Open Cron Agent scaffolding
+    let cron_res = execute_agent(app_dir, Some("cron"), false);
+    assert!(cron_res.is_ok(), "execute_agent cron failed");
+    assert!(app_dir.join("agent_cron.py").exists());
+
+    // Test OpenRouter & Open-Source Models configuration
+    let m_res = execute_agent(app_dir, Some("models"), false);
+    assert!(m_res.is_ok(), "execute_agent models failed");
+    assert!(app_dir.join("cpm.models.json").exists());
 }
 
 #[test]

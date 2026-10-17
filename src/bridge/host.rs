@@ -7,6 +7,7 @@
 /// Supported runtimes: `python`, `node`, and any executable that
 /// speaks the 4-byte BE length-prefixed JSON wire format.
 
+use crate::acquisition::runner::AcquisitionRunner;
 use crate::bridge::peer::BridgePeer;
 use crate::bridge::transport::rpc::StdioRpcTransport;
 use anyhow::{anyhow, Result};
@@ -32,7 +33,8 @@ pub struct HostSupervisor;
 impl HostSupervisor {
     /// Spawn a language host process.
     pub async fn spawn_host(program: &str, script_path: &Path) -> Result<HostProcess> {
-        let mut child = Command::new(program)
+        let resolved = AcquisitionRunner::resolve_executable(program);
+        let mut child = Command::new(&resolved)
             .arg(script_path)
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
