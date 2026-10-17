@@ -43,34 +43,48 @@ pub fn execute_test(path: &Path, filter: Option<&str>, watch: bool, coverage: bo
     }
 
     // 2. Node / JS / TS (package.json)
-    if path.join("package.json").exists() {
-        executed_any = true;
-        println!("  {} Running JavaScript/TypeScript tests...", "📦".yellow());
-        let (pm, mut args) = if path.join("pnpm-lock.yaml").exists() {
-            ("pnpm", vec!["test"])
-        } else if path.join("bun.lockb").exists() || path.join("bun.lock").exists() {
-            ("bun", vec!["test"])
-        } else if path.join("yarn.lock").exists() {
-            ("yarn", vec!["test"])
+    let pkg_json_path = path.join("package.json");
+    if pkg_json_path.exists() {
+        let pkg_content = std::fs::read_to_string(&pkg_json_path).unwrap_or_default();
+        let test_script = if let Ok(val) = serde_json::from_str::<serde_json::Value>(&pkg_content) {
+            val.get("scripts").and_then(|s| s.get("test")).and_then(|t| t.as_str()).map(|s| s.to_string())
         } else {
-            ("npm", vec!["test"])
+            None
         };
 
-        if coverage {
-            args.push("--");
-            args.push("--coverage");
-        }
-        if watch {
-            args.push("--");
-            args.push("--watch");
-        }
+        if let Some(script) = test_script {
+            if script.contains("no test specified") {
+                println!("  {} No tests specified in package.json (skipped)", "ℹ".dimmed());
+            } else {
+                executed_any = true;
+                println!("  {} Running JavaScript/TypeScript tests...", "📦".yellow());
+                let (pm, mut args) = if path.join("pnpm-lock.yaml").exists() {
+                    ("pnpm", vec!["test"])
+                } else if path.join("bun.lockb").exists() || path.join("bun.lock").exists() {
+                    ("bun", vec!["test"])
+                } else if path.join("yarn.lock").exists() {
+                    ("yarn", vec!["test"])
+                } else {
+                    ("npm", vec!["test"])
+                };
 
-        let resolved_pm = crate::acquisition::AcquisitionRunner::resolve_executable(pm);
-        let mut cmd = Command::new(&resolved_pm);
-        cmd.args(&args).current_dir(path);
-        let status = cmd.status().map_err(|e| anyhow!("Failed to execute {} test: {}", pm, e))?;
-        if !status.success() {
-            return Err(anyhow!("Node.js test suite failed"));
+                if coverage {
+                    args.push("--");
+                    args.push("--coverage");
+                }
+                if watch {
+                    args.push("--");
+                    args.push("--watch");
+                }
+
+                let resolved_pm = crate::acquisition::AcquisitionRunner::resolve_executable(pm);
+                let mut cmd = Command::new(&resolved_pm);
+                cmd.args(&args).current_dir(path);
+                let status = cmd.status().map_err(|e| anyhow!("Failed to execute {} test: {}", pm, e))?;
+                if !status.success() {
+                    return Err(anyhow!("Node.js test suite failed"));
+                }
+            }
         }
     }
 

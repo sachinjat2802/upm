@@ -41,25 +41,35 @@ pub fn execute_build(path: &Path, release: bool, target: Option<&str>) -> Result
     }
 
     // 2. Node / JS / Web
-    if path.join("package.json").exists() {
-        built_any = true;
-        println!("  {} Building JavaScript/TypeScript bundle...", "📦".yellow());
-        let pm = if path.join("pnpm-lock.yaml").exists() {
-            "pnpm"
-        } else if path.join("bun.lockb").exists() || path.join("bun.lock").exists() {
-            "bun"
-        } else if path.join("yarn.lock").exists() {
-            "yarn"
+    let pkg_json_path = path.join("package.json");
+    if pkg_json_path.exists() {
+        let pkg_content = std::fs::read_to_string(&pkg_json_path).unwrap_or_default();
+        let has_build_script = if let Ok(val) = serde_json::from_str::<serde_json::Value>(&pkg_content) {
+            val.get("scripts").and_then(|s| s.get("build")).is_some()
         } else {
-            "npm"
+            false
         };
 
-        let resolved_pm = crate::acquisition::AcquisitionRunner::resolve_executable(pm);
-        let mut cmd = Command::new(&resolved_pm);
-        cmd.arg("run").arg("build").current_dir(path);
-        let status = cmd.status().map_err(|e| anyhow!("Failed to execute {} run build: {}", pm, e))?;
-        if !status.success() {
-            return Err(anyhow!("Web build failed"));
+        if has_build_script {
+            built_any = true;
+            println!("  {} Building JavaScript/TypeScript bundle...", "📦".yellow());
+            let pm = if path.join("pnpm-lock.yaml").exists() {
+                "pnpm"
+            } else if path.join("bun.lockb").exists() || path.join("bun.lock").exists() {
+                "bun"
+            } else if path.join("yarn.lock").exists() {
+                "yarn"
+            } else {
+                "npm"
+            };
+
+            let resolved_pm = crate::acquisition::AcquisitionRunner::resolve_executable(pm);
+            let mut cmd = Command::new(&resolved_pm);
+            cmd.arg("run").arg("build").current_dir(path);
+            let status = cmd.status().map_err(|e| anyhow!("Failed to execute {} run build: {}", pm, e))?;
+            if !status.success() {
+                return Err(anyhow!("Web build failed"));
+            }
         }
     }
 
