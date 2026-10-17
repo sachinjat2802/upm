@@ -1,7 +1,7 @@
-# Contributing to CPM (Universal Package Platform)
+# Contributing to UPM (Universal Package Manager)
 
-Thank you for your interest in contributing to **CPM** (Universal Package Platform)!
-CPM is designed from the ground up to be the first choice for both human software engineers and autonomous AI coding agents.
+Thank you for your interest in contributing to **UPM** (Universal Package Manager)!
+UPM is designed from the ground up to be the first choice for both human software engineers and autonomous AI coding agents.
 
 ---
 
@@ -24,13 +24,13 @@ The project is structured into three primary layers:
 ### Building & Checking
 ```bash
 # Clone the repository
-git clone https://github.com/sachinjat2802/cpm.git
-cd cpm
+git clone https://github.com/sachinjat2802/upm.git
+cd upm
 
 # Fast compile check
 cargo check
 
-# Build debug binaries (cpm and upm)
+# Build debug binary (upm)
 cargo build
 
 # Run all test suites

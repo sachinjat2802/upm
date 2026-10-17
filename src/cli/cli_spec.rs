@@ -18,7 +18,7 @@ use crate::cli::*;
     name = "upm",
     about = "\n  ╭──────────────────────────────────────────────────────╮\n  │  UPM — Universal Package Manager                      │\n  │  Write in one language. Depend on all of them.       │\n  ╰──────────────────────────────────────────────────────╯\n\n  A polyglot package manager that auto-detects and orchestrates\n  npm, pnpm, pip, uv, cargo, go, and 14 more ecosystems.\n\n  Quick start:\n    upm init                    Create a new polyglot project\n    upm detect                  Show detected ecosystems\n    upm install                 Install all dependencies\n    upm add pip:requests        Add a foreign dependency\n    upm bridge call python:math.sqrt '[9]'",
     version = env!("CARGO_PKG_VERSION"),
-    after_help = "  Docs:    https://github.com/sachinjat2802/cpm\n"
+    after_help = "  Docs:    https://github.com/sachinjat2802/upm\n"
 )]
 pub struct Cli {
     /// Format all command output as JSON (#2)
