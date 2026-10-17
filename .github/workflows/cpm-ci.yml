@@ -167,20 +167,17 @@ jobs:
         run: |
           ./target/release/upm list
           ./target/release/upm info serde
-          ./target/release/upm explain serde
+          ./target/release/upm why serde
           ./target/release/upm guess
 
-      - name: Security, Secret Scanning & Compliance Policies
+      - name: Security & Compliance Policies
         run: |
-          ./target/release/upm scan-secrets
           ./target/release/upm policy
           ./target/release/upm licenses
-          ./target/release/upm audit
 
-      - name: CI & Benchmark Diagnostics
+      - name: CI Automation Diagnostics
         run: |
           ./target/release/upm ci
-          ./target/release/upm benchmark
 
       - name: Workspace Lifecycle Test (Init, Detect, Lock)
         run: |

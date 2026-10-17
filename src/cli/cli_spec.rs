@@ -155,7 +155,7 @@ pub enum Commands {
     Lock {
         #[arg(default_value = ".")]
         path: PathBuf,
-        #[arg(short = 'v', long)]
+        #[arg(short = 'c', long)]
         verify: bool,
         #[arg(short = 'u', long)]
         update: bool,
@@ -240,7 +240,7 @@ pub enum Commands {
         dry_run: bool,
     },
     /// ❓ Explain why a dependency is included in the workspace (#16)
-    #[command(next_help_heading = "Core Commands")]
+    #[command(next_help_heading = "Core Commands", visible_alias = "explain")]
     Why {
         package: String,
         #[arg(default_value = ".")]
