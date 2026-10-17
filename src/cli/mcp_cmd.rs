@@ -175,7 +175,36 @@ fn sync_mcp_configs(path: &Path) -> Result<()> {
         if let Some(parent) = config_path.parent() {
             let _ = fs::create_dir_all(parent);
         }
-        if fs::write(&config_path, &serialized).is_ok() {
+
+        // Non-destructive merge: preserve existing client settings
+        let write_res = if config_path.exists() {
+            if let Ok(existing_str) = fs::read_to_string(&config_path) {
+                if let Ok(mut existing_val) = serde_json::from_str::<serde_json::Value>(&existing_str) {
+                    if let Some(obj) = existing_val.as_object_mut() {
+                        if let Ok(mcp_val) = serde_json::to_value(&master_config.mcp_servers) {
+                            obj.insert("mcpServers".to_string(), mcp_val);
+                            if let Ok(merged_str) = serde_json::to_string_pretty(&existing_val) {
+                                fs::write(&config_path, merged_str)
+                            } else {
+                                fs::write(&config_path, &serialized)
+                            }
+                        } else {
+                            fs::write(&config_path, &serialized)
+                        }
+                    } else {
+                        fs::write(&config_path, &serialized)
+                    }
+                } else {
+                    fs::write(&config_path, &serialized)
+                }
+            } else {
+                fs::write(&config_path, &serialized)
+            }
+        } else {
+            fs::write(&config_path, &serialized)
+        };
+
+        if write_res.is_ok() {
             println!("  {} Synced to {} ({})", "✔".green(), client_name.bold(), config_path.display());
         }
     }

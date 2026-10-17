@@ -102,8 +102,8 @@ pub fn execute_scan_secrets(path: &Path) -> anyhow::Result<()> {
     let mut findings: Vec<SecretFinding> = Vec::new();
     let mut files_scanned = 0;
 
-    // Recursively walk the workspace
-    scan_directory(path, path, &mut findings, &mut files_scanned);
+    // Iteratively walk the workspace
+    scan_directory(path, &mut findings, &mut files_scanned);
 
     // Report results
     println!("  {} Scanned {} files across workspace.", "✔".green(), files_scanned.to_string().bold());
@@ -127,65 +127,68 @@ pub fn execute_scan_secrets(path: &Path) -> anyhow::Result<()> {
     Ok(())
 }
 
-/// Recursively scan a directory for secret patterns.
+/// Iteratively scan the workspace directory tree for secret patterns.
 fn scan_directory(
     root: &Path,
-    dir: &Path,
     findings: &mut Vec<SecretFinding>,
     files_scanned: &mut usize,
 ) {
-    let entries = match std::fs::read_dir(dir) {
-        Ok(entries) => entries,
-        Err(_) => return,
-    };
+    let mut stack = vec![root.to_path_buf()];
 
-    for entry in entries.flatten() {
-        let entry_path = entry.path();
-        let file_name = entry.file_name().to_string_lossy().to_string();
+    while let Some(current_dir) = stack.pop() {
+        let entries = match std::fs::read_dir(&current_dir) {
+            Ok(entries) => entries,
+            Err(_) => continue,
+        };
 
-        if entry_path.is_dir() {
-            // Skip known dependency/build directories
-            if SKIP_DIRS.contains(&file_name.as_str()) {
-                continue;
-            }
-            scan_directory(root, &entry_path, findings, files_scanned);
-        } else if entry_path.is_file() {
-            // Check file extension
-            let ext = entry_path
-                .extension()
-                .and_then(|e| e.to_str())
-                .unwrap_or("");
+        for entry in entries.flatten() {
+            let entry_path = entry.path();
+            let file_name = entry.file_name().to_string_lossy().to_string();
 
-            // Also scan extensionless dotfiles like .env
-            let is_dotenv = file_name.starts_with(".env");
-            if !is_dotenv && !SCANNABLE_EXTENSIONS.contains(&ext) {
-                continue;
-            }
+            if entry_path.is_dir() {
+                // Skip known dependency/build directories
+                if SKIP_DIRS.contains(&file_name.as_str()) {
+                    continue;
+                }
+                stack.push(entry_path);
+            } else if entry_path.is_file() {
+                // Check file extension
+                let ext = entry_path
+                    .extension()
+                    .and_then(|e| e.to_str())
+                    .unwrap_or("");
 
-            // Read file and scan lines
-            if let Ok(content) = std::fs::read_to_string(&entry_path) {
-                *files_scanned += 1;
-                let relative = entry_path
-                    .strip_prefix(root)
-                    .unwrap_or(&entry_path)
-                    .display()
-                    .to_string();
+                // Also scan extensionless dotfiles like .env
+                let is_dotenv = file_name.starts_with(".env");
+                if !is_dotenv && !SCANNABLE_EXTENSIONS.contains(&ext) {
+                    continue;
+                }
 
-                for (line_num, line) in content.lines().enumerate() {
-                    for detector in DETECTORS {
-                        if (detector.checker)(line) {
-                            // Truncate the preview for readability
-                            let preview = if line.len() > 80 {
-                                format!("{}...", &line[..80])
-                            } else {
-                                line.to_string()
-                            };
-                            findings.push(SecretFinding {
-                                file: relative.clone(),
-                                line_number: line_num + 1,
-                                pattern_name: detector.name.to_string(),
-                                preview: preview.trim().to_string(),
-                            });
+                // Read file and scan lines
+                if let Ok(content) = std::fs::read_to_string(&entry_path) {
+                    *files_scanned += 1;
+                    let relative = entry_path
+                        .strip_prefix(root)
+                        .unwrap_or(&entry_path)
+                        .display()
+                        .to_string();
+
+                    for (line_num, line) in content.lines().enumerate() {
+                        for detector in DETECTORS {
+                            if (detector.checker)(line) {
+                                // UTF-8 safe truncation for preview
+                                let preview = if line.chars().count() > 80 {
+                                    format!("{}...", line.chars().take(80).collect::<String>())
+                                } else {
+                                    line.to_string()
+                                };
+                                findings.push(SecretFinding {
+                                    file: relative.clone(),
+                                    line_number: line_num + 1,
+                                    pattern_name: detector.name.to_string(),
+                                    preview: preview.trim().to_string(),
+                                });
+                            }
                         }
                     }
                 }

@@ -132,6 +132,12 @@ fn sync_ai_rules(path: &Path) -> Result<()> {
         println!("  {} Synchronized {} rule -> {}", "✔".green(), ide.bold(), file_path.display());
     }
 
+    // Modern Cursor MDC rules (.cursor/rules/cpm.mdc)
+    let cursor_rules_dir = path.join(".cursor").join("rules");
+    let _ = fs::create_dir_all(&cursor_rules_dir);
+    let _ = fs::write(cursor_rules_dir.join("cpm.mdc"), &rule_content);
+    println!("  {} Synchronized Cursor MDC rule -> {}", "✔".green(), cursor_rules_dir.join("cpm.mdc").display());
+
     // Antigravity rules
     let ag_rules_dir = path.join(".agent").join("rules");
     let _ = fs::create_dir_all(&ag_rules_dir);

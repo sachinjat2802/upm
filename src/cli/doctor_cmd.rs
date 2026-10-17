@@ -42,7 +42,8 @@ pub fn execute_doctor(path: &Path, fix: bool) -> anyhow::Result<()> {
 
     for (_cmd, name, ver_cmd) in tools {
         let parts: Vec<&str> = ver_cmd.split_whitespace().collect();
-        let is_ok = Command::new(parts[0]).args(&parts[1..]).output().is_ok();
+        let resolved = crate::acquisition::AcquisitionRunner::resolve_executable(parts[0]);
+        let is_ok = Command::new(&resolved).args(&parts[1..]).output().is_ok();
         if is_ok {
             println!("    {} {} → {}", "✔".green(), name.bold(), "installed".dimmed());
         } else {
@@ -63,7 +64,8 @@ pub fn execute_doctor(path: &Path, fix: bool) -> anyhow::Result<()> {
             issues += 1;
             if fix {
                 println!("    ▶ Repairing virtualenv via `uv venv`...");
-                if Command::new("uv").arg("venv").current_dir(path).status().is_ok() {
+                let resolved_uv = crate::acquisition::AcquisitionRunner::resolve_executable("uv");
+                if Command::new(&resolved_uv).arg("venv").current_dir(path).status().is_ok() {
                     println!("    {} Virtualenv self-repaired cleanly.", "✔".green());
                     repaired += 1;
                 }
@@ -85,7 +87,8 @@ pub fn execute_doctor(path: &Path, fix: bool) -> anyhow::Result<()> {
             issues += 1;
             if fix {
                 println!("    ▶ Repairing node_modules via `pnpm install`...");
-                if Command::new("pnpm").arg("install").current_dir(path).status().is_ok() {
+                let resolved_pnpm = crate::acquisition::AcquisitionRunner::resolve_executable("pnpm");
+                if Command::new(&resolved_pnpm).arg("install").current_dir(path).status().is_ok() {
                     println!("    ✔ node_modules self-repaired cleanly.");
                     repaired += 1;
                 }

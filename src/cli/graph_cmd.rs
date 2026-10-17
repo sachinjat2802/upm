@@ -23,26 +23,49 @@ pub fn execute_graph(path: &Path, out_file: Option<&str>) -> anyhow::Result<()> 
 
     println!("  ▶ Traversing polyglot dependency DAG in upm.toml...");
 
-    let html_content = r#"<!DOCTYPE html>
+    let manifest = crate::acquisition::UpmManifest::load_from_dir(path);
+    let mut nodes_html = String::new();
+
+    if let Some(ref m) = manifest {
+        for (pkg, ver) in &m.foreign_dependencies {
+            let class_name = if pkg.starts_with("pip:") || pkg.starts_with("python:") {
+                "python"
+            } else if pkg.starts_with("npm:") || pkg.starts_with("node:") || pkg.starts_with("pnpm:") {
+                "node-js"
+            } else if pkg.starts_with("cargo:") || pkg.starts_with("rust:") {
+                "rust"
+            } else {
+                "generic"
+            };
+            nodes_html.push_str(&format!("  <div class=\"node {}\">{} ({})</div>\n", class_name, pkg, ver));
+        }
+    }
+
+    if nodes_html.is_empty() {
+        nodes_html.push_str("  <div class=\"node generic\">No foreign dependencies declared in upm.toml</div>\n");
+    }
+
+    let html_content = format!(
+        r#"<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
   <title>CPM Dependency Graph Visualizer</title>
   <style>
-    body { background-color: #1e1e2e; color: #cdd6f4; font-family: system-ui, sans-serif; padding: 2rem; }
-    .node { padding: 10px 18px; border-radius: 8px; margin: 8px; display: inline-block; font-weight: bold; }
-    .python { background: #38761d; color: #fff; }
-    .node-js { background: #b45f06; color: #fff; }
-    .rust { background: #b45f06; color: #fff; }
+    body {{ background-color: #1e1e2e; color: #cdd6f4; font-family: system-ui, sans-serif; padding: 2rem; }}
+    .node {{ padding: 10px 18px; border-radius: 8px; margin: 8px; display: inline-block; font-weight: bold; }}
+    .python {{ background: #38761d; color: #fff; }}
+    .node-js {{ background: #b45f06; color: #fff; }}
+    .rust {{ background: #c2410c; color: #fff; }}
+    .generic {{ background: #475569; color: #fff; }}
   </style>
 </head>
 <body>
   <h1>🕸️ CPM Polyglot Dependency Graph</h1>
-  <div class="node python">pip:docling (^2.12.0)</div>
-  <div class="node node-js">npm:express (^4.19.0)</div>
-  <div class="node rust">crates:serde (^1.0.200)</div>
-</body>
-</html>"#;
+{}</body>
+</html>"#,
+        nodes_html
+    );
 
     std::fs::write(&target_path, html_content)?;
 

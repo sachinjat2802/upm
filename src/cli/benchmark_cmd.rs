@@ -21,19 +21,24 @@ pub async fn execute_benchmark(language: &str, iterations: usize) -> anyhow::Res
     println!("  {}", "╰──────────────────────────────────────────────────────╯".cyan());
     println!();
 
-    let host_file = match language {
-        "python" | "py" => "hosts/python_host.py",
-        "node" | "js" => "hosts/node_host.js",
+    let host_name = match language {
+        "python" | "py" => "python_host.py",
+        "node" | "js" => "node_host.js",
         other => anyhow::bail!("Unsupported benchmark language: {}", other),
     };
 
-    let host_path = Path::new(host_file);
-    if !host_path.exists() {
-        anyhow::bail!("Host script not found at {}", host_file);
-    }
+    let candidate1 = Path::new("hosts").join(host_name);
+    let candidate2 = std::env::current_exe().ok().and_then(|e| e.parent().map(|p| p.join("hosts").join(host_name)));
+    let host_path = if candidate1.exists() {
+        candidate1
+    } else if let Some(ref c2) = candidate2.filter(|p| p.exists()) {
+        c2.clone()
+    } else {
+        anyhow::bail!("Host script '{}' not found in ./hosts or binary directory", host_name);
+    };
 
     print!("  ▶ Spawning {} host supervisor... ", language.cyan());
-    let host = HostSupervisor::spawn_host(language, host_path).await?;
+    let host = HostSupervisor::spawn_host(language, &host_path).await?;
     println!("{}", "connected".green().bold());
     println!("  ▶ Running {} RPC iterations...", iterations.to_string().bold().yellow());
     println!();

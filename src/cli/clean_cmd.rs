@@ -37,6 +37,8 @@ pub fn execute_clean(path: &Path, dry_run: bool) -> anyhow::Result<()> {
 
                 if dry_run {
                     println!("    {} [dry-run] Would remove {} ({:.1} MB)", "⊘".yellow(), dir_name.bold(), size_mb);
+                    cleaned_dirs += 1;
+                    total_freed_bytes += size;
                 } else {
                     match std::fs::remove_dir_all(&target_dir) {
                         Ok(_) => {
@@ -56,7 +58,7 @@ pub fn execute_clean(path: &Path, dry_run: bool) -> anyhow::Result<()> {
     let total_freed_mb = total_freed_bytes as f64 / (1024.0 * 1024.0);
     println!();
     if dry_run {
-        println!("  {} Dry run complete. Found {} artifact directory(s).", "ℹ".blue(), cleaned_dirs);
+        println!("  {} Dry run complete. Found {} artifact directory(s) ({:.1} MB).", "ℹ".blue(), cleaned_dirs, total_freed_mb);
     } else {
         println!(
             "  {} Cleaned {} artifact directory(s), freed {:.1} MB disk space!",
@@ -72,15 +74,16 @@ pub fn execute_clean(path: &Path, dry_run: bool) -> anyhow::Result<()> {
 
 fn get_dir_size(path: &Path) -> u64 {
     let mut total = 0;
-    if let Ok(entries) = std::fs::read_dir(path) {
-        for entry in entries.flatten() {
-            let p = entry.path();
-            if p.is_file() {
-                if let Ok(meta) = p.metadata() {
+    let mut stack = vec![path.to_path_buf()];
+    while let Some(current) = stack.pop() {
+        if let Ok(entries) = std::fs::read_dir(&current) {
+            for entry in entries.flatten() {
+                let p = entry.path();
+                if p.is_dir() {
+                    stack.push(p);
+                } else if let Ok(meta) = p.metadata() {
                     total += meta.len();
                 }
-            } else if p.is_dir() {
-                total += get_dir_size(&p);
             }
         }
     }

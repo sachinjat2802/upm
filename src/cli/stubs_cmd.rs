@@ -22,11 +22,26 @@ pub async fn execute_generate_stubs(out_dir: &Path) -> anyhow::Result<()> {
 
     std::fs::create_dir_all(out_dir)?;
 
+    let get_host_path = |name: &str| -> Option<std::path::PathBuf> {
+        let p1 = Path::new("hosts").join(name);
+        if p1.exists() {
+            return Some(p1);
+        }
+        if let Ok(exe) = std::env::current_exe() {
+            if let Some(parent) = exe.parent() {
+                let p2 = parent.join("hosts").join(name);
+                if p2.exists() {
+                    return Some(p2);
+                }
+            }
+        }
+        None
+    };
+
     // 1. Generate Python stubs (.pyi)
-    let py_host_path = Path::new("hosts/python_host.py");
-    if py_host_path.exists() {
+    if let Some(py_host_path) = get_host_path("python_host.py") {
         print!("  ▶ Inspecting Python host methods... ");
-        if let Ok(host) = HostSupervisor::spawn_host("python", py_host_path).await {
+        if let Ok(host) = HostSupervisor::spawn_host("python", &py_host_path).await {
             let res = host.peer.call("__inspect__", vec![]).await?;
             if let UpmValue::Array(items) = res {
                 let mut pyi_content = String::from("# CPM Auto-Generated Python Type Stubs (.pyi)\n\n");
@@ -47,10 +62,9 @@ pub async fn execute_generate_stubs(out_dir: &Path) -> anyhow::Result<()> {
     }
 
     // 2. Generate Node.js / TypeScript stubs (.d.ts)
-    let node_host_path = Path::new("hosts/node_host.js");
-    if node_host_path.exists() {
+    if let Some(node_host_path) = get_host_path("node_host.js") {
         print!("  ▶ Inspecting Node.js host methods... ");
-        if let Ok(host) = HostSupervisor::spawn_host("node", node_host_path).await {
+        if let Ok(host) = HostSupervisor::spawn_host("node", &node_host_path).await {
             let res = host.peer.call("__inspect__", vec![]).await?;
             if let UpmValue::Array(items) = res {
                 let mut dts_content = String::from("// CPM Auto-Generated TypeScript Type Definitions (.d.ts)\n\nexport namespace CpmBridge {\n");
