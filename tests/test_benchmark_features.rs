@@ -169,3 +169,34 @@ fn test_cpm_script_and_tool_runner() {
     let list_res = execute_run_script(app_dir, None, &[]);
     assert!(list_res.is_ok(), "execute_run_script list failed: {:?}", list_res);
 }
+
+#[test]
+fn test_cpm_workspace_management() {
+    let tmp = tempdir().expect("tempdir failed");
+    let root = tmp.path();
+
+    // Create sub-package in packages/core
+    let pkg_dir = root.join("packages").join("core");
+    std::fs::create_dir_all(&pkg_dir).unwrap();
+    std::fs::write(pkg_dir.join("package.json"), r#"{"name": "@cpm/core", "version": "0.1.0"}"#).unwrap();
+
+    let res = upm::cli::execute_workspace(root, Some("list"), None, &[]);
+    assert!(res.is_ok(), "execute_workspace failed: {:?}", res);
+}
+
+#[test]
+fn test_cpm_config_management() {
+    let res = upm::cli::execute_config(Some("list"), None, None);
+    assert!(res.is_ok(), "execute_config list failed: {:?}", res);
+
+    let get_res = upm::cli::execute_config(Some("get"), Some("storage.drive"), None);
+    assert!(get_res.is_ok(), "execute_config get failed: {:?}", get_res);
+}
+
+#[test]
+fn test_cpm_ci_generation() {
+    let tmp = tempdir().expect("tempdir failed");
+    let res = upm::cli::execute_ci(tmp.path(), Some("github"), None);
+    assert!(res.is_ok(), "execute_ci failed: {:?}", res);
+    assert!(tmp.path().join(".github").join("workflows").join("cpm-ci.yml").exists());
+}

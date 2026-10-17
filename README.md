@@ -148,7 +148,7 @@ cpm mcp add weather-tool --cmd python -- weather.py
 cpm mcp sync
 ```
 
-### 3. OpenPackage Cross-IDE Synchronization
+### 3. Universal AI Cross-IDE Synchronization
 ```bash
 # Sync AI rules across Cursor, Claude, Windsurf, Cline, and Antigravity
 cpm ai sync
@@ -174,36 +174,54 @@ All package stores are centralized on high-capacity storage.
 ### Core & Agentic App Creation
 | Command | Alias | Description |
 | :--- | :--- | :--- |
-| `cpm create [path] [-t template]` | `new` | 🚀 Scaffold complete agentic apps (`agentic`, `polyglot-ai`, `fullstack`, `cli`) |
+| `cpm create [path] [-t template]` | `new` | 🚀 Scaffold apps (`agentic`, `langgraph`, `langchain`, `multiagent`, `polyglot-ai`, `cli`) |
 | `cpm init [path]` | `i` | 📝 Initialize a polyglot `upm.toml` manifest interactively or non-interactively |
 | `cpm detect [path]` | `d` | 🔍 Auto-detect workspace language ecosystems using weighted signal scoring |
 | `cpm install` | `is` | 📦 Concurrently install dependencies across all detected ecosystems |
 | `cpm add <eco:pkg>` | `a` | ➕ Add a foreign dependency (e.g. `pip:fastapi`, `npm:express`, `cargo:serde`) |
 | `cpm remove <eco:pkg>` | `rm` | ➖ Remove a foreign dependency from manifests and ecosystem lockfiles |
 | `cpm update` | `up` | 🔄 Update dependencies across all ecosystems with parallel resolution |
+| `cpm test [args]` | `t` | 🧪 Concurrently run tests across detected ecosystems (pytest, cargo test, npm test) |
+| `cpm build [args]` | `b` | 🏗️ Build production release artifacts across polyglot ecosystems |
+| `cpm deploy [provider]` | — | 🚀 Deploy application artifacts to cloud, Docker, or edge providers |
 | `cpm run [script]` | — | ▶️ Run scripts from `upm.toml`, `package.json`, or `pyproject.toml` |
 | `cpm exec <tool>` | `x` | 🔨 Run local package binaries (`node_modules/.bin`, `.venv/Scripts`, `target`) |
 | `cpm lock [-v] [-u]` | — | 🔒 Generate or verify deterministic `cpm.lock` with SHA-256 hashes |
 | `cpm guess` | — | 🔍 Scan source code AST/imports to detect missing dependencies |
 | `cpm info <pkg>` | — | ℹ️ Inspect package metadata and registry links across ecosystems |
 
-### AI, MCP & Agentic Operations
+### AI, MCP & Agentic Frameworks
 | Command | Description |
 | :--- | :--- |
 | `cpm agent context [--json]` | 🧠 Generate token-optimized workspace context for AI coding agents |
 | `cpm agent prompt` | 📋 Output system prompt instructions for LLM coding agents |
+| `cpm agent graph` | 🕸️ Scaffold LangGraph state machine with cyclic graph and checkpoints |
+| `cpm agent chain` | ⛓️ Scaffold LangChain LCEL streaming prompt-to-model pipeline |
+| `cpm agent team` | 👥 Deploy hierarchical supervisor-to-worker multi-agent teams |
+| `cpm agent models` | 🤖 Configure OpenRouter, Ollama, vLLM, OpenAI, and Gemini models |
 | `cpm ai sync` | 🔄 Synchronize rules across Cursor, Claude, Windsurf, Cline, and Antigravity |
 | `cpm ai add <rule>` | ➕ Add an AI rule to the workspace and sync to all IDEs |
 | `cpm mcp list` | 🔌 List all configured Model Context Protocol servers across installed AI IDEs |
 | `cpm mcp add <name> --cmd <c>`| ➕ Register a new MCP server in workspace and clients |
 | `cpm mcp sync` | 🔄 Synchronize MCP configurations across Claude Desktop, Cursor, Zed, Antigravity |
 
+### Workspace, Ecosystem & Lifecycle
+| Command | Alias | Description |
+| :--- | :--- | :--- |
+| `cpm workspace [list/members/health]`| `ws` | 🏢 Manage monorepos, multi-package workspaces, and member dependencies |
+| `cpm env [list/get/set/export]` | — | 🔐 Manage environment variables, `.env` profiles, and secret masking |
+| `cpm publish [--dry-run]` | `pub` | 📤 Publish polyglot packages to registries (npm, PyPI, Crates.io) with verification |
+| `cpm plugin [list/install/run]` | — | 🧩 Extend CPM with community plugins and custom ecosystem adapters |
+| `cpm config [get/set/list]` | — | ⚙️ Inspect and modify workspace and global CPM configurations |
+| `cpm upgrade [--check]` | — | ⬆️ Upgrade the CPM binary to the latest available release |
+| `cpm ci [github/gitlab]` | — | 🤖 Generate optimized continuous integration workflows |
+
 ### Storage, Performance & Diagnostics
 | Command | Description |
 | :--- | :--- |
 | `cpm drive status` | 💾 Inspect local drive allocation and active CPM storage directories |
 | `cpm drive setup` | ⚙️ Configure Cargo, Pip, npm, pnpm, and CPM to store all data on D: drive |
-| `cpm cache status` | 🗄️ Display Flight CAS cache statistics, size, and hit rates |
+| `cpm cache status` | 🗄️ Display Content-Addressable Storage (CAS) statistics, size, and hit rates |
 | `cpm cache clean` | 🧹 Purge the global package cache and reclaim disk space |
 | `cpm doctor` | 🩺 Run self-healing diagnostics and automatic environment repairs |
 | `cpm bridge call <fn> [args]` | 🌉 Call cross-language methods with zero RPC latency |
@@ -245,10 +263,10 @@ async fn main() -> anyhow::Result<()> {
 ```
 D:\ (High-Capacity Storage: >800 GB Free)
 └── .cpm\
-    ├── cache\          <-- Flight Content-Addressable Storage (CAS)
+    ├── cache\          <-- Content-Addressable Storage (CAS)
     ├── bin\            <-- Global tool binaries
-    ├── ai\             <-- Universal OpenPackage AI rules & skills
-    ├── mcp\            <-- mcpman Server instances & configurations
+    ├── ai\             <-- Native CPM AI rules & skills
+    ├── mcp\            <-- Native MCP Server instances & configurations
     └── venvs\          <-- Isolated Python virtual environments
 └── .cargo\             <-- Rust Crates & toolchains
 └── .rustup\            <-- Rust compiler toolchains

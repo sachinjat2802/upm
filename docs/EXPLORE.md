@@ -7,10 +7,10 @@
 ## 🌟 Table of Contents
 1. [The Agentic Era Manifesto](#1-the-agentic-era-manifesto)
 2. [Exploration 1: Scaffolding an Agentic App](#2-exploration-1-scaffolding-an-agentic-app)
-3. [Exploration 2: Replit UPM Dependency Guesser](#3-exploration-2-replit-upm-dependency-guesser)
-4. [Exploration 3: Flight CAS Cache & Lockfile Verification](#4-exploration-3-flight-cas-cache--lockfile-verification)
-5. [Exploration 4: OpenPackage Cross-IDE Synchronization](#5-exploration-4-openpackage-cross-ide-synchronization)
-6. [Exploration 5: mcpman Universal MCP Hub](#6-exploration-5-mcpman-universal-mcp-hub)
+3. [Exploration 2: Native AST Dependency Guesser](#3-exploration-2-native-ast-dependency-guesser)
+4. [Exploration 3: Content-Addressable Storage (CAS) & Lockfile Verification](#4-exploration-3-content-addressable-storage-cas--lockfile-verification)
+5. [Exploration 4: Universal AI Guidelines Cross-IDE Synchronization](#5-exploration-4-universal-ai-guidelines-cross-ide-synchronization)
+6. [Exploration 5: Universal MCP Hub](#6-exploration-5-universal-mcp-hub)
 7. [Exploration 6: Autonomous AI Agent Interface](#7-exploration-6-autonomous-ai-agent-interface)
 8. [Exploration 7: High-Capacity D: Drive Optimization](#8-exploration-7-high-capacity-d-drive-optimization)
 9. [Exploration 8: Zero-Latency Cross-Language Bridge](#9-exploration-8-zero-latency-cross-language-bridge)
@@ -53,9 +53,9 @@ cpm run dev
 
 ---
 
-## 3. Exploration 2: Replit UPM Dependency Guesser
+## 3. Exploration 2: Native AST Dependency Guesser
 
-Inspired by Replit UPM, CPM inspects your codebase's Abstract Syntax Tree (AST) to detect undeclared dependencies:
+CPM inspects your codebase's Abstract Syntax Tree (AST) to detect undeclared dependencies in a single pass:
 
 ```bash
 # Scan Python, JavaScript, TypeScript, and Rust source files
@@ -79,9 +79,9 @@ cpm guess --apply
 
 ---
 
-## 4. Exploration 3: Flight CAS Cache & Lockfile Verification
+## 4. Exploration 3: Content-Addressable Storage (CAS) & Lockfile Verification
 
-Inspired by Flight, CPM provides a high-speed Content-Addressable Storage (CAS) cache and deterministic lockfile engine:
+CPM provides a high-speed Content-Addressable Storage (CAS) cache and deterministic lockfile engine:
 
 ### Generating Deterministic Lockfiles:
 ```bash
@@ -115,9 +115,9 @@ cpm cache clean
 
 ---
 
-## 5. Exploration 4: OpenPackage Cross-IDE Synchronization
+## 5. Exploration 4: Universal AI Guidelines Cross-IDE Synchronization
 
-Inspired by OpenPackage (`opkg`), CPM guarantees that your AI instructions remain in sync across all AI coding assistants:
+CPM guarantees that your AI instructions remain in sync across all AI coding assistants:
 
 ```bash
 # Synchronizes rules between Cursor, Claude, Windsurf, Cline, and Antigravity
@@ -136,9 +136,9 @@ CPM writes the rule once and updates:
 
 ---
 
-## 6. Exploration 5: mcpman Universal MCP Hub
+## 6. Exploration 5: Universal MCP Hub
 
-Inspired by `mcpman`, CPM unifies Model Context Protocol server configuration:
+CPM unifies Model Context Protocol server configuration across all AI editors:
 
 ```bash
 # List all detected MCP servers across installed AI IDEs

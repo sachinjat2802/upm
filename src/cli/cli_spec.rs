@@ -484,6 +484,57 @@ pub enum Commands {
         key: Option<String>,
         value: Option<String>,
     },
+    /// 🏢 Polyglot monorepo & multi-package workspace orchestrator
+    #[command(next_help_heading = "Core Commands", visible_alias = "ws")]
+    Workspace {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        action: Option<String>,
+        command: Option<String>,
+        #[arg(last = true)]
+        args: Vec<String>,
+    },
+    /// 📦 Release & publish packages to npm, Crates.io, or PyPI
+    #[command(next_help_heading = "DevOps & Cloud Native")]
+    Publish {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(long)]
+        dry_run: bool,
+        #[arg(short = 'b', long)]
+        bump: Option<String>,
+        #[arg(short = 't', long)]
+        tag: Option<String>,
+    },
+    /// 🔌 Manage community plugins and extensions
+    #[command(next_help_heading = "Advanced Utilities")]
+    Plugin {
+        action: Option<String>,
+        name: Option<String>,
+    },
+    /// ⚙️ Manage global CPM user configuration (D:\.cpm\config.toml)
+    #[command(next_help_heading = "Advanced Utilities")]
+    Config {
+        action: Option<String>,
+        key: Option<String>,
+        value: Option<String>,
+    },
+    /// 🚀 Self-update CPM to latest binary release
+    #[command(next_help_heading = "Core Commands")]
+    Upgrade {
+        #[arg(short = 'c', long)]
+        check: bool,
+    },
+    /// 🤖 Auto-generate production CI/CD workflows (GitHub, GitLab, CircleCI)
+    #[command(next_help_heading = "DevOps & Cloud Native")]
+    Ci {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(short = 'p', long)]
+        provider: Option<String>,
+        #[arg(short = 'o', long)]
+        out: Option<String>,
+    },
 }
 
 #[derive(Subcommand)]
@@ -574,6 +625,12 @@ pub async fn run_cli_app(_bin_name: &str) -> anyhow::Result<()> {
         Commands::Build { path, release, target } => execute_build(&path, release, target.as_deref())?,
         Commands::Deploy { path, provider, env, dry_run } => execute_deploy(&path, provider.as_deref(), env.as_deref(), dry_run)?,
         Commands::Env { path, action, key, value } => execute_env(&path, action.as_deref(), key.as_deref(), value.as_deref())?,
+        Commands::Workspace { path, action, command, args } => execute_workspace(&path, action.as_deref(), command.as_deref(), &args)?,
+        Commands::Publish { path, dry_run, bump, tag } => execute_publish(&path, dry_run, bump.as_deref(), tag.as_deref())?,
+        Commands::Plugin { action, name } => execute_plugin(action.as_deref(), name.as_deref())?,
+        Commands::Config { action, key, value } => execute_config(action.as_deref(), key.as_deref(), value.as_deref())?,
+        Commands::Upgrade { check } => execute_upgrade(check)?,
+        Commands::Ci { path, provider, out } => execute_ci(&path, provider.as_deref(), out.as_deref())?,
         Commands::Bridge { sub } => match sub {
             BridgeSubcommands::Call { target, args_json } => {
                 execute_bridge_call(&target, args_json.as_deref()).await?;

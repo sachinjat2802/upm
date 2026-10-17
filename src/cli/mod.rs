@@ -51,6 +51,12 @@ pub mod test_cmd;
 pub mod build_cmd;
 pub mod deploy_cmd;
 pub mod env_cmd;
+pub mod workspace_cmd;
+pub mod publish_cmd;
+pub mod plugin_cmd;
+pub mod config_cmd;
+pub mod upgrade_cmd;
+pub mod ci_cmd;
 
 use crate::acquisition::{AcquisitionRunner, AdapterRegistry, DetectionEngine, UpmManifest};
 use colored::Colorize;
@@ -108,6 +114,12 @@ pub use test_cmd::execute_test;
 pub use build_cmd::execute_build;
 pub use deploy_cmd::execute_deploy;
 pub use env_cmd::execute_env;
+pub use workspace_cmd::execute_workspace;
+pub use publish_cmd::execute_publish;
+pub use plugin_cmd::execute_plugin;
+pub use config_cmd::execute_config;
+pub use upgrade_cmd::execute_upgrade;
+pub use ci_cmd::execute_ci;
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 
