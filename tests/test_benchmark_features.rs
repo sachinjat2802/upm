@@ -254,3 +254,83 @@ fn test_cpm_upgrade_check() {
     let res = upm::cli::execute_upgrade(true);
     assert!(res.is_ok(), "execute_upgrade check failed: {:?}", res);
 }
+
+#[test]
+fn test_cpm_clean_command() {
+    let tmp = tempdir().expect("tempdir failed");
+    let path = tmp.path();
+    fs::create_dir_all(path.join("node_modules")).unwrap();
+    fs::create_dir_all(path.join("target")).unwrap();
+    fs::create_dir_all(path.join(".venv")).unwrap();
+
+    let dry_res = upm::cli::execute_clean(path, true);
+    assert!(dry_res.is_ok(), "execute_clean dry-run failed: {:?}", dry_res);
+
+    let clean_res = upm::cli::execute_clean(path, false);
+    assert!(clean_res.is_ok(), "execute_clean failed: {:?}", clean_res);
+    assert!(!path.join("node_modules").exists());
+    assert!(!path.join("target").exists());
+}
+
+#[test]
+fn test_cpm_diff_and_resolve() {
+    let tmp = tempdir().expect("tempdir failed");
+    let path = tmp.path();
+    execute_create(path, Some("agentic"), Some("diff-test")).unwrap();
+
+    let diff_res = upm::cli::execute_diff(path);
+    assert!(diff_res.is_ok(), "execute_diff failed: {:?}", diff_res);
+
+    let resolve_res = upm::cli::execute_resolve(path);
+    assert!(resolve_res.is_ok(), "execute_resolve failed: {:?}", resolve_res);
+}
+
+#[test]
+fn test_cpm_cost_and_licenses() {
+    let tmp = tempdir().expect("tempdir failed");
+    let path = tmp.path();
+    execute_create(path, Some("agentic"), Some("cost-test")).unwrap();
+
+    let cost_res = upm::cli::execute_cost(path);
+    assert!(cost_res.is_ok(), "execute_cost failed: {:?}", cost_res);
+
+    let lic_res = upm::cli::execute_licenses(path);
+    assert!(lic_res.is_ok(), "execute_licenses failed: {:?}", lic_res);
+}
+
+#[test]
+fn test_cpm_devops_helm_and_crd() {
+    let tmp = tempdir().expect("tempdir failed");
+    let path = tmp.path();
+
+    let helm_res = upm::cli::execute_helm(path, Some("helm-chart"));
+    assert!(helm_res.is_ok(), "execute_helm failed: {:?}", helm_res);
+    assert!(path.join("helm-chart").join("Chart.yaml").exists());
+
+    let op_res = upm::cli::execute_operator(path, Some("crd.yaml"));
+    assert!(op_res.is_ok(), "execute_operator failed: {:?}", op_res);
+    assert!(path.join("crd.yaml").exists());
+
+    let df_res = upm::cli::execute_dockerfile(path, Some("Dockerfile"));
+    assert!(df_res.is_ok(), "execute_dockerfile failed: {:?}", df_res);
+    assert!(path.join("Dockerfile").exists());
+}
+
+#[test]
+fn test_cpm_bundle_and_trace() {
+    let tmp = tempdir().expect("tempdir failed");
+    let path = tmp.path();
+    execute_create(path, Some("agentic"), Some("bundle-test")).unwrap();
+
+    let bundle_res = upm::cli::execute_bundle(path, Some("bundle.tar.gz"));
+    assert!(bundle_res.is_ok(), "execute_bundle failed: {:?}", bundle_res);
+    assert!(path.join("bundle.tar.gz").exists());
+
+    let trace_res = upm::cli::execute_trace(path, Some("trace.json"));
+    assert!(trace_res.is_ok(), "execute_trace failed: {:?}", trace_res);
+    assert!(path.join("trace.json").exists());
+
+    let flame_res = upm::cli::execute_flamegraph(path, Some("flame.svg"));
+    assert!(flame_res.is_ok(), "execute_flamegraph failed: {:?}", flame_res);
+    assert!(path.join("flame.svg").exists());
+}

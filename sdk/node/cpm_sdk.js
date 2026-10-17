@@ -20,7 +20,12 @@ class CpmBridge {
     _findCpmBin() {
         let curr = path.resolve(__dirname);
         for (let i = 0; i < 5; i++) {
-            for (const rel of [path.join('target', 'release', 'cpm.exe'), path.join('target', 'debug', 'cpm.exe')]) {
+            for (const rel of [
+                path.join('target', 'release', 'cpm.exe'),
+                path.join('target', 'debug', 'cpm.exe'),
+                path.join('target', 'release', 'cpm'),
+                path.join('target', 'debug', 'cpm'),
+            ]) {
                 const p = path.join(curr, rel);
                 if (fs.existsSync(p)) {
                     return p;
