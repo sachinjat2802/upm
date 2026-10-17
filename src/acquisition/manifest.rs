@@ -57,13 +57,18 @@ impl UpmManifest {
 
     pub fn load_from_dir(path: &Path) -> Option<Self> {
         Self::try_load_from_dir(path).unwrap_or_else(|e| {
-            eprintln!("  ⚠ Warning: Could not parse upm.toml: {}", e);
+            eprintln!("  ⚠ Warning: Could not parse manifest (cpm.toml/upm.toml): {}", e);
             None
         })
     }
 
     pub fn try_load_from_dir(path: &Path) -> anyhow::Result<Option<Self>> {
-        let manifest_path = path.join("upm.toml");
+        let cpm_path = path.join("cpm.toml");
+        let manifest_path = if cpm_path.exists() {
+            cpm_path
+        } else {
+            path.join("upm.toml")
+        };
         if manifest_path.exists() {
             let content = fs::read_to_string(&manifest_path)?;
             let manifest: UpmManifest = toml::from_str(&content)?;
@@ -75,17 +80,42 @@ impl UpmManifest {
 
     pub fn save_to_dir(&self, path: &Path) -> anyhow::Result<()> {
         fs::create_dir_all(path)?;
-        let manifest_path = path.join("upm.toml");
+        let manifest_name = if path.join("cpm.toml").exists() {
+            "cpm.toml"
+        } else {
+            "upm.toml"
+        };
+        let manifest_path = path.join(manifest_name);
         let content = toml::to_string_pretty(self)?;
-        let tmp_path = path.join(".upm.toml.tmp");
+        let tmp_path = path.join(format!(".{}.tmp", manifest_name));
+
+        // Atomic file write with safe replacement on Windows
         if fs::write(&tmp_path, &content).is_ok() {
+            if manifest_path.exists() {
+                let _ = fs::remove_file(&manifest_path);
+            }
             if fs::rename(&tmp_path, &manifest_path).is_err() {
-                let _ = fs::write(&manifest_path, content);
+                let _ = fs::write(&manifest_path, &content);
+                let _ = fs::remove_file(&tmp_path);
             }
         } else {
             fs::write(&manifest_path, content)?;
         }
         Ok(())
+    }
+
+    pub fn add_foreign_dependency(&mut self, eco: &str, pkg: &str, version: &str) {
+        let key = format!("{}:{}", eco, pkg);
+        self.foreign_dependencies.insert(key, version.to_string());
+    }
+
+    pub fn remove_foreign_dependency(&mut self, eco: &str, pkg: &str) -> bool {
+        let key = format!("{}:{}", eco, pkg);
+        self.foreign_dependencies.remove(&key).is_some()
+    }
+
+    pub fn has_ecosystem(&self, eco: &str) -> bool {
+        self.ecosystems.iter().any(|e| e.eq_ignore_ascii_case(eco))
     }
 
     pub fn bootstrap_native_manifests(path: &Path, name: &str, languages: &[String]) -> anyhow::Result<()> {
@@ -103,21 +133,21 @@ impl UpmManifest {
                     }
                     let index_js = path.join("index.js");
                     if !index_js.exists() {
-                        let _ = fs::write(index_js, "// Polyglot Node.js Entrypoint\nconsole.log('UPM Node.js App');\n");
+                        let _ = fs::write(index_js, "// Polyglot Node.js Entrypoint\nconsole.log('CPM Node.js App');\n");
                     }
                 }
                 "python" | "pip" | "uv" | "poetry" => {
                     let pyproject = path.join("pyproject.toml");
                     if !pyproject.exists() {
                         let content = format!(
-                            "[project]\nname = \"{}\"\nversion = \"0.1.0\"\ndescription = \"Universal Package Platform polyglot project\"\ndependencies = []\n",
+                            "[project]\nname = \"{}\"\nversion = \"0.1.0\"\ndescription = \"CPM polyglot project\"\ndependencies = []\n",
                             name
                         );
                         fs::write(pyproject, content)?;
                     }
                     let main_py = path.join("main.py");
                     if !main_py.exists() {
-                        let _ = fs::write(main_py, "# Polyglot Python Entrypoint\nprint('UPM Python App')\n");
+                        let _ = fs::write(main_py, "# Polyglot Python Entrypoint\nprint('CPM Python App')\n");
                     }
                 }
                 "rust" | "cargo" => {
@@ -133,7 +163,7 @@ impl UpmManifest {
                     let _ = fs::create_dir_all(&src_dir);
                     let main_rs = src_dir.join("main.rs");
                     if !main_rs.exists() {
-                        let _ = fs::write(main_rs, "fn main() {\n    println!(\"UPM Rust App\");\n}\n");
+                        let _ = fs::write(main_rs, "fn main() {\n    println!(\"CPM Rust App\");\n}\n");
                     }
                 }
                 "go" => {
@@ -144,7 +174,7 @@ impl UpmManifest {
                     }
                     let main_go = path.join("main.go");
                     if !main_go.exists() {
-                        let _ = fs::write(main_go, "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println(\"UPM Go App\")\n}\n");
+                        let _ = fs::write(main_go, "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println(\"CPM Go App\")\n}\n");
                     }
                 }
                 _ => {}

@@ -42,9 +42,9 @@ pub fn execute_quickstart(path: &Path) -> anyhow::Result<()> {
     println!("  Run `{}` to inspect environment health and auto-repair broken virtual environments.", "cpm doctor --fix".bold().yellow());
     println!();
 
-    let manifest_exists = path.join("upm.toml").exists();
+    let manifest_exists = path.join("cpm.toml").exists() || path.join("upm.toml").exists();
     if manifest_exists {
-        println!("  {} Workspace Status: Active `upm.toml` manifest detected!", "✔".green());
+        println!("  {} Workspace Status: Active workspace manifest (cpm.toml/upm.toml) detected!", "✔".green());
     } else {
         println!("  {} Get started now by running: {}", "💡".yellow(), "cpm init".bold().cyan());
     }

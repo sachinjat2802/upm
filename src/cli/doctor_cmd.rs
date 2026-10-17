@@ -63,11 +63,19 @@ pub fn execute_doctor(path: &Path, fix: bool) -> anyhow::Result<()> {
             println!("    {} Corrupt virtualenv found at .venv (missing python binary)", "✖".bold().red());
             issues += 1;
             if fix {
-                println!("    ▶ Repairing virtualenv via `uv venv`...");
+                println!("    ▶ Repairing virtualenv...");
                 let resolved_uv = crate::acquisition::AcquisitionRunner::resolve_executable("uv");
-                if Command::new(&resolved_uv).arg("venv").current_dir(path).status().is_ok() {
+                let repaired_ok = if Command::new(&resolved_uv).arg("venv").current_dir(path).status().map(|s| s.success()).unwrap_or(false) {
+                    true
+                } else {
+                    let resolved_py = crate::acquisition::AcquisitionRunner::resolve_executable("python");
+                    Command::new(&resolved_py).args(["-m", "venv", ".venv"]).current_dir(path).status().map(|s| s.success()).unwrap_or(false)
+                };
+                if repaired_ok {
                     println!("    {} Virtualenv self-repaired cleanly.", "✔".green());
                     repaired += 1;
+                } else {
+                    println!("    {} Failed to repair virtualenv.", "✖".red());
                 }
             }
         }
@@ -86,14 +94,46 @@ pub fn execute_doctor(path: &Path, fix: bool) -> anyhow::Result<()> {
             println!("    {} package.json exists but node_modules is missing!", "!".yellow());
             issues += 1;
             if fix {
-                println!("    ▶ Repairing node_modules via `pnpm install`...");
-                let resolved_pnpm = crate::acquisition::AcquisitionRunner::resolve_executable("pnpm");
-                if Command::new(&resolved_pnpm).arg("install").current_dir(path).status().is_ok() {
-                    println!("    ✔ node_modules self-repaired cleanly.");
+                println!("    ▶ Repairing node_modules...");
+                // Select installer based on lockfile or availability
+                let installer = if path.join("pnpm-lock.yaml").exists() {
+                    "pnpm"
+                } else if path.join("yarn.lock").exists() {
+                    "yarn"
+                } else if path.join("bun.lockb").exists() || path.join("bun.lock").exists() {
+                    "bun"
+                } else {
+                    "npm"
+                };
+                let resolved_pm = crate::acquisition::AcquisitionRunner::resolve_executable(installer);
+                let repaired_ok = Command::new(&resolved_pm).arg("install").current_dir(path).status().map(|s| s.success()).unwrap_or(false);
+                if repaired_ok {
+                    println!("    {} node_modules self-repaired cleanly via {}.", "✔".green(), installer.cyan());
                     repaired += 1;
+                } else {
+                    // Fallback to npm
+                    let resolved_npm = crate::acquisition::AcquisitionRunner::resolve_executable("npm");
+                    if Command::new(&resolved_npm).arg("install").current_dir(path).status().map(|s| s.success()).unwrap_or(false) {
+                        println!("    {} node_modules self-repaired cleanly via npm.", "✔".green());
+                        repaired += 1;
+                    } else {
+                        println!("    {} Failed to install node_modules.", "✖".red());
+                    }
                 }
             }
         }
+    } else {
+        println!("    {} No package.json detected.", "ℹ".blue());
+    }
+    println!();
+
+    // 4. Manifest and Lockfile Integrity Check
+    println!("  {} {}", "4. Project Manifest & Lockfile Health:".bold(), "(Checking manifest consistency)".dimmed());
+    let has_manifest = path.join("cpm.toml").exists() || path.join("upm.toml").exists();
+    if has_manifest {
+        println!("    {} CPM workspace manifest detected.", "✔".green());
+    } else if path.join("package.json").exists() || path.join("pyproject.toml").exists() || path.join("Cargo.toml").exists() {
+        println!("    {} Native project manifests present without top-level cpm.toml/upm.toml.", "ℹ".blue());
     }
     println!();
 
@@ -106,7 +146,7 @@ pub fn execute_doctor(path: &Path, fix: bool) -> anyhow::Result<()> {
             "  │".cyan(),
         );
     } else {
-        println!("  {}  ⚠️ {}{}",
+        println!("  {}  ⚠️  {}{}",
             "│".cyan(),
             format!("Found {} issue(s). Run `cpm doctor --fix` to self-heal.", issues).bold().yellow(),
             "  │".cyan(),

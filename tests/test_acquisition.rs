@@ -89,3 +89,32 @@ fn test_upm_manifest_lifecycle() {
     assert!(loaded.ecosystems.contains(&"uv".to_string()));
     assert!(loaded.ecosystems.contains(&"pnpm".to_string()));
 }
+
+#[test]
+fn test_cpm_manifest_dual_support_and_helpers() {
+    let dir = tempdir().unwrap();
+    let root = dir.path();
+
+    let mut manifest = UpmManifest::new("cpm-polyglot", "2.0.0", Some("rust"), vec!["cargo".into(), "uv".into()]);
+    assert!(manifest.has_ecosystem("cargo"));
+    assert!(manifest.has_ecosystem("CARGO"));
+    assert!(manifest.has_ecosystem("uv"));
+    assert!(!manifest.has_ecosystem("npm"));
+
+    manifest.add_foreign_dependency("python", "numpy", "^1.26.0");
+    manifest.add_foreign_dependency("node", "chalk", "^5.0.0");
+    assert_eq!(manifest.foreign_dependencies.get("python:numpy").map(|s| s.as_str()), Some("^1.26.0"));
+
+    assert!(manifest.remove_foreign_dependency("node", "chalk"));
+    assert!(!manifest.remove_foreign_dependency("node", "chalk"));
+
+    // Save to cpm.toml
+    let cpm_file = root.join("cpm.toml");
+    std::fs::write(&cpm_file, "").unwrap();
+    manifest.save_to_dir(root).unwrap();
+
+    let loaded = UpmManifest::load_from_dir(root).unwrap();
+    assert_eq!(loaded.project.name, "cpm-polyglot");
+    assert_eq!(loaded.project.version, "2.0.0");
+    assert_eq!(loaded.foreign_dependencies.get("python:numpy").map(|s| s.as_str()), Some("^1.26.0"));
+}
