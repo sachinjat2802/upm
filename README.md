@@ -23,7 +23,30 @@
 [![Agentic AI Ready](https://img.shields.io/badge/Agentic_AI-Claude_%7C_Cursor_%7C_Windsurf_%7C_Antigravity-purple.svg?style=flat-square)](https://github.com/sachinjat2802/upm)
 [![Storage: D-Drive High Capacity](https://img.shields.io/badge/Storage-D:Drive%20High%20Capacity-cyan.svg?style=flat-square)](https://github.com/sachinjat2802/upm)
 
+<br/>
+
+**🌐 [Read the Official Documentation on GitHub Pages »](https://sachinjat2802.github.io/upm/)**
+
+[Overview](https://sachinjat2802.github.io/upm/) • [Getting Started](https://sachinjat2802.github.io/upm/getting-started.html) • [Setup Guide](https://sachinjat2802.github.io/upm/setup-guide.html) • [Architecture](https://sachinjat2802.github.io/upm/architecture.html) • [Bridge Protocol](https://sachinjat2802.github.io/upm/bridge-specification.html) • [Migration Guide](https://sachinjat2802.github.io/upm/migration-guide.html)
+
 </div>
+
+---
+
+## 📖 Official Documentation & Interactive Guides
+
+Interactive, full-featured documentation is live on GitHub Pages:
+
+👉 **[https://sachinjat2802.github.io/upm/](https://sachinjat2802.github.io/upm/)**
+
+| Guide | Description | Link |
+| :--- | :--- | :--- |
+| 🏠 **Documentation Portal** | Overview, interactive terminal demos, and feature tours | [Open Portal](https://sachinjat2802.github.io/upm/) |
+| 🚀 **Getting Started** | 5-minute tutorial, installation script, and first polyglot project | [Read Guide](https://sachinjat2802.github.io/upm/getting-started.html) |
+| 📋 **Setup & Prerequisites** | System requirements & prerequisites across 20+ language ecosystems | [Read Guide](https://sachinjat2802.github.io/upm/setup-guide.html) |
+| 🏗️ **Architecture & Engine** | System internals, AST dependency scanner, CAS storage & benchmarks | [Read Guide](https://sachinjat2802.github.io/upm/architecture.html) |
+| 🌉 **Bridge Protocol Spec** | Cross-language sub-millisecond JSON-RPC & memory bridge | [Read Guide](https://sachinjat2802.github.io/upm/bridge-specification.html) |
+| ⚡ **Migration Guide** | Zero-downtime migration for Next.js, FastAPI, Express, Django & Rails | [Read Guide](https://sachinjat2802.github.io/upm/migration-guide.html) |
 
 ---
 
