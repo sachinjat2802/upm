@@ -65,7 +65,9 @@
             margin-bottom: 40px;
         }
         .stat-card {
-            background: var(--bg-card); backdrop-filter: blur(12px);
+            background: var(--bg-card);
+            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(12px);
             border: 1px solid var(--border); border-radius: var(--radius);
             padding: 20px 24px; box-shadow: var(--glass-shadow);
         }
@@ -78,7 +80,9 @@
         @media (max-width: 868px) { .grid-2 { grid-template-columns: 1fr; } }
 
         .card {
-            background: var(--bg-card); backdrop-filter: blur(16px);
+            background: var(--bg-card);
+            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(16px);
             border: 1px solid var(--border); border-radius: var(--radius);
             padding: 28px; box-shadow: var(--glass-shadow); transition: all 0.25s ease;
         }

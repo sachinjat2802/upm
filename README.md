@@ -19,6 +19,7 @@
 [![Rust 2021](https://img.shields.io/badge/Rust-2021_Edition-orange.svg?style=flat-square&logo=rust)](https://www.rust-lang.org/)
 [![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg?style=flat-square)](LICENSE)
 [![Platform: Windows | macOS | Linux](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-brightgreen.svg?style=flat-square)](https://github.com/sachinjat2802/upm)
+[![Documentation: GitHub Pages](https://img.shields.io/badge/Docs-GitHub_Pages-blue.svg?style=flat-square&logo=github)](https://sachinjat2802.github.io/upm/)
 [![Agentic AI Ready](https://img.shields.io/badge/Agentic_AI-Claude_%7C_Cursor_%7C_Windsurf_%7C_Antigravity-purple.svg?style=flat-square)](https://github.com/sachinjat2802/upm)
 [![Storage: D-Drive High Capacity](https://img.shields.io/badge/Storage-D:Drive%20High%20Capacity-cyan.svg?style=flat-square)](https://github.com/sachinjat2802/upm)
 

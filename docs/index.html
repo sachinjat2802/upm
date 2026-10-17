@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPM — Universal Package Manager | Official Documentation</title>
+    <meta name="description" content="Write in one language. Depend on all of them. The polyglot package manager and cross-language runtime bridge orchestrating 20+ language ecosystems.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #070a12;
+            --bg-secondary: #0d1322;
+            --bg-card: rgba(18, 26, 44, 0.7);
+            --bg-card-hover: rgba(26, 38, 64, 0.85);
+            --bg-code: #060911;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-cyan: #38bdf8;
+            --accent-purple: #c084fc;
+            --accent-green: #4ade80;
+            --accent-yellow: #facc15;
+            --accent-pink: #f472b6;
+            --border: rgba(56, 189, 248, 0.15);
+            --border-hover: rgba(56, 189, 248, 0.35);
+            --gradient-primary: linear-gradient(135deg, #38bdf8 0%, #c084fc 50%, #f472b6 100%);
+            --gradient-glow: radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.15) 0%, transparent 70%);
+            --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        /* Ambient background glow */
+        .ambient-glow {
+            position: fixed;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 100vw; height: 600px;
+            background: var(--gradient-glow);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1140px;
+            margin: 0 auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── Modern Navigation Bar ── */
+        .navbar-wrapper {
+            position: sticky;
+            top: 16px;
+            z-index: 100;
+            margin-bottom: 48px;
+        }
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 24px;
+            background: rgba(13, 19, 34, 0.8);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            box-shadow: var(--shadow-glass);
+        }
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 900;
+            font-size: 18px;
+            letter-spacing: -0.5px;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+        .nav-brand span {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .nav-links {
+            display: flex;
+            gap: 6px;
+            list-style: none;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .nav-links a {
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--text-primary);
+            background: rgba(56, 189, 248, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+        .btn-github {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 16px;
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.2) 0%, rgba(192, 132, 252, 0.2) 100%);
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            border-radius: 999px;
+            color: var(--accent-cyan);
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .btn-github:hover {
+            transform: translateY(-1px);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+        }
+
+        /* ── Hero Section ── */
+        .hero {
+            text-align: center;
+            padding: 40px 0 60px;
+        }
+        .badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 18px;
+            background: rgba(56, 189, 248, 0.08);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 24px;
+        }
+        .badge-pill .dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            box-shadow: 0 0 10px var(--accent-green);
+        }
+        .hero h1 {
+            font-size: clamp(38px, 6vw, 64px);
+            font-weight: 900;
+            letter-spacing: -2px;
+            line-height: 1.1;
+            margin-bottom: 20px;
+        }
+        .hero h1 .gradient-text {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero p.lead {
+            font-size: clamp(17px, 2.2vw, 21px);
+            color: var(--text-secondary);
+            max-width: 740px;
+            margin: 0 auto 36px;
+        }
+
+        /* ── Install Command Box ── */
+        .install-box {
+            max-width: 620px;
+            margin: 0 auto 48px;
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            box-shadow: var(--shadow-glass);
+        }
+        .install-cmd {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13.5px;
+            color: var(--accent-cyan);
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .install-cmd .prefix { color: var(--text-muted); -webkit-user-select: none; user-select: none; }
+        .btn-copy {
+            background: rgba(56, 189, 248, 0.15);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            color: var(--text-primary);
+            padding: 7px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .btn-copy:hover {
+            background: var(--accent-cyan);
+            color: #070a12;
+        }
+
+        /* ── Documentation Hub Cards ── */
+        .section-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .section-header h2 {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -0.8px;
+            margin-bottom: 10px;
+        }
+        .section-header p {
+            color: var(--text-secondary);
+            font-size: 15px;
+        }
+
+        .guide-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            margin-bottom: 80px;
+        }
+        .guide-card {
+            background: var(--bg-card);
+            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: var(--shadow-glass);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .guide-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 3px;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .guide-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--border-hover);
+            background: var(--bg-card-hover);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+        }
+        .guide-card:hover::before { opacity: 1; }
+
+        .card-icon {
+            font-size: 32px;
+            margin-bottom: 16px;
+            display: inline-block;
+        }
+        .card-tag {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--accent-cyan);
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        .guide-card h3 {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+        .guide-card p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 20px;
+            flex-grow: 1;
+        }
+        .card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            padding-top: 16px;
+        }
+
+        /* ── Pillars / Feature Matrix ── */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            margin-bottom: 80px;
+        }
+        .feature-item {
+            background: rgba(18, 26, 44, 0.5);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 24px;
+        }
+        .feature-item h4 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--accent-cyan);
+        }
+        .feature-item p {
+            font-size: 13.5px;
+            color: var(--text-secondary);
+        }
+
+        /* ── Code Showcase ── */
+        .showcase {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 36px;
+            margin-bottom: 80px;
+            box-shadow: var(--shadow-glass);
+        }
+        .showcase-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .showcase-header h3 { font-size: 20px; font-weight: 800; }
+        .code-window {
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13.5px;
+            overflow-x: auto;
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+        .code-window .keyword { color: #f472b6; }
+        .code-window .string { color: #4ade80; }
+        .code-window .comment { color: var(--text-muted); }
+        .code-window .func { color: #38bdf8; }
+
+        /* ── Ecosystem Badges ── */
+        .ecosystems-bar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 80px;
+        }
+        .eco-badge {
+            background: rgba(18, 26, 44, 0.8);
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        /* ── Footer ── */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 48px 0;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        footer a { color: var(--accent-cyan); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+
+        @media (max-width: 768px) {
+            .navbar { flex-direction: column; gap: 12px; border-radius: var(--radius-md); }
+            .nav-links { justify-content: center; }
+            .install-box { flex-direction: column; align-items: stretch; }
+            .btn-copy { text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-glow"></div>
+
+    <div class="container">
+        <!-- Sticky Navigation -->
+        <div class="navbar-wrapper">
+            <nav class="navbar">
+                <a href="index.html" class="nav-brand">
+                    📦 <span>UPM</span>
+                </a>
+                <ul class="nav-links">
+                    <li><a href="index.html" class="active">Overview</a></li>
+                    <li><a href="getting-started.html">Getting Started</a></li>
+                    <li><a href="setup-guide.html">Setup Guide</a></li>
+                    <li><a href="architecture.html">Architecture</a></li>
+                    <li><a href="bridge-specification.html">Bridge Protocol</a></li>
+                    <li><a href="migration-guide.html">Migration Guide</a></li>
+                </ul>
+                <a href="https://github.com/sachinjat2802/upm" target="_blank" rel="noopener" class="btn-github">
+                    ★ Star on GitHub
+                </a>
+            </nav>
+        </div>
+
+        <!-- Hero Section -->
+        <header class="hero">
+            <div class="badge-pill">
+                <span class="dot"></span> Polyglot Package Management v0.1.0
+            </div>
+            <h1>
+                Write in one language.<br>
+                <span class="gradient-text">Depend on all of them.</span>
+            </h1>
+            <p class="lead">
+                UPM is a universal package manager and cross-language runtime bridge. Auto-detect, orchestrate, and call functions across 20+ language ecosystems with sub-millisecond RPC.
+            </p>
+
+            <!-- Install Box -->
+            <div class="install-box">
+                <div class="install-cmd">
+                    <span class="prefix">$ </span>curl -fsSL https://raw.githubusercontent.com/sachinjat2802/upm/master/install.sh | bash
+                </div>
+                <button class="btn-copy" onclick="navigator.clipboard.writeText('curl -fsSL https://raw.githubusercontent.com/sachinjat2802/upm/master/install.sh | bash'); this.innerText='✔ Copied!'; setTimeout(()=>this.innerText='Copy', 2000);">
+                    Copy
+                </button>
+            </div>
+
+            <!-- Ecosystem Badges -->
+            <div class="ecosystems-bar">
+                <span class="eco-badge">🦀 Rust (Cargo)</span>
+                <span class="eco-badge">📦 Node.js (npm / pnpm / yarn / bun)</span>
+                <span class="eco-badge">🐍 Python (pip / uv / poetry)</span>
+                <span class="eco-badge">🐹 Go</span>
+                <span class="eco-badge">☕ Java (Maven / Gradle)</span>
+                <span class="eco-badge">💎 Ruby (Bundler)</span>
+                <span class="eco-badge">🎯 Dart / Flutter</span>
+                <span class="eco-badge">🐘 PHP (Composer)</span>
+                <span class="eco-badge">+12 More</span>
+            </div>
+        </header>
+
+        <!-- Documentation Hub Guides Grid -->
+        <section>
+            <div class="section-header">
+                <h2>Documentation & Technical Guides</h2>
+                <p>Everything you need from quick start tutorials to deep wire protocol specifications.</p>
+            </div>
+
+            <div class="guide-grid">
+                <!-- Guide 1: Getting Started -->
+                <a href="getting-started.html" class="guide-card">
+                    <div>
+                        <span class="card-icon">🚀</span>
+                        <div class="card-tag">Tutorial • 10 Min Read</div>
+                        <h3>Getting Started</h3>
+                        <p>Complete walkthrough of UPM. Learn how to initialize polyglot projects, auto-detect ecosystems, and call foreign libraries.</p>
+                    </div>
+                    <div class="card-footer">
+                        <span>Read Getting Started</span>
+                        <span>→</span>
+                    </div>
+                </a>
+
+                <!-- Guide 2: Setup Guide -->
+                <a href="setup-guide.html" class="guide-card">
+                    <div>
+                        <span class="card-icon">⚙️</span>
+                        <div class="card-tag">Installation • Toolchains</div>
+                        <h3>Setup & Prerequisites</h3>
+                        <p>Detailed OS prerequisite guides for Windows, macOS, and Linux across Rust, Node, Python, Go, and JVM environments.</p>
+                    </div>
+                    <div class="card-footer">
+                        <span>Read Setup Guide</span>
+                        <span>→</span>
+                    </div>
+                </a>
+
+                <!-- Guide 3: Architecture -->
+                <a href="architecture.html" class="guide-card">
+                    <div>
+                        <span class="card-icon">🏗️</span>
+                        <div class="card-tag">Internal Spec • L2 & L2'</div>
+                        <h3>Architecture Specification</h3>
+                        <p>In-depth design of the L2 Acquisition Engine, multi-signal scoring matrix, and deterministic cryptographic CAS lockfile.</p>
+                    </div>
+                    <div class="card-footer">
+                        <span>Read Architecture</span>
+                        <span>→</span>
+                    </div>
+                </a>
+
+                <!-- Guide 4: Bridge Specification -->
+                <a href="bridge-specification.html" class="guide-card">
+                    <div>
+                        <span class="card-icon">🌉</span>
+                        <div class="card-tag">Wire Protocol • RPC</div>
+                        <h3>Bridge Protocol Specification</h3>
+                        <p>Wire framing, JSON-RPC envelopes, variant value codecs, binary blobs, and handle table memory management.</p>
+                    </div>
+                    <div class="card-footer">
+                        <span>Read Bridge Spec</span>
+                        <span>→</span>
+                    </div>
+                </a>
+
+                <!-- Guide 5: Migration Guide -->
+                <a href="migration-guide.html" class="guide-card">
+                    <div>
+                        <span class="card-icon">⚡</span>
+                        <div class="card-tag">5 Steps • Zero Lock-In</div>
+                        <h3>Migration Guide</h3>
+                        <p>Move existing Next.js, FastAPI, NestJS, Rails, or Django apps to UPM in 5 non-destructive steps with zero code refactoring.</p>
+                    </div>
+                    <div class="card-footer">
+                        <span>Read Migration Guide</span>
+                        <span>→</span>
+                    </div>
+                </a>
+
+                <!-- Guide 6: Interactive Dependency Graph -->
+                <a href="https://github.com/sachinjat2802/upm" target="_blank" rel="noopener" class="guide-card">
+                    <div>
+                        <span class="card-icon">⭐</span>
+                        <div class="card-tag">Open Source • GitHub</div>
+                        <h3>Repository & Contributions</h3>
+                        <p>View source code, report issues, submit PRs, and explore the complete test suite with 1,000,000 generative fuzz tests.</p>
+                    </div>
+                    <div class="card-footer">
+                        <span>Explore on GitHub</span>
+                        <span>↗</span>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Live Code Showcase -->
+        <section class="showcase">
+            <div class="showcase-header">
+                <div>
+                    <h3>1-Line Cross-Language RPC Bridge</h3>
+                    <p style="color: var(--text-secondary); font-size: 14px;">Import SDKs in Python, Node, Go, or Rust and execute foreign methods directly.</p>
+                </div>
+            </div>
+            <div class="code-window">
+<span class="comment">// Node.js / TypeScript calling Python AI library</span>
+<span class="keyword">const</span> { <span class="func">CpmBridge</span> } = <span class="func">require</span>(<span class="string">'./sdk/node/cpm_sdk'</span>);
+<span class="keyword">const</span> bridge = <span class="keyword">new</span> <span class="func">CpmBridge</span>();
+
+<span class="comment">// Call python:math.sqrt over stdio RPC</span>
+<span class="keyword">const</span> result = <span class="keyword">await</span> bridge.<span class="func">call</span>(<span class="string">'python:math.sqrt'</span>, [<span class="keyword">144</span>]);
+console.<span class="func">log</span>(result); <span class="comment">// → 12.0</span>
+            </div>
+        </section>
+
+        <!-- Feature Grid -->
+        <section>
+            <div class="section-header">
+                <h2>Built for Polyglot Production</h2>
+                <p>Engineered for high performance, deterministic reproducibility, and zero friction.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <h4>🔍 Multi-Signal Detection</h4>
+                    <p>Calculates weighted heuristic scores across manifests, lockfiles, markers, and file extensions.</p>
+                </div>
+                <div class="feature-item">
+                    <h4>🔒 Deterministic CAS Lockfile</h4>
+                    <p>Cryptographically verifies SHA-256 package content integrity across all ecosystems in <code>upm.lock</code>.</p>
+                </div>
+                <div class="feature-item">
+                    <h4>⚡ High Performance RPC</h4>
+                    <p>Sub-millisecond latency cross-language calls with binary framing and lifecycle supervision.</p>
+                </div>
+                <div class="feature-item">
+                    <h4>🛡️ Enterprise Security & Secrets</h4>
+                    <p>Built-in secret leak scanning, open-source license compliance auditing, and RBAC policy enforcement.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>© 2026 UPM Contributors. Released under MIT / Apache-2.0 License.</p>
+            <p style="margin-top: 8px;">
+                <a href="https://github.com/sachinjat2802/upm">GitHub</a> • 
+                <a href="getting-started.html">Getting Started</a> • 
+                <a href="migration-guide.html">Migration Guide</a> • 
+                <a href="architecture.html">Architecture</a>
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

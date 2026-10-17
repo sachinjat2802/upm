@@ -3,15 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Migration Guide — Moving Existing Apps to CPM</title>
+    <title>Migration Guide — Moving Existing Apps to UPM</title>
+    <meta name="description" content="Zero breaking changes. Migrate Next.js, React, FastAPI, NestJS, Express, Rails, or Django apps to UPM in 5 simple steps.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #090d16;
-            --bg-secondary: #0f172a;
-            --bg-card: rgba(30, 41, 59, 0.7);
+            --bg-primary: #070a12;
+            --bg-secondary: #0d1322;
+            --bg-card: rgba(18, 26, 44, 0.7);
+            --bg-card-hover: rgba(26, 38, 64, 0.85);
             --accent-cyan: #38bdf8;
             --accent-purple: #c084fc;
             --accent-green: #4ade80;
@@ -19,23 +21,92 @@
             --accent-pink: #f472b6;
             --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
+            --text-muted: #64748b;
             --border: rgba(56, 189, 248, 0.15);
             --border-hover: rgba(56, 189, 248, 0.35);
             --gradient-primary: linear-gradient(135deg, #38bdf8 0%, #c084fc 50%, #f472b6 100%);
-            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
             --radius: 16px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             line-height: 1.7;
             padding-bottom: 60px;
         }
 
-        .container { max-width: 1000px; margin: 0 auto; padding: 40px 24px; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 16px 24px 40px; }
+
+        /* Navbar */
+        .navbar-wrapper {
+            position: sticky;
+            top: 16px;
+            z-index: 100;
+            margin-bottom: 40px;
+        }
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 24px;
+            background: rgba(13, 19, 34, 0.85);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            box-shadow: var(--shadow-glass);
+        }
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 900;
+            font-size: 18px;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+        .nav-brand span {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .nav-links {
+            display: flex;
+            gap: 6px;
+            list-style: none;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .nav-links a {
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--text-primary);
+            background: rgba(56, 189, 248, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+        .btn-github {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 16px;
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.2) 0%, rgba(192, 132, 252, 0.2) 100%);
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            border-radius: 999px;
+            color: var(--accent-cyan);
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+        }
 
         header { text-align: center; margin-bottom: 48px; }
         .badge {
@@ -51,40 +122,79 @@
 
         /* Step Cards */
         .step-card {
-            background: var(--bg-card); backdrop-filter: blur(16px);
+            background: var(--bg-card);
+            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(16px);
             border: 1px solid var(--border); border-radius: var(--radius);
-            padding: 32px; margin-bottom: 24px; box-shadow: var(--glass-shadow);
+            padding: 32px; margin-bottom: 24px; box-shadow: var(--shadow-glass);
             position: relative;
         }
         .step-number {
             display: inline-flex; align-items: center; justify-content: center;
             width: 36px; height: 36px; border-radius: 50%;
-            background: var(--gradient-primary); color: #0f172a; font-weight: 800; font-size: 16px;
+            background: var(--gradient-primary); color: #070a12; font-weight: 800; font-size: 16px;
             margin-bottom: 16px;
         }
         .step-card h2 { font-size: 22px; font-weight: 800; margin-bottom: 12px; }
         .step-card p { color: var(--text-secondary); font-size: 14px; margin-bottom: 16px; }
 
         .code-box {
-            background: #070a11; border: 1px solid var(--border); border-radius: 10px;
+            background: #060911; border: 1px solid var(--border); border-radius: 10px;
             padding: 16px 20px; font-family: 'JetBrains Mono', monospace; font-size: 13px;
             color: var(--accent-cyan); overflow-x: auto; margin-bottom: 12px;
+            line-height: 1.6;
         }
-        .code-box .comment { color: var(--text-secondary); }
+        .code-box .comment { color: var(--text-muted); }
 
         .highlight-box {
             background: rgba(74, 222, 128, 0.08); border: 1px solid rgba(74, 222, 128, 0.25);
             border-radius: 10px; padding: 16px 20px; font-size: 13px; color: var(--accent-green);
         }
+
+        footer {
+            border-top: 1px solid var(--border);
+            margin-top: 60px;
+            padding-top: 32px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        footer a { color: var(--accent-cyan); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+
+        @media (max-width: 768px) {
+            .navbar { flex-direction: column; gap: 12px; border-radius: var(--radius); }
+            .nav-links { justify-content: center; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Sticky Navigation -->
+        <div class="navbar-wrapper">
+            <nav class="navbar">
+                <a href="index.html" class="nav-brand">
+                    📦 <span>UPM</span>
+                </a>
+                <ul class="nav-links">
+                    <li><a href="index.html">Overview</a></li>
+                    <li><a href="getting-started.html">Getting Started</a></li>
+                    <li><a href="setup-guide.html">Setup Guide</a></li>
+                    <li><a href="architecture.html">Architecture</a></li>
+                    <li><a href="bridge-specification.html">Bridge Protocol</a></li>
+                    <li><a href="migration-guide.html" class="active">Migration Guide</a></li>
+                </ul>
+                <a href="https://github.com/sachinjat2802/upm" target="_blank" rel="noopener" class="btn-github">
+                    ★ Star on GitHub
+                </a>
+            </nav>
+        </div>
+
         <header>
             <div class="badge">📖 Migration Guide</div>
-            <h1>Move Any Existing App to CPM</h1>
+            <h1>Move Any Existing App to UPM</h1>
             <p class="subtitle">
-                Zero breaking changes. Migrate Next.js, React, FastAPI, NestJS, Express, Rails, or Django apps to CPM in 5 simple steps.
+                Zero breaking changes. Migrate Next.js, React, FastAPI, NestJS, Express, Rails, or Django apps to UPM in 5 simple steps.
             </p>
         </header>
 
@@ -92,27 +202,27 @@
         <div class="step-card">
             <div class="step-number">1</div>
             <h2>Scan Existing Repository Ecosystems</h2>
-            <p>Open your existing project directory in terminal and run <code>cpm detect</code>. CPM automatically scans your project markers, lockfiles, and manifests without changing any files.</p>
+            <p>Open your existing project directory in terminal and run <code>upm detect</code>. UPM automatically scans your project markers, lockfiles, and manifests without modifying any files.</p>
             <div class="code-box">
 <span class="comment"># Navigate to your existing codebase</span>
 cd /path/to/my-existing-app
 
 <span class="comment"># Scan multi-signal detection scores</span>
-cpm detect
+upm detect
             </div>
         </div>
 
         <!-- Step 2 -->
         <div class="step-card">
             <div class="step-number">2</div>
-            <h2>Initialize CPM Manifest (Zero Code Changes)</h2>
-            <p>Run non-interactive initialization. CPM creates a clean <code>upm.toml</code> manifest file. All your existing <code>package.json</code>, <code>pyproject.toml</code>, or <code>Cargo.toml</code> files remain 100% intact.</p>
+            <h2>Initialize UPM Manifest (Zero Code Changes)</h2>
+            <p>Run non-interactive initialization. UPM creates a clean <code>upm.toml</code> manifest file. All your existing <code>package.json</code>, <code>pyproject.toml</code>, or <code>Cargo.toml</code> files remain 100% intact.</p>
             <div class="code-box">
-<span class="comment"># Initialize CPM in existing folder without overwriting existing code</span>
-cpm init -y
+<span class="comment"># Initialize UPM in existing folder without overwriting existing code</span>
+upm init -y
             </div>
             <div class="highlight-box">
-                ✔ <strong>Zero Breaking Changes:</strong> Existing build scripts, npm run dev, and python main.py files continue working exactly as before.
+                ✔ <strong>Zero Breaking Changes:</strong> Existing build scripts, <code>npm run dev</code>, and <code>python main.py</code> files continue working exactly as before.
             </div>
         </div>
 
@@ -123,21 +233,21 @@ cpm init -y
             <p>Want to introduce Python AI libraries into your Next.js app or Rust compute into your FastAPI app? Use smart auto-detecting package addition.</p>
             <div class="code-box">
 <span class="comment"># Add Python library to your Next.js / Express app</span>
-cpm add pip:docling
+upm add pip:docling
 
 <span class="comment"># Add Rust library</span>
-cpm add cargo:serde
+upm add cargo:serde
 
 <span class="comment"># Add Node.js library</span>
-cpm add npm:express
+upm add npm:express
             </div>
         </div>
 
         <!-- Step 4 -->
         <div class="step-card">
             <div class="step-number">4</div>
-            <h2>Drop In CPM Client SDK</h2>
-            <p>Import the CPM SDK for Python (<code>cpm_sdk.py</code>) or Node.js/TypeScript (<code>cpm_sdk.js</code>) to invoke foreign language functions in 1 line of code.</p>
+            <h2>Drop In UPM Client SDK</h2>
+            <p>Import the UPM SDK for Python (<code>cpm_sdk.py</code>) or Node.js/TypeScript (<code>cpm_sdk.js</code>) to invoke foreign language functions in 1 line of code.</p>
             <div class="code-box">
 <span class="comment">// TypeScript / Node.js (Next.js, NestJS, Express)</span>
 const { CpmBridge } = require('./sdk/node/cpm_sdk');
@@ -153,12 +263,21 @@ const result = await bridge.call('python:docling.parse', ['proposal.pdf']);
             <p>Run concurrent ecosystem installation and security lockfile auditing.</p>
             <div class="code-box">
 <span class="comment"># Install all detected ecosystems concurrently in parallel</span>
-cpm install --parallel
+upm install --parallel
 
 <span class="comment"># Audit lockfiles and security vulnerabilities</span>
-cpm audit
+upm audit
             </div>
         </div>
+
+        <footer>
+            <p>© 2026 UPM Contributors. Released under MIT / Apache-2.0 License.</p>
+            <p style="margin-top: 8px;">
+                <a href="index.html">Documentation Home</a> • 
+                <a href="getting-started.html">Getting Started</a> • 
+                <a href="https://github.com/sachinjat2802/upm">GitHub Repository</a>
+            </p>
+        </footer>
     </div>
 </body>
 </html>
