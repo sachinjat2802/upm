@@ -8,36 +8,48 @@ use colored::Colorize;
 
 /// Display metadata for a package across ecosystems.
 pub fn execute_info(package: &str) -> Result<()> {
-    let (eco, pkg_name) = if let Some((e, p)) = package.split_once(':') {
+    let (eco, raw_pkg) = if let Some((e, p)) = package.split_once(':') {
         (e.to_lowercase(), p.to_string())
     } else {
         ("generic".to_string(), package.to_string())
+    };
+
+    let (pkg_name, requested_ver) = if let Some((n, v)) = raw_pkg.split_once('@') {
+        (n.to_string(), Some(v.to_string()))
+    } else if let Some((n, v)) = raw_pkg.split_once("==") {
+        (n.to_string(), Some(v.to_string()))
+    } else {
+        (raw_pkg, None)
     };
 
     println!();
     println!("  {} Package Information: {}:{}", "📦".cyan(), eco.cyan().bold(), pkg_name.bold().yellow());
     println!("  {}", "═".repeat(50).dimmed());
 
+    if let Some(ref ver) = requested_ver {
+        println!("  Requested Ver:  {}", ver.bold().cyan());
+    }
+
     match eco.as_str() {
         "npm" | "pnpm" | "yarn" | "bun" => {
             println!("  Ecosystem:      JavaScript / TypeScript (npm)");
             println!("  Package Name:   {}", pkg_name.yellow().bold());
             println!("  Registry URL:   https://www.npmjs.com/package/{}", pkg_name);
-            println!("  Install via:    cpm add npm:{}", pkg_name);
+            println!("  Install via:    cpm add npm:{}", if let Some(v) = &requested_ver { format!("{}@{}", pkg_name, v) } else { pkg_name.clone() });
             println!("  Usage Format:   const {} = require('{}');", pkg_name.replace('-', "_"), pkg_name);
         }
         "pip" | "uv" | "poetry" => {
             println!("  Ecosystem:      Python (PyPI)");
             println!("  Package Name:   {}", pkg_name.yellow().bold());
             println!("  Registry URL:   https://pypi.org/project/{}/", pkg_name);
-            println!("  Install via:    cpm add pip:{}", pkg_name);
+            println!("  Install via:    cpm add pip:{}", if let Some(v) = &requested_ver { format!("{}=={}", pkg_name, v) } else { pkg_name.clone() });
             println!("  Usage Format:   import {}", pkg_name.replace('-', "_"));
         }
         "cargo" | "rust" => {
             println!("  Ecosystem:      Rust (crates.io)");
             println!("  Crate Name:     {}", pkg_name.yellow().bold());
             println!("  Registry URL:   https://crates.io/crates/{}", pkg_name);
-            println!("  Install via:    cpm add cargo:{}", pkg_name);
+            println!("  Install via:    cpm add cargo:{}", if let Some(v) = &requested_ver { format!("{}@{}", pkg_name, v) } else { pkg_name.clone() });
             println!("  Usage Format:   use {}::*;", pkg_name.replace('-', "_"));
         }
         "go" => {

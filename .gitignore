@@ -24,3 +24,9 @@ _build/
 .dart_tool/
 .gradle/
 obj/
+
+# CPM workspace artifacts
+.cpm_backup/
+.cpm_bundle_manifest
+*.cpm_pkg
+*.tmp

@@ -170,6 +170,12 @@ fn test_package_info_query() {
 
     let res2 = execute_info("npm:express");
     assert!(res2.is_ok(), "execute_info npm:express failed: {:?}", res2);
+
+    let res3 = execute_info("pip:fastapi@0.110.0");
+    assert!(res3.is_ok(), "execute_info versioned failed: {:?}", res3);
+
+    let res4 = execute_info("cargo:serde==1.0.197");
+    assert!(res4.is_ok(), "execute_info == versioned failed: {:?}", res4);
 }
 
 #[test]
