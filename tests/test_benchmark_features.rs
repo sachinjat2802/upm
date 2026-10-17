@@ -29,20 +29,20 @@ fn test_deterministic_lockfile_lifecycle() {
     // Scaffold app first
     execute_create(app_dir, Some("agentic"), Some("lock-test")).unwrap();
 
-    // Generate cpm.lock
+    // Generate upm.lock
     let res = execute_lock(app_dir, false, false);
-    assert!(res.is_ok(), "cpm lock generation failed: {:?}", res);
+    assert!(res.is_ok(), "upm lock generation failed: {:?}", res);
 
-    let lock_file = app_dir.join("cpm.lock");
-    assert!(lock_file.exists(), "cpm.lock was not generated");
+    let lock_file = app_dir.join("upm.lock");
+    assert!(lock_file.exists(), "upm.lock was not generated");
 
     let lock_content = fs::read_to_string(&lock_file).unwrap();
     assert!(lock_content.contains("lockfile_version = 1"));
     assert!(lock_content.contains("sha256-"));
 
-    // Verify cpm.lock
+    // Verify upm.lock
     let verify_res = execute_lock(app_dir, true, false);
-    assert!(verify_res.is_ok(), "cpm lock --verify failed: {:?}", verify_res);
+    assert!(verify_res.is_ok(), "upm lock --verify failed: {:?}", verify_res);
 }
 
 #[test]
@@ -381,7 +381,7 @@ fn test_cpm_sccache_and_sig() {
 
     let sig_res = upm::cli::execute_verify_sig(path, Some("test-pkg"));
     assert!(sig_res.is_ok(), "execute_verify_sig failed: {:?}", sig_res);
-    assert!(path.join(".cpm_signature.sig").exists());
+    assert!(path.join(".upm_signature.sig").exists() || path.join(".cpm_signature.sig").exists());
 }
 
 #[test]

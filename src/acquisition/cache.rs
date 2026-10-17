@@ -190,7 +190,17 @@ pub fn compute_sha256(data: &[u8]) -> String {
         }
     }
 
-    format!("{:016x}{:016x}{:016x}{:016x}", h1, h2, h3, h4)
+    let mut out = [0u8; 64];
+    const HEX_CHARS: &[u8; 16] = b"0123456789abcdef";
+    for (idx, &h) in [h1, h2, h3, h4].iter().enumerate() {
+        let base = idx * 16;
+        for shift_idx in 0..16 {
+            let nibble = ((h >> ((15 - shift_idx) * 4)) & 0x0F) as usize;
+            out[base + shift_idx] = HEX_CHARS[nibble];
+        }
+    }
+    // SAFETY: out contains strictly ASCII hex digits [0-9a-f]
+    unsafe { String::from_utf8_unchecked(out.to_vec()) }
 }
 
 /// Verify integrity of a package file against its expected SHA-256 hash.

@@ -1,6 +1,6 @@
-//! # Self-Update & Upgrade Engine (`cpm upgrade`)
+//! # Self-Update & Upgrade Engine (`upm upgrade`)
 //!
-//! Checks and updates the `cpm` binary to the latest stable release.
+//! Checks and updates the `upm` binary to the latest stable release.
 //!
 //! Time Complexity: O(1) network version query.
 //! Space Complexity: O(1) buffer allocation.
@@ -14,7 +14,7 @@ pub fn execute_upgrade(check_only: bool) -> Result<()> {
 
     println!();
     println!("  {}", "╭──────────────────────────────────────────────────────╮".cyan());
-    println!("  {}  🚀 {}", "│".cyan(), "CPM Self-Update & Upgrade Engine".bold().white());
+    println!("  {}  🚀 {}", "│".cyan(), "UPM Self-Update & Upgrade Engine".bold().white());
     println!("  {}", "╰──────────────────────────────────────────────────────╯".cyan());
     println!();
     println!("  Installed Version: {}", current_version.bold().green());
@@ -22,7 +22,7 @@ pub fn execute_upgrade(check_only: bool) -> Result<()> {
     println!();
 
     if check_only {
-        println!("  {} You are running the latest version of CPM (v{})", "✔".bold().green(), current_version);
+        println!("  {} You are running the latest version of UPM (v{})", "✔".bold().green(), current_version);
         println!();
         return Ok(());
     }
@@ -34,7 +34,7 @@ pub fn execute_upgrade(check_only: bool) -> Result<()> {
 
     match cmd.status() {
         Ok(status) if status.success() => {
-            println!("  {} Successfully updated CPM to latest binary build!", "✔".bold().green());
+            println!("  {} Successfully updated UPM to latest binary build!", "✔".bold().green());
         }
         _ => {
             println!("  {} Binary is up to date.", "✔".green());

@@ -1,4 +1,4 @@
-/// # `cpm resolve` CLI Subcommand — Transitive Dependency Conflict Resolver
+/// # `upm resolve` CLI Subcommand — Transitive Dependency Conflict Resolver
 ///
 /// Analyzes cross-language transitive dependency trees and auto-suggests
 /// optimal resolution strategies for version conflicts across PyPI, npm, Crates.io, and Go.
@@ -20,7 +20,7 @@ pub fn execute_resolve(path: &Path) -> anyhow::Result<()> {
     println!("  {}", "╭──────────────────────────────────────────────────────╮".cyan());
     println!("  {}  🧠 {}{}",
         "│".cyan(),
-        "CPM Transitive Dependency Resolution Advisor".bold().white(),
+        "UPM Transitive Dependency Resolution Advisor".bold().white(),
         "       │".cyan(),
     );
     println!("  {}", "╰──────────────────────────────────────────────────────╯".cyan());
@@ -45,7 +45,7 @@ pub fn execute_resolve(path: &Path) -> anyhow::Result<()> {
                     package: pkg_key.clone(),
                     ecosystem: "upm.toml".to_string(),
                     issue: format!("Unpinned wildcard version constraint '{}'", ver),
-                    recommendation: format!("Pin version in upm.toml, e.g. `cpm add {}@^1.0.0`", pkg_key),
+                    recommendation: format!("Pin version in upm.toml, e.g. `upm add {}@^1.0.0`", pkg_key),
                 });
             }
         }

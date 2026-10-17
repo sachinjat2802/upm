@@ -1,6 +1,6 @@
-//! # CPM CLI Binary Entry Point
+//! # UPM CLI Binary Entry Point
 //!
-//! Command-line interface driver for `cpm` (Cross-Language Package Manager).
+//! Command-line interface driver for `upm` (Universal Package Manager).
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {

@@ -1,4 +1,4 @@
-/// # `cpm rollback` CLI Subcommand — Instant Workspace Rollback Engine
+/// # `upm rollback` CLI Subcommand — Instant Workspace Rollback Engine
 ///
 /// Restores previous snapshot state of `upm.toml` manifest and lockfiles
 /// in case of breaking dependency updates or acquisition failures.
@@ -13,19 +13,30 @@ pub fn execute_rollback(path: &Path) -> anyhow::Result<()> {
     println!("  {}", "╭──────────────────────────────────────────────────────╮".cyan());
     println!("  {}  ⏪ {}{}",
         "│".cyan(),
-        "CPM Disaster Recovery & Rollback Engine".bold().white(),
+        "UPM Disaster Recovery & Rollback Engine".bold().white(),
         "          │".cyan(),
     );
     println!("  {}", "╰──────────────────────────────────────────────────────╯".cyan());
     println!();
 
-    let backup_dir = path.join(".cpm_backup");
+    let upm_backup = path.join(".upm_backup");
+    let backup_dir = if upm_backup.exists() {
+        upm_backup
+    } else if path.join(".cpm_backup").exists() {
+        path.join(".cpm_backup")
+    } else {
+        upm_backup
+    };
+
     if !backup_dir.exists() {
-        println!("  {} No previous rollback snapshot found at .cpm_backup", "ℹ".blue());
+        println!("  {} No previous rollback snapshot found at .upm_backup", "ℹ".blue());
         println!("  Creating initial workspace restore point snapshot...");
         std::fs::create_dir_all(&backup_dir)?;
         if path.join("upm.toml").exists() {
             std::fs::copy(path.join("upm.toml"), backup_dir.join("upm.toml"))?;
+        }
+        if path.join("upm.lock").exists() {
+            std::fs::copy(path.join("upm.lock"), backup_dir.join("upm.lock"))?;
         }
         println!("  {} Restore point snapshot created cleanly.", "✔".green());
         println!();
@@ -39,7 +50,7 @@ pub fn execute_rollback(path: &Path) -> anyhow::Result<()> {
     };
 
     if backup_entries.is_empty() {
-        println!("  {} Backup directory .cpm_backup is empty.", "ℹ".blue());
+        println!("  {} Backup directory is empty.", "ℹ".blue());
         println!();
         return Ok(());
     }

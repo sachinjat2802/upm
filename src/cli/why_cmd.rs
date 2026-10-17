@@ -1,4 +1,4 @@
-/// # `cpm why` CLI Subcommand — Dependency Reason Explainer
+/// # `upm why` CLI Subcommand — Dependency Reason Explainer
 ///
 /// Explains why a package is included in the workspace (direct manifest entry,
 /// foreign dependency in `upm.toml`, or ecosystem default dependency).
@@ -76,7 +76,7 @@ pub fn execute_why(path: &Path, package: &str) -> anyhow::Result<()> {
             package.bold().yellow()
         );
         println!(
-            "  {} It may be a transitive dependency or hasn't been added yet with `cpm add`.",
+            "  {} It may be a transitive dependency or hasn't been added yet with `upm add`.",
             "  ".dimmed()
         );
         println!();

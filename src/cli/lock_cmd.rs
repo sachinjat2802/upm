@@ -1,6 +1,6 @@
 //! # Deterministic Lockfile & Integrity Verification Engine
 //!
-//! Generates and audits `cpm.lock` to guarantee reproducible builds across
+//! Generates and audits `upm.lock` to guarantee reproducible builds across
 //! developer workstations and CI/CD pipelines.
 
 use crate::acquisition::cache::compute_sha256;
@@ -13,11 +13,14 @@ use std::fs;
 use std::path::Path;
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct CpmLockfile {
+pub struct UpmLockfile {
     pub lockfile_version: u32,
     pub generated_at: String,
     pub packages: BTreeMap<String, LockedPackage>,
 }
+
+/// Backwards compatibility alias for UpmLockfile
+pub type CpmLockfile = UpmLockfile;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct LockedPackage {
@@ -28,20 +31,27 @@ pub struct LockedPackage {
 
 /// Execute lockfile generation or verification.
 pub fn execute_lock(path: &Path, verify: bool, update: bool) -> Result<()> {
-    let lock_path = path.join("cpm.lock");
+    let upm_lock = path.join("upm.lock");
+    let lock_path = if upm_lock.exists() {
+        upm_lock
+    } else if path.join("cpm.lock").exists() {
+        path.join("cpm.lock")
+    } else {
+        upm_lock
+    };
 
     if verify {
         if !lock_path.exists() {
-            println!("  {} No cpm.lock found to verify. Run 'cpm lock' first.", "!".yellow());
-            return Err(anyhow!("Missing cpm.lock"));
+            println!("  {} No upm.lock found to verify. Run 'upm lock' first.", "!".yellow());
+            return Err(anyhow!("Missing upm.lock"));
         }
 
         let content = fs::read_to_string(&lock_path)?;
-        let lockfile: CpmLockfile = toml::from_str(&content)
-            .map_err(|e| anyhow!("Corrupt cpm.lock: {}", e))?;
+        let lockfile: UpmLockfile = toml::from_str(&content)
+            .map_err(|e| anyhow!("Corrupt upm.lock: {}", e))?;
 
         println!();
-        println!("  {} Verifying lockfile integrity (CPM CAS Engine)...", "🔒".cyan());
+        println!("  {} Verifying lockfile integrity (UPM CAS Engine)...", "🔒".cyan());
         println!("  {}", "═".repeat(50).dimmed());
 
         let mut all_valid = true;
@@ -75,10 +85,10 @@ pub fn execute_lock(path: &Path, verify: bool, update: bool) -> Result<()> {
             Err(anyhow!("Lockfile verification failed: one or more packages have invalid integrity hashes."))
         }
     } else {
-        // Generate or update cpm.lock
+        // Generate or update upm.lock
         println!();
         println!(
-            "  {} {} deterministic lockfile (cpm.lock)...",
+            "  {} {} deterministic lockfile (upm.lock)...",
             "🔒".cyan(),
             if update { "Updating" } else { "Generating" }
         );
@@ -165,19 +175,20 @@ pub fn execute_lock(path: &Path, verify: bool, update: bool) -> Result<()> {
             }
         }
 
-        let lockfile = CpmLockfile {
+        let lockfile = UpmLockfile {
             lockfile_version: 1,
             generated_at: chrono_now(),
             packages: locked_packages,
         };
 
+        let target_lock = path.join("upm.lock");
         let serialized = toml::to_string_pretty(&lockfile)?;
-        fs::write(&lock_path, serialized)?;
+        fs::write(&target_lock, serialized)?;
 
         println!(
             "  {} Wrote {} with {} locked dependencies.",
             "✔".green(),
-            "cpm.lock".bold().cyan(),
+            "upm.lock".bold().cyan(),
             lockfile.packages.len().to_string().yellow()
         );
         println!();

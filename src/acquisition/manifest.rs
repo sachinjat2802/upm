@@ -57,17 +57,17 @@ impl UpmManifest {
 
     pub fn load_from_dir(path: &Path) -> Option<Self> {
         Self::try_load_from_dir(path).unwrap_or_else(|e| {
-            eprintln!("  ⚠ Warning: Could not parse manifest (cpm.toml/upm.toml): {}", e);
+            eprintln!("  ⚠ Warning: Could not parse manifest (upm.toml): {}", e);
             None
         })
     }
 
     pub fn try_load_from_dir(path: &Path) -> anyhow::Result<Option<Self>> {
-        let cpm_path = path.join("cpm.toml");
-        let manifest_path = if cpm_path.exists() {
-            cpm_path
+        let upm_path = path.join("upm.toml");
+        let manifest_path = if upm_path.exists() {
+            upm_path
         } else {
-            path.join("upm.toml")
+            path.join("cpm.toml")
         };
         if manifest_path.exists() {
             let content = fs::read_to_string(&manifest_path)?;
@@ -80,11 +80,7 @@ impl UpmManifest {
 
     pub fn save_to_dir(&self, path: &Path) -> anyhow::Result<()> {
         fs::create_dir_all(path)?;
-        let manifest_name = if path.join("cpm.toml").exists() {
-            "cpm.toml"
-        } else {
-            "upm.toml"
-        };
+        let manifest_name = "upm.toml";
         let manifest_path = path.join(manifest_name);
         let content = toml::to_string_pretty(self)?;
         let tmp_path = path.join(format!(".{}.tmp", manifest_name));

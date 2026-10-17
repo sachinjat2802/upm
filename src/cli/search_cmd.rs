@@ -1,4 +1,4 @@
-/// # `cpm search` CLI Subcommand — Cross-Registry Package Search
+/// # `upm search` CLI Subcommand — Cross-Registry Package Search
 ///
 /// Searches across npm, PyPI, Crates.io, and Go package registries simultaneously.
 
@@ -43,8 +43,8 @@ pub fn execute_search(query: &str) -> anyhow::Result<()> {
     println!("    • {:<24} → Idiomatic Go module library", format!("go:github.com/{}/{}", q, q).bold().cyan());
     println!();
 
-    println!("  {} Install any package using: {}", "💡".yellow(), format!("cpm add <prefix>:<package>").bold().white());
-    println!("  {} Example: {}", "  ".dimmed(), format!("cpm add pip:{}", q).green().bold());
+    println!("  {} Install any package using: {}", "💡".yellow(), format!("upm add <prefix>:<package>").bold().white());
+    println!("  {} Example: {}", "  ".dimmed(), format!("upm add pip:{}", q).green().bold());
     println!();
 
     Ok(())

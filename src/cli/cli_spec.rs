@@ -10,13 +10,13 @@ use colored::control;
 use crate::cli::*;
 
 /// ╭──────────────────────────────────────────────────────╮
-/// │  CPM — Cross-Language Package Manager                 │
+/// │  UPM — Universal Package Manager                      │
 /// │  Write in one language. Depend on all of them.       │
 /// ╰──────────────────────────────────────────────────────╯
 #[derive(Parser)]
 #[command(
-    name = "cpm",
-    about = "\n  ╭──────────────────────────────────────────────────────╮\n  │  CPM — Cross-Language Package Manager                 │\n  │  Write in one language. Depend on all of them.       │\n  ╰──────────────────────────────────────────────────────╯\n\n  A polyglot package manager that auto-detects and orchestrates\n  npm, pnpm, pip, uv, cargo, go, and 14 more ecosystems.\n\n  Quick start:\n    cpm init                    Create a new polyglot project\n    cpm detect                  Show detected ecosystems\n    cpm install                 Install all dependencies\n    cpm add pip:requests        Add a foreign dependency\n    cpm bridge call python:math.sqrt '[9]'",
+    name = "upm",
+    about = "\n  ╭──────────────────────────────────────────────────────╮\n  │  UPM — Universal Package Manager                      │\n  │  Write in one language. Depend on all of them.       │\n  ╰──────────────────────────────────────────────────────╯\n\n  A polyglot package manager that auto-detects and orchestrates\n  npm, pnpm, pip, uv, cargo, go, and 14 more ecosystems.\n\n  Quick start:\n    upm init                    Create a new polyglot project\n    upm detect                  Show detected ecosystems\n    upm install                 Install all dependencies\n    upm add pip:requests        Add a foreign dependency\n    upm bridge call python:math.sqrt '[9]'",
     version = env!("CARGO_PKG_VERSION"),
     after_help = "  Docs:    https://github.com/sachinjat2802/cpm\n"
 )]
@@ -594,7 +594,7 @@ pub async fn run_cli_app(_bin_name: &str) -> anyhow::Result<()> {
         Commands::Why { package, path } => execute_why(&path, &package)?,
         Commands::Quickstart { path } => execute_quickstart(&path)?,
         Commands::Version => {
-            println!("cpm / upm version {}", env!("CARGO_PKG_VERSION"));
+            println!("upm version {}", env!("CARGO_PKG_VERSION"));
         }
         Commands::Doctor { path, fix } => execute_doctor(&path, fix)?,
         Commands::GenerateStubs { out_dir } => execute_generate_stubs(&out_dir).await?,

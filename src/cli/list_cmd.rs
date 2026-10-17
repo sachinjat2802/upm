@@ -1,4 +1,4 @@
-/// # `cpm list` / `cpm ls` CLI Subcommand — Universal Dependency Lister
+/// # `upm list` / `upm ls` CLI Subcommand — Universal Dependency Lister
 ///
 /// Lists all installed dependencies across active ecosystems and foreign `upm.toml` manifest entries.
 
@@ -12,7 +12,7 @@ pub fn execute_list(path: &Path, filter: Option<&str>) -> anyhow::Result<()> {
     println!("  {}", "╭──────────────────────────────────────────────────────╮".cyan());
     println!("  {}  📋 {}{}",
         "│".cyan(),
-        "CPM Universal Dependency Lister".bold().white(),
+        "UPM Universal Dependency Lister".bold().white(),
         "              │".cyan(),
     );
     println!("  {}", "╰──────────────────────────────────────────────────────╯".cyan());

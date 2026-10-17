@@ -175,8 +175,8 @@ impl DetectionEngine {
             });
         }
 
-        // Determine highest score per language group — single-pass O(A)
-        let mut max_per_lang: HashMap<String, u32> = HashMap::new();
+        // Determine highest score per language group (bounded small language set)
+        let mut max_per_lang: HashMap<String, u32> = HashMap::with_capacity(16);
         for score in &scores {
             if score.total_score > 0 {
                 max_per_lang
@@ -190,8 +190,8 @@ impl DetectionEngine {
             }
         }
 
-        // Mark winners and collect — second pass O(A)
-        let mut detected_ecosystems = Vec::new();
+        // Mark winners and collect
+        let mut detected_ecosystems = Vec::with_capacity(max_per_lang.len());
         for score in &mut scores {
             if score.total_score > 0 {
                 if let Some(&max_score) = max_per_lang.get(&score.adapter.language) {

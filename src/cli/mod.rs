@@ -519,7 +519,7 @@ pub fn execute_status(path: &Path) -> anyhow::Result<()> {
         }
         println!();
     } else {
-        println!("  {} {}",    "Manifest".dimmed(), "not found (run cpm init)".yellow());
+        println!("  {} {}",    "Manifest".dimmed(), "not found (run upm init)".yellow());
         println!();
     }
 

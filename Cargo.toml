@@ -3,7 +3,7 @@ name = "upm"
 version = "0.1.0"
 edition = "2021"
 authors = ["UPM Contributors"]
-description = "Universal Package Platform — Write in one language. Depend on all of them."
+description = "Universal Package Manager (UPM) — Write in one language. Depend on all of them."
 default-run = "upm"
 license = "MIT OR Apache-2.0"
 readme = "README.md"
@@ -13,10 +13,6 @@ categories = ["command-line-utilities", "development-tools"]
 [[bin]]
 name = "upm"
 path = "src/main.rs"
-
-[[bin]]
-name = "cpm"
-path = "src/cpm_main.rs"
 
 [dependencies]
 clap = { version = "4.4", features = ["derive", "env", "color"] }
@@ -35,3 +31,10 @@ base64 = "0.22"
 
 [dev-dependencies]
 tempfile = "3.8"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+panic = "abort"
+strip = true

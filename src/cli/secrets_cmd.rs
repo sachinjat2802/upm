@@ -1,4 +1,4 @@
-/// # `cpm scan-secrets` CLI Subcommand — Secret & API Key Leak Scanner
+/// # `upm scan-secrets` CLI Subcommand — Secret & API Key Leak Scanner
 ///
 /// Scans workspace source files for hardcoded API keys, JWT tokens, private SSH keys,
 /// and cloud credentials before publishing or committing code.
@@ -93,7 +93,7 @@ const SCANNABLE_EXTENSIONS: &[&str] = &[
 const SKIP_DIRS: &[&str] = &[
     "node_modules", ".venv", "venv", "target", ".git", ".hg", ".svn",
     "__pycache__", ".tox", "dist", "build", "vendor", ".gradle",
-    "_build", "deps", ".dart_tool", "obj", "bin", ".cpm_backup", ".cpm",
+    "_build", "deps", ".dart_tool", "obj", "bin", ".upm_backup", ".upm", ".cpm_backup", ".cpm",
     ".next", ".nuxt",
 ];
 
@@ -110,7 +110,7 @@ pub fn execute_scan_secrets(path: &Path) -> anyhow::Result<()> {
     println!("  {}", "╭──────────────────────────────────────────────────────╮".cyan());
     println!("  {}  🛡️ {}{}",
         "│".cyan(),
-        "CPM Secret & API Key Leak Security Scanner".bold().white(),
+        "UPM Secret & API Key Leak Security Scanner".bold().white(),
         "        │".cyan(),
     );
     println!("  {}", "╰──────────────────────────────────────────────────────╯".cyan());

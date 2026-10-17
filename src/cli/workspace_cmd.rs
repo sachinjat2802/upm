@@ -1,4 +1,4 @@
-//! # Universal Workspace & Monorepo Manager (`cpm workspace`)
+//! # Universal Workspace & Monorepo Manager (`upm workspace`)
 //!
 //! Provides enterprise-grade polyglot monorepo orchestration across
 //! Rust, JavaScript/TypeScript, Python, and Go packages.
@@ -33,19 +33,19 @@ pub fn execute_workspace(
             if let Some(cmd) = cmd_or_arg {
                 run_workspace_command(path, cmd, extra_args)
             } else {
-                Err(anyhow!("Missing command: cpm workspace run <command>"))
+                Err(anyhow!("Missing command: upm workspace run <command>"))
             }
         }
         "exec" => {
             if let Some(tool) = cmd_or_arg {
                 exec_workspace_tool(path, tool, extra_args)
             } else {
-                Err(anyhow!("Missing tool name: cpm workspace exec <tool>"))
+                Err(anyhow!("Missing tool name: upm workspace exec <tool>"))
             }
         }
         other => {
             println!("  {} Unknown workspace action: '{}'", "!".yellow(), other);
-            println!("  Usage: cpm workspace [list | run <script> | exec <tool>]");
+            println!("  Usage: upm workspace [list | run <script> | exec <tool>]");
             Ok(())
         }
     }
@@ -146,7 +146,7 @@ fn list_workspace_packages(root: &Path) -> Result<()> {
             );
         }
         println!();
-        println!("  Run across all packages: {}", "cpm workspace run <script>".bold().green());
+        println!("  Run across all packages: {}", "upm workspace run <script>".bold().green());
     }
     println!();
     Ok(())

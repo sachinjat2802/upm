@@ -1,7 +1,7 @@
-//! # CPM Cross-Language Script & Tool Runner
+//! # UPM Cross-Language Script & Tool Runner
 //!
-//! Provides unified multi-language task execution (`cpm run <script>`) and
-//! local package binary execution (`cpm exec <tool>`).
+//! Provides unified multi-language task execution (`upm run <script>`) and
+//! local package binary execution (`upm exec <tool>`).
 
 use crate::acquisition::manifest::UpmManifest;
 use anyhow::{anyhow, Result};
@@ -68,7 +68,7 @@ pub fn execute_run_script(path: &Path, script_name: Option<&str>, extra_args: &[
         Some(s) if !s.is_empty() => s,
         _ => {
             println!();
-            println!("  {}", "📜 Available Project Scripts (CPM Task Engine)".bold().cyan());
+            println!("  {}", "📜 Available Project Scripts (UPM Task Engine)".bold().cyan());
             println!("  {}", "═".repeat(60).dimmed());
             if available_scripts.is_empty() {
                 println!("  No scripts defined in upm.toml, package.json, or pyproject.toml.");
@@ -82,7 +82,7 @@ pub fn execute_run_script(path: &Path, script_name: Option<&str>, extra_args: &[
                     println!("    {}", format!("(source: {})", source).dimmed());
                 }
                 println!();
-                println!("  Run any script with: {}", "cpm run <script>".bold().green());
+                println!("  Run any script with: {}", "upm run <script>".bold().green());
             }
             println!();
             return Ok(());
@@ -133,13 +133,13 @@ pub fn execute_run_script(path: &Path, script_name: Option<&str>, extra_args: &[
     } else {
         println!();
         println!("  {} Script '{}' not found in project.", "✖".bold().red(), target.bold());
-        println!("  Run '{}' to list available scripts.", "cpm run".cyan());
+        println!("  Run '{}' to list available scripts.", "upm run".cyan());
         println!();
         Err(anyhow!("Script not found: {}", target))
     }
 }
 
-/// Execute a local ecosystem binary tool (e.g. `cpm exec tsc` or `cpm exec pytest`).
+/// Execute a local ecosystem binary tool (e.g. `upm exec tsc` or `upm exec pytest`).
 pub fn execute_tool(path: &Path, tool_name: &str, args: &[String]) -> Result<()> {
     let mut search_paths = Vec::new();
 

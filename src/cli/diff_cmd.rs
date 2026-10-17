@@ -1,4 +1,4 @@
-/// # `cpm diff` CLI Subcommand — Dependency Diff Viewer
+/// # `upm diff` CLI Subcommand — Dependency Diff Viewer
 ///
 /// Displays visual diffs of dependency version changes across active ecosystem lockfiles
 /// and manifests.
@@ -13,7 +13,7 @@ pub fn execute_diff(path: &Path) -> anyhow::Result<()> {
     println!("  {}", "╭──────────────────────────────────────────────────────╮".cyan());
     println!("  {}  📊 {}{}",
         "│".cyan(),
-        "CPM Universal Dependency Diff Viewer".bold().white(),
+        "UPM Universal Dependency Diff Viewer".bold().white(),
         "              │".cyan(),
     );
     println!("  {}", "╰──────────────────────────────────────────────────────╯".cyan());
@@ -36,7 +36,7 @@ pub fn execute_diff(path: &Path) -> anyhow::Result<()> {
 
         if !lockfile_exists && eco.lockfile_file.is_some() {
             println!("    {} Manifest: {} | Lockfile: {}", "!".yellow(), eco.manifest_file.cyan(), lockfile_name.yellow());
-            println!("    └── {} Lockfile missing! Run `cpm install` to lock dependencies.", "⚠".yellow());
+            println!("    └── {} Lockfile missing! Run `upm install` to lock dependencies.", "⚠".yellow());
             total_drift += 1;
         } else {
             println!("    {} Manifest: {} | Lockfile: {}", "✔".green(), eco.manifest_file.cyan(), lockfile_name.dimmed());
