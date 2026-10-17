@@ -31,7 +31,10 @@ func NewCpmBridge(cpmBin string) *CpmBridge {
 func findCpmBin() string {
 	curr, _ := os.Getwd()
 	for i := 0; i < 5; i++ {
-		for _, rel := range []string{"target/release/cpm.exe", "target/debug/cpm.exe", "target/release/cpm", "target/debug/cpm"} {
+		for _, rel := range []string{
+			"target/release/upm.exe", "target/debug/upm.exe", "target/release/upm", "target/debug/upm",
+			"target/release/cpm.exe", "target/debug/cpm.exe", "target/release/cpm", "target/debug/cpm",
+		} {
 			p := filepath.Join(curr, rel)
 			if _, err := os.Stat(p); err == nil {
 				return p
@@ -43,7 +46,7 @@ func findCpmBin() string {
 		}
 		curr = parent
 	}
-	return "cpm"
+	return "upm"
 }
 
 func (b *CpmBridge) Call(target string, args []interface{}) (interface{}, error) {

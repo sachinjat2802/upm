@@ -5,10 +5,82 @@ on:
     branches: [ master, main ]
   pull_request:
     branches: [ master, main ]
+  workflow_dispatch:
 
 jobs:
-  polyglot-check:
-    name: UPM Polyglot Dependency Audit & Build
+  # ---------------------------------------------------------------------------
+  # 1. Multi-Platform Build & Smoke Test Matrix
+  # ---------------------------------------------------------------------------
+  matrix-build:
+    name: Build & Smoke Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Build UPM Release Executable
+        run: cargo build --release --bin upm
+
+      - name: Smoke Test Binary (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          ./target/release/upm --version
+          ./target/release/upm --help
+          ./target/release/upm doctor
+
+      - name: Smoke Test Binary (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          .\target\release\upm.exe --version
+          .\target\release\upm.exe --help
+          .\target\release\upm.exe doctor
+
+      - name: Upload Binary Artifact (Linux)
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: upm-linux-x64
+          path: target/release/upm
+          if-no-files-found: error
+
+      - name: Upload Binary Artifact (macOS)
+        if: runner.os == 'macOS'
+        uses: actions/upload-artifact@v4
+        with:
+          name: upm-macos-x64
+          path: target/release/upm
+          if-no-files-found: error
+
+      - name: Upload Binary Artifact (Windows)
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: upm-windows-x64
+          path: target/release/upm.exe
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # 2. Comprehensive Test Suites & Generative Fuzz Matrix
+  # ---------------------------------------------------------------------------
+  test-suites:
+    name: Comprehensive Test Matrix & Fuzzing
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -25,25 +97,101 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
-      - name: Cache UPM Global Store
+      - name: Cache Cargo Dependencies
         uses: actions/cache@v4
         with:
-          path: ~/.upm/cache
-          key: ${{ runner.os }}-upm-${{ hashFiles('**/upm.toml') }}
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-test-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-test-
 
-      - name: Build UPM Executable
+      - name: Run Core Library Unit Tests
+        run: cargo test --lib --verbose
+
+      - name: Run Integration Tests
+        run: |
+          cargo test --test test_acquisition --verbose
+          cargo test --test test_detection --verbose
+          cargo test --test test_cli_commands --verbose
+          cargo test --test test_bridge_protocol --verbose
+          cargo test --test test_bridge_rpc --verbose
+          cargo test --test test_bridge_host_integration --verbose
+          cargo test --test test_benchmark_features --verbose
+
+      - name: Run Deep Edge Cases Suite
+        run: cargo test --test test_deep_edge_cases -- --nocapture
+
+      - name: Run 1,000,000 Generative Adversarial Fuzz Matrix
+        run: cargo test --test test_massive_scale_fuzz -- --nocapture
+
+      - name: Run Value Codec & Acquisition Edge Cases
+        run: |
+          cargo test --test test_acquisition_edge_cases --verbose
+          cargo test --test test_value_codec_edge_cases --verbose
+
+  # ---------------------------------------------------------------------------
+  # 3. End-to-End CLI Smoke & Workspace Lifecycle Validation
+  # ---------------------------------------------------------------------------
+  cli-e2e:
+    name: End-to-End CLI & Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Build UPM Release Executable
         run: cargo build --release --bin upm
 
-      - name: Run UPM Doctor Diagnostics
+      - name: Diagnostic & Doctor Inspection
         run: ./target/release/upm doctor
 
-      - name: Scan Secrets & Compliance Policies
+      - name: Query & Information Commands
+        run: |
+          ./target/release/upm list
+          ./target/release/upm info serde
+          ./target/release/upm explain serde
+          ./target/release/upm guess
+
+      - name: Security, Secret Scanning & Compliance Policies
         run: |
           ./target/release/upm scan-secrets
           ./target/release/upm policy
           ./target/release/upm licenses
+          ./target/release/upm audit
 
-      - name: Run Cargo Unit Tests
-        run: cargo test
+      - name: CI & Benchmark Diagnostics
+        run: |
+          ./target/release/upm ci
+          ./target/release/upm benchmark
+
+      - name: Workspace Lifecycle Test (Init, Detect, Lock)
+        run: |
+          mkdir -p /tmp/upm-test-workspace
+          cd /tmp/upm-test-workspace
+          $GITHUB_WORKSPACE/target/release/upm init --yes
+          test -f upm.toml
+          $GITHUB_WORKSPACE/target/release/upm lock
+          test -f upm.lock
+
+      - name: Polyglot SDK Bridge Verification
+        run: |
+          python3 -c "from sdk.python.cpm_sdk import CpmBridge; b = CpmBridge(); print('Python SDK Bridge binary:', b.cpm_bin)"
+          node -e "const { CpmBridge } = require('./sdk/node/cpm_sdk.js'); const b = new CpmBridge(); console.log('Node SDK Bridge binary:', b.cpmBin);"

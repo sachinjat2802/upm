@@ -16,7 +16,10 @@ class CpmBridge {
   static String _findCpmBin() {
     var curr = Directory.current;
     for (var i = 0; i < 5; i++) {
-      for (var rel in ['target/release/cpm.exe', 'target/debug/cpm.exe', 'target/release/cpm', 'target/debug/cpm']) {
+      for (var rel in [
+        'target/release/upm.exe', 'target/debug/upm.exe', 'target/release/upm', 'target/debug/upm',
+        'target/release/cpm.exe', 'target/debug/cpm.exe', 'target/release/cpm', 'target/debug/cpm',
+      ]) {
         var f = File('${curr.path}/$rel');
         if (f.existsSync()) {
           return f.path;
@@ -26,7 +29,7 @@ class CpmBridge {
       if (parent.path == curr.path) break;
       curr = parent;
     }
-    return 'cpm';
+    return 'upm';
   }
 
   Future<dynamic> call(String target, List<dynamic> args) async {

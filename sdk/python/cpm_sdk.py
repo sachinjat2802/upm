@@ -22,6 +22,10 @@ class CpmBridge:
         curr = os.path.dirname(os.path.abspath(__file__))
         for _ in range(5):
             for rel in [
+                os.path.join("target", "release", "upm.exe"),
+                os.path.join("target", "debug", "upm.exe"),
+                os.path.join("target", "release", "upm"),
+                os.path.join("target", "debug", "upm"),
                 os.path.join("target", "release", "cpm.exe"),
                 os.path.join("target", "debug", "cpm.exe"),
                 os.path.join("target", "release", "cpm"),
@@ -34,7 +38,7 @@ class CpmBridge:
             if parent == curr:
                 break
             curr = parent
-        return "cpm"
+        return "upm"
 
     def call(self, target: str, args=None):
         """

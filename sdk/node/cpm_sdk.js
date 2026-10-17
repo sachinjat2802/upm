@@ -21,6 +21,10 @@ class CpmBridge {
         let curr = path.resolve(__dirname);
         for (let i = 0; i < 5; i++) {
             for (const rel of [
+                path.join('target', 'release', 'upm.exe'),
+                path.join('target', 'debug', 'upm.exe'),
+                path.join('target', 'release', 'upm'),
+                path.join('target', 'debug', 'upm'),
                 path.join('target', 'release', 'cpm.exe'),
                 path.join('target', 'debug', 'cpm.exe'),
                 path.join('target', 'release', 'cpm'),
@@ -35,7 +39,7 @@ class CpmBridge {
             if (parent === curr) break;
             curr = parent;
         }
-        return 'cpm';
+        return 'upm';
     }
 
     /**

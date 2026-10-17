@@ -33,7 +33,7 @@ impl CpmBridge {
     fn find_cpm_bin() -> PathBuf {
         let mut curr = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
         for _ in 0..5 {
-            for rel in &["target/release/cpm.exe", "target/debug/cpm.exe", "target/release/cpm", "target/debug/cpm"] {
+            for rel in &["target/release/upm.exe", "target/debug/upm.exe", "target/release/upm", "target/debug/upm", "target/release/cpm.exe", "target/debug/cpm.exe", "target/release/cpm", "target/debug/cpm"] {
                 let candidate = curr.join(rel);
                 if candidate.exists() {
                     return candidate;
@@ -45,7 +45,7 @@ impl CpmBridge {
                 break;
             }
         }
-        PathBuf::from("cpm")
+        PathBuf::from("upm")
     }
 
     /// Invoke a foreign language RPC method.

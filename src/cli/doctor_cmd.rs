@@ -1,4 +1,4 @@
-/// # `cpm doctor` CLI Subcommand — Self-Healing Runtime Diagnostics
+/// # `upm doctor` CLI Subcommand — Self-Healing Runtime Diagnostics
 ///
 /// Diagnostic engine that inspects environment toolchains, virtualenv integrity,
 /// node_modules status, lockfile health, and bridge host availability. Supports
@@ -15,7 +15,7 @@ pub fn execute_doctor(path: &Path, fix: bool) -> anyhow::Result<()> {
     println!("  {}", "╭──────────────────────────────────────────────────────╮".cyan());
     println!("  {}  🩺 {}{}",
         "│".cyan(),
-        "CPM Self-Healing Runtime Diagnostics & Doctor".bold().white(),
+        "UPM Self-Healing Runtime Diagnostics & Doctor".bold().white(),
         "     │".cyan(),
     );
     println!("  {}", "╰──────────────────────────────────────────────────────╯".cyan());
@@ -129,11 +129,11 @@ pub fn execute_doctor(path: &Path, fix: bool) -> anyhow::Result<()> {
 
     // 4. Manifest and Lockfile Integrity Check
     println!("  {} {}", "4. Project Manifest & Lockfile Health:".bold(), "(Checking manifest consistency)".dimmed());
-    let has_manifest = path.join("cpm.toml").exists() || path.join("upm.toml").exists();
+    let has_manifest = path.join("upm.toml").exists() || path.join("cpm.toml").exists();
     if has_manifest {
-        println!("    {} CPM workspace manifest detected.", "✔".green());
+        println!("    {} UPM workspace manifest detected.", "✔".green());
     } else if path.join("package.json").exists() || path.join("pyproject.toml").exists() || path.join("Cargo.toml").exists() {
-        println!("    {} Native project manifests present without top-level cpm.toml/upm.toml.", "ℹ".blue());
+        println!("    {} Native project manifests present without top-level upm.toml.", "ℹ".blue());
     }
     println!();
 
@@ -148,7 +148,7 @@ pub fn execute_doctor(path: &Path, fix: bool) -> anyhow::Result<()> {
     } else {
         println!("  {}  ⚠️  {}{}",
             "│".cyan(),
-            format!("Found {} issue(s). Run `cpm doctor --fix` to self-heal.", issues).bold().yellow(),
+            format!("Found {} issue(s). Run `upm doctor --fix` to self-heal.", issues).bold().yellow(),
             "  │".cyan(),
         );
         if repaired > 0 {

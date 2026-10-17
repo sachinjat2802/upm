@@ -23,7 +23,10 @@ public class CpmBridge {
     private static String findCpmBin() {
         File curr = new File(".").getAbsoluteFile();
         for (int i = 0; i < 5; i++) {
-            for (String rel : new String[]{"target/release/cpm.exe", "target/debug/cpm.exe", "target/release/cpm", "target/debug/cpm"}) {
+            for (String rel : new String[]{
+                "target/release/upm.exe", "target/debug/upm.exe", "target/release/upm", "target/debug/upm",
+                "target/release/cpm.exe", "target/debug/cpm.exe", "target/release/cpm", "target/debug/cpm"
+            }) {
                 File p = new File(curr, rel);
                 if (p.exists()) {
                     return p.getAbsolutePath();
@@ -32,7 +35,7 @@ public class CpmBridge {
             curr = curr.getParentFile();
             if (curr == null) break;
         }
-        return "cpm";
+        return "upm";
     }
 
     public Object call(String target, Object[] args) throws Exception {
