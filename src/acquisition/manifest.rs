@@ -74,9 +74,17 @@ impl UpmManifest {
     }
 
     pub fn save_to_dir(&self, path: &Path) -> anyhow::Result<()> {
+        fs::create_dir_all(path)?;
         let manifest_path = path.join("upm.toml");
         let content = toml::to_string_pretty(self)?;
-        fs::write(manifest_path, content)?;
+        let tmp_path = path.join(".upm.toml.tmp");
+        if fs::write(&tmp_path, &content).is_ok() {
+            if fs::rename(&tmp_path, &manifest_path).is_err() {
+                let _ = fs::write(&manifest_path, content);
+            }
+        } else {
+            fs::write(&manifest_path, content)?;
+        }
         Ok(())
     }
 

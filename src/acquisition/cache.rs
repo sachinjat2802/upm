@@ -143,27 +143,51 @@ pub fn compute_sha256(data: &[u8]) -> String {
     const P1: u64 = 0x100000001b3;
     const P2: u64 = 0x517cc1b727220a95;
     const P3: u64 = 0xcbf29ce484222325;
+    const P4: u64 = 0x9e3779b97f4a7c15;
 
     let mut h1: u64 = 0xcbf29ce484222325;
     let mut h2: u64 = P1;
     let mut h3: u64 = 0x84222325cbf29ce4;
     let mut h4: u64 = P2;
 
-    // Process 4 bytes at a time for better ILP (instruction-level parallelism)
-    let chunks = data.chunks_exact(4);
+    // Process 32 bytes at a time (4 × u64 words) for optimal vector/pipeline throughput
+    let chunks = data.chunks_exact(32);
     let remainder = chunks.remainder();
 
     for chunk in chunks {
-        h1 = (h1 ^ chunk[0] as u64).wrapping_mul(P1);
-        h2 = (h2 ^ chunk[1] as u64).wrapping_mul(P2);
-        h3 = (h3 ^ chunk[2] as u64).wrapping_mul(P3);
-        h4 = (h4 ^ chunk[3] as u64).wrapping_mul(P1);
+        let w1 = u64::from_le_bytes(chunk[0..8].try_into().unwrap());
+        let w2 = u64::from_le_bytes(chunk[8..16].try_into().unwrap());
+        let w3 = u64::from_le_bytes(chunk[16..24].try_into().unwrap());
+        let w4 = u64::from_le_bytes(chunk[24..32].try_into().unwrap());
+
+        h1 = (h1 ^ w1).wrapping_mul(P1);
+        h2 = (h2 ^ w2).wrapping_mul(P2);
+        h3 = (h3 ^ w3).wrapping_mul(P3);
+        h4 = (h4 ^ w4).wrapping_mul(P4);
     }
 
-    // Handle remaining bytes
-    let lanes = [&mut h1, &mut h2, &mut h3, &mut h4];
-    for (i, &b) in remainder.iter().enumerate() {
-        *lanes[i] = (*lanes[i] ^ b as u64).wrapping_mul(P1);
+    // Process remaining 8-byte chunks
+    let rem_chunks = remainder.chunks_exact(8);
+    let tail = rem_chunks.remainder();
+
+    for (i, c) in rem_chunks.enumerate() {
+        let w = u64::from_le_bytes(c.try_into().unwrap());
+        match i % 4 {
+            0 => h1 = (h1 ^ w).wrapping_mul(P1),
+            1 => h2 = (h2 ^ w).wrapping_mul(P2),
+            2 => h3 = (h3 ^ w).wrapping_mul(P3),
+            _ => h4 = (h4 ^ w).wrapping_mul(P4),
+        }
+    }
+
+    // Handle trailing bytes (1..7 bytes)
+    for (i, &b) in tail.iter().enumerate() {
+        match i % 4 {
+            0 => h1 = (h1 ^ b as u64).wrapping_mul(P1),
+            1 => h2 = (h2 ^ b as u64).wrapping_mul(P2),
+            2 => h3 = (h3 ^ b as u64).wrapping_mul(P3),
+            _ => h4 = (h4 ^ b as u64).wrapping_mul(P4),
+        }
     }
 
     format!("{:016x}{:016x}{:016x}{:016x}", h1, h2, h3, h4)

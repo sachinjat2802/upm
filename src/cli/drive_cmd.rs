@@ -171,7 +171,7 @@ fn configure_d_drive() -> Result<()> {
 
         // Single PowerShell execution for all variables (7x faster)
         let _ = std::process::Command::new("powershell")
-            .args(["-NoProfile", "-Command", &ps_script])
+            .args(["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", &ps_script])
             .output();
 
         println!();

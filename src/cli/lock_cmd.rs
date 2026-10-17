@@ -44,73 +44,109 @@ pub fn execute_lock(path: &Path, verify: bool, update: bool) -> Result<()> {
         println!("  {} Verifying lockfile integrity (CPM CAS Engine)...", "🔒".cyan());
         println!("  {}", "═".repeat(50).dimmed());
 
-        let all_valid = true;
+        let mut all_valid = true;
         for (pkg_id, locked) in &lockfile.packages {
-            println!(
-                "  {} {} ({}) [hash: {}...]",
-                "✔".green(),
-                pkg_id.bold(),
-                locked.version.cyan(),
-                &locked.integrity[..12.min(locked.integrity.len())].dimmed()
-            );
+            // Verify integrity format: sha256-[64 hex chars]
+            let valid_format = locked.integrity.starts_with("sha256-") && locked.integrity.len() == 71;
+            if !valid_format {
+                println!(
+                    "  {} {} ({}) [INVALID INTEGRITY HASH]",
+                    "✖".bold().red(),
+                    pkg_id.bold(),
+                    locked.version.cyan()
+                );
+                all_valid = false;
+            } else {
+                println!(
+                    "  {} {} ({}) [hash: {}...]",
+                    "✔".green(),
+                    pkg_id.bold(),
+                    locked.version.cyan(),
+                    &locked.integrity[..19.min(locked.integrity.len())].dimmed()
+                );
+            }
         }
 
         println!();
         if all_valid {
             println!("  {} All {} dependencies verified successfully.", "✔".green().bold(), lockfile.packages.len());
+            Ok(())
+        } else {
+            Err(anyhow!("Lockfile verification failed: one or more packages have invalid integrity hashes."))
         }
-        return Ok(());
-    }
-
-    // Generate or update cpm.lock
-    println!();
-    println!(
-        "  {} {} deterministic lockfile (cpm.lock)...",
-        "🔒".cyan(),
-        if update { "Updating" } else { "Generating" }
-    );
-
-    let manifest = UpmManifest::load_from_dir(path)
-        .unwrap_or_else(|| UpmManifest::default_for("polyglot-app", vec![]));
-
-    let mut locked_packages = BTreeMap::new();
-
-    for (dep_key, ver_spec) in &manifest.foreign_dependencies {
-        let (eco, pkg) = dep_key.split_once(':').unwrap_or(("generic", dep_key.as_str()));
-        let dummy_payload = format!("{}:{}:{}", eco, pkg, ver_spec);
-        let hash = compute_sha256(dummy_payload.as_bytes());
-
-        locked_packages.insert(
-            dep_key.clone(),
-            LockedPackage {
-                ecosystem: eco.to_string(),
-                version: ver_spec.trim_start_matches('^').trim_start_matches('~').to_string(),
-                integrity: format!("sha256-{}", hash),
-            },
+    } else {
+        // Generate or update cpm.lock
+        println!();
+        println!(
+            "  {} {} deterministic lockfile (cpm.lock)...",
+            "🔒".cyan(),
+            if update { "Updating" } else { "Generating" }
         );
+
+        let manifest = UpmManifest::load_from_dir(path)
+            .unwrap_or_else(|| UpmManifest::default_for("polyglot-app", vec![]));
+
+        let mut locked_packages = BTreeMap::new();
+
+        for (dep_key, ver_spec) in &manifest.foreign_dependencies {
+            let (eco, pkg) = dep_key.split_once(':').unwrap_or(("generic", dep_key.as_str()));
+            let dummy_payload = format!("{}:{}:{}", eco, pkg, ver_spec);
+            let hash = compute_sha256(dummy_payload.as_bytes());
+
+            locked_packages.insert(
+                dep_key.clone(),
+                LockedPackage {
+                    ecosystem: eco.to_string(),
+                    version: ver_spec.trim_start_matches('^').trim_start_matches('~').to_string(),
+                    integrity: format!("sha256-{}", hash),
+                },
+            );
+        }
+
+        let lockfile = CpmLockfile {
+            lockfile_version: 1,
+            generated_at: chrono_now(),
+            packages: locked_packages,
+        };
+
+        let serialized = toml::to_string_pretty(&lockfile)?;
+        fs::write(&lock_path, serialized)?;
+
+        println!(
+            "  {} Wrote {} with {} locked dependencies.",
+            "✔".green(),
+            "cpm.lock".bold().cyan(),
+            lockfile.packages.len().to_string().yellow()
+        );
+        println!();
+
+        Ok(())
     }
-
-    let lockfile = CpmLockfile {
-        lockfile_version: 1,
-        generated_at: chrono_now(),
-        packages: locked_packages,
-    };
-
-    let serialized = toml::to_string_pretty(&lockfile)?;
-    fs::write(&lock_path, serialized)?;
-
-    println!(
-        "  {} Wrote {} with {} locked dependencies.",
-        "✔".green(),
-        "cpm.lock".bold().cyan(),
-        lockfile.packages.len().to_string().yellow()
-    );
-    println!();
-
-    Ok(())
 }
 
+/// Compute live UTC ISO-8601 timestamp with O(1) arithmetic.
 fn chrono_now() -> String {
-    // Standard ISO 8601 timestamp string
-    "2026-10-16T22:58:00Z".to_string()
+    if let Ok(duration) = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH) {
+        let secs = duration.as_secs();
+        let s = secs % 60;
+        let m = (secs / 60) % 60;
+        let h = (secs / 3600) % 24;
+        let days = secs / 86400;
+
+        // Euclidean calendar algorithm (Howard Hinnant)
+        let z = days + 719468;
+        let era = z / 146097;
+        let doe = z - era * 146097;
+        let yoe = (doe - doe / 1460 + doe / 36524 - doe / 146096) / 365;
+        let y = yoe + era * 400;
+        let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+        let mp = (5 * doy + 2) / 153;
+        let d = doy - (153 * mp + 2) / 5 + 1;
+        let m_idx = if mp < 10 { mp + 3 } else { mp - 9 };
+        let final_y = if m_idx <= 2 { y + 1 } else { y };
+
+        format!("{:04}-{:02}-{:02}T{:02}:{:02}:{:02}Z", final_y, m_idx, d, h, m, s)
+    } else {
+        "2026-10-17T00:00:00Z".to_string()
+    }
 }

@@ -1,7 +1,7 @@
-//! # Package Information Inspector
+//! # Universal Package Inspector (`cpm info`)
 //!
-//! Inspects package specifications, metadata, versions, and repository links
-//! across any ecosystem (inspired by `upm info` and `npm view`).
+//! Inspects package specifications, metadata, versions, and registry links
+//! across any language ecosystem (CPM Universal Package Inspector).
 
 use anyhow::Result;
 use colored::Colorize;
@@ -45,6 +45,30 @@ pub fn execute_info(package: &str) -> Result<()> {
             println!("  Module Name:    {}", pkg_name.yellow().bold());
             println!("  Registry URL:   https://pkg.go.dev/{}", pkg_name);
             println!("  Install via:    cpm add go:{}", pkg_name);
+        }
+        "maven" | "gradle" => {
+            println!("  Ecosystem:      Java / JVM (Maven Central)");
+            println!("  Artifact Name:  {}", pkg_name.yellow().bold());
+            println!("  Registry URL:   https://central.sonatype.com/artifact/{}", pkg_name);
+            println!("  Install via:    cpm add maven:{}", pkg_name);
+        }
+        "composer" | "php" => {
+            println!("  Ecosystem:      PHP (Packagist)");
+            println!("  Package Name:   {}", pkg_name.yellow().bold());
+            println!("  Registry URL:   https://packagist.org/packages/{}", pkg_name);
+            println!("  Install via:    cpm add composer:{}", pkg_name);
+        }
+        "nuget" | "csharp" | "dotnet" => {
+            println!("  Ecosystem:      .NET / C# (NuGet)");
+            println!("  Package Name:   {}", pkg_name.yellow().bold());
+            println!("  Registry URL:   https://www.nuget.org/packages/{}", pkg_name);
+            println!("  Install via:    cpm add nuget:{}", pkg_name);
+        }
+        "rubygems" | "gem" | "ruby" => {
+            println!("  Ecosystem:      Ruby (RubyGems)");
+            println!("  Gem Name:       {}", pkg_name.yellow().bold());
+            println!("  Registry URL:   https://rubygems.org/gems/{}", pkg_name);
+            println!("  Install via:    cpm add gem:{}", pkg_name);
         }
         _ => {
             println!("  Ecosystem:      {}", eco.cyan());
