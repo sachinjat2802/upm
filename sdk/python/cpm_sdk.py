@@ -1,5 +1,5 @@
 """
-CPM Python SDK — Native Python Client for CPM / UPM Polyglot Bridge RPC
+CPM Python SDK — Native Python Client for CPM Polyglot Bridge RPC
 
 Usage:
     from cpm_sdk import CpmBridge

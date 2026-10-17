@@ -1,5 +1,5 @@
 /**
- * CPM Node.js SDK — Native JavaScript/TypeScript Client for CPM / UPM Polyglot Bridge RPC
+ * CPM Node.js SDK — Native JavaScript/TypeScript Client for CPM Polyglot Bridge RPC
  *
  * Usage:
  *   const { CpmBridge } = require('./cpm_sdk');
