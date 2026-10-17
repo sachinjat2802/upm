@@ -370,3 +370,40 @@ fn test_cpm_cache_operations() {
     let clean_res = upm::cli::execute_cache(std::path::Path::new("."), Some("clean"));
     assert!(clean_res.is_ok(), "execute_cache clean failed: {:?}", clean_res);
 }
+
+#[test]
+fn test_cpm_sccache_and_sig() {
+    let tmp = tempdir().expect("tempdir failed");
+    let path = tmp.path();
+
+    let sc_res = upm::cli::execute_sccache(path);
+    assert!(sc_res.is_ok(), "execute_sccache failed: {:?}", sc_res);
+
+    let sig_res = upm::cli::execute_verify_sig(path, Some("test-pkg"));
+    assert!(sig_res.is_ok(), "execute_verify_sig failed: {:?}", sig_res);
+    assert!(path.join(".cpm_signature.sig").exists());
+}
+
+#[test]
+fn test_cpm_alias_and_audit_log() {
+    let tmp = tempdir().expect("tempdir failed");
+    let path = tmp.path();
+
+    // List aliases
+    let list_res = upm::cli::execute_alias(path, Some("list"), None, None);
+    assert!(list_res.is_ok(), "execute_alias list failed: {:?}", list_res);
+
+    // Add alias
+    let add_res = upm::cli::execute_alias(path, Some("add"), Some("my-run"), Some("run dev"));
+    assert!(add_res.is_ok(), "execute_alias add failed: {:?}", add_res);
+    assert!(path.join(".cpm_aliases.json").exists());
+
+    // Remove alias
+    let rm_res = upm::cli::execute_alias(path, Some("remove"), Some("my-run"), None);
+    assert!(rm_res.is_ok(), "execute_alias remove failed: {:?}", rm_res);
+
+    // Audit log
+    let audit_res = upm::cli::execute_audit_log(path);
+    assert!(audit_res.is_ok(), "execute_audit_log failed: {:?}", audit_res);
+    assert!(path.join(".cpm_audit.log").exists());
+}

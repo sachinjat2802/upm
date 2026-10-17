@@ -20,7 +20,7 @@ pub fn execute_audit_log(path: &Path) -> anyhow::Result<()> {
 
     let audit_file = path.join(".cpm_audit.log");
     if !audit_file.exists() {
-        let default_log = r#"[2026-08-20T12:00:00Z] INIT: Bootstrapped upm.toml manifest
+        let default_log = r#"[2026-08-20T12:00:00Z] INIT: Bootstrapped cpm.toml manifest
 [2026-08-20T12:15:22Z] ADD: Installed pip:docling (Semver: ^2.12.0)
 [2026-08-20T12:20:45Z] ADD: Installed npm:express (Semver: ^4.19.0)
 [2026-08-20T12:45:10Z] CALL: RPC bridge invocation node:crypto.sha256 (210µs)
